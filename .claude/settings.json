@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun dev)",
+      "Bash(bun run build)",
+      "Bash(bun run lint*)",
+      "Bash(bun run format)",
+      "Bash(bun run preview)",
+      "Bash(bun add *)",
+      "Bash(bun install)",
+      "Bash(bun test*)",
+      "Bash(bunx shadcn@latest *)",
+      "Bash(bun --version)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(du *)",
+      "Read(src/**)",
+      "Read(public/**)",
+      "Read(.claude/**)",
+      "Edit(src/**)",
+      "Edit(public/**)",
+      "Edit(CLAUDE.md)",
+      "Write(src/**)",
+      "Write(public/**)",
+      "Write(.claude/**)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Edit(src/components/ui/**)",
+      "Edit(src/routeTree.gen.ts)",
+      "Write(src/components/ui/**)",
+      "Write(src/routeTree.gen.ts)"
+    ]
+  }
+}

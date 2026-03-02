@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "menu": "Menu",
+    "dashboard": "Painel",
+    "projects": "Projetos",
+    "templates": "Modelos",
+    "calendar": "Calendario",
+    "affiliate": "Afiliado",
+    "profile": "Perfil",
+    "settings": "Configuracoes"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "toggle": "Alternar tema"
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "Ingles",
+    "pt-BR": "Portugues",
+    "es": "Espanhol"
+  },
+  "common": {
+    "comingSoon": "Em breve",
+    "loading": "Carregando...",
+    "error": "Algo deu errado",
+    "login": "Entrar",
+    "logout": "Sair"
+  }
+}

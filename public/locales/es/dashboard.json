@@ -1,0 +1,11 @@
+{
+  "title": "Panel",
+  "welcome": "Bienvenido a VDClip",
+  "description": "Administra tus clips de video, proyectos y plantillas.",
+  "cards": {
+    "projects": "Total de Proyectos",
+    "templates": "Plantillas",
+    "clips": "Clips Creados",
+    "storage": "Almacenamiento Usado"
+  }
+}
