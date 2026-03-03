@@ -1,0 +1,266 @@
+{
+  "nav": {
+    "title": "VDClip Admin",
+    "management": "Gestion",
+    "users": "Usuarios",
+    "metrics": "Metricas",
+    "providers": "Proveedores",
+    "backToApp": "Volver a la App"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "suspended": "Suspendido"
+  },
+  "plan": {
+    "free": "Gratuito",
+    "lite": "Lite",
+    "premium": "Premium",
+    "ultimate": "Ultimate"
+  },
+  "users": {
+    "title": "Usuarios",
+    "searchPlaceholder": "Buscar por nombre o correo...",
+    "noResults": "No se encontraron usuarios.",
+    "view": "Ver"
+  },
+  "userDetail": {
+    "title": "Detalles del Usuario",
+    "createdAt": "Creado",
+    "lastLogin": "Ultimo acceso",
+    "planInfo": "Info del Plan",
+    "plan": "Plan",
+    "provider": "Proveedor",
+    "expires": "Expira",
+    "noExpiry": "Sin expiracion",
+    "subscriptionId": "ID Suscripcion",
+    "changePlan": "Cambiar Plan",
+    "newPlan": "Nuevo Plan",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "credits": "Creditos",
+    "addCredit": "Agregar Credito",
+    "addCreditTitle": "Agregar Creditos",
+    "creditType": "Tipo de Credito",
+    "creditAmount": "Cantidad",
+    "creditValidDays": "Validez (dias)",
+    "creditValidDaysHint": "Dejar vacio para sin expiracion.",
+    "confirmAddCredit": "Confirmar",
+    "mediaStats": "Estadisticas de Medios",
+    "mediaCreated": "Creados",
+    "mediaPosted": "Publicados",
+    "viewMedia": "Ver Medios",
+    "account": "Cuenta",
+    "emailVerified": "Email verificado",
+    "socialAccount": "Cuenta social",
+    "socialLogins": "Inicios sociales",
+    "connected": "vinculados",
+    "yes": "Si",
+    "no": "No",
+    "teams": "Equipos",
+    "noTeams": "Sin equipos.",
+    "membersCount": "miembros",
+    "viewTeam": "Ver",
+    "hide": "Ocultar",
+    "actions": "Acciones",
+    "cancelSubscription": "Cancelar Suscripcion",
+    "accessAffiliate": "Panel de Afiliado",
+    "hideAffiliate": "Ocultar Afiliado",
+    "viewTemplates": "Templates",
+    "hideTemplates": "Ocultar Templates"
+  },
+  "creditTypes": {
+    "plan_cycle": "Ciclo del Plan",
+    "purchased": "Comprado",
+    "promotional": "Promocional",
+    "bonus": "Bonus",
+    "adjustment": "Ajuste"
+  },
+  "teamRole": {
+    "owner": "Propietario",
+    "admin": "Admin",
+    "member": "Miembro"
+  },
+  "affiliate": {
+    "title": "Panel de Afiliado",
+    "noData": "Este usuario no tiene cuenta de afiliado.",
+    "createTitle": "Crear Cuenta de Afiliado",
+    "referralCode": "Codigo de Referencia",
+    "commissionPercent": "Comision (%)",
+    "create": "Crear Afiliado",
+    "tier": "Nivel",
+    "tiers": {
+      "bronze": "Bronce",
+      "silver": "Plata",
+      "gold": "Oro"
+    },
+    "totalReferrals": "Total de Referidos",
+    "active": "activos",
+    "totalEarnings": "Ganancias Totales",
+    "pendingPayout": "Pago Pendiente"
+  },
+  "teamSettings": {
+    "title": "Configuracion del Equipo",
+    "noData": "Equipo no encontrado.",
+    "name": "Nombre del Equipo",
+    "plan": "Plan",
+    "members": "Miembros",
+    "storage": "Almacenamiento",
+    "membersList": "Miembros",
+    "credits": "Creditos del Equipo",
+    "addCreditTitle": "Agregar Creditos al Equipo",
+    "viewTeamMedia": "Ver Medios del Equipo",
+    "templates": "Templates"
+  },
+  "templates": {
+    "title": "Templates",
+    "count": "templates",
+    "empty": "Sin templates.",
+    "create": "Nuevo Template",
+    "createTitle": "Crear Template",
+    "createDescription": "Crear un nuevo template con configuracion predeterminada.",
+    "nameLabel": "Nombre del Template",
+    "namePlaceholder": "Mi Template",
+    "confirmCreate": "Crear",
+    "rename": "Renombrar",
+    "renameTitle": "Renombrar Template",
+    "confirmRename": "Renombrar",
+    "delete": "Eliminar",
+    "deleteTitle": "Eliminar Template",
+    "deleteDescription": "Estas seguro de eliminar \"{{name}}\"? Esta accion no se puede deshacer.",
+    "confirmDelete": "Eliminar",
+    "viewSettings": "Ver Configuracion",
+    "settings": "Configuracion",
+    "edit": "Editar",
+    "done": "Listo",
+    "updated": "Actualizado",
+    "layout": {
+      "title": "Layout",
+      "aspectRatio": "Proporcion",
+      "faceTracking": "Seguimiento Facial",
+      "layouts": "Layouts"
+    },
+    "caption": {
+      "title": "Subtitulos",
+      "enabled": "Activado",
+      "preset": "Preset",
+      "animation": "Animacion",
+      "position": "Posicion",
+      "captionsPerPage": "Subtitulos/Pagina",
+      "font": "Fuente",
+      "fontSize": "Tamano",
+      "colors": "Colores",
+      "fontColor": "Color de Fuente",
+      "highlightColor": "Resaltado",
+      "style": "Estilo",
+      "removePunctuation": "Quitar Puntuacion",
+      "removeProfanity": "Quitar Groserias",
+      "outline": "Contorno",
+      "outlineColor": "Color del Contorno",
+      "outlineWidth": "Ancho del Contorno",
+      "shadow": "Sombra",
+      "shadowColor": "Color de Sombra",
+      "shadowBlur": "Desenfoque de Sombra"
+    },
+    "hook": {
+      "title": "Hook",
+      "enabled": "Activado"
+    },
+    "logo": {
+      "title": "Logo",
+      "enabled": "Activado",
+      "image": "URL de Imagen",
+      "scale": "Escala",
+      "opacity": "Opacidad",
+      "alternatePosition": "Alternar Posicion",
+      "positions": "Posiciones",
+      "pos": {
+        "top-left": "Superior Izquierda",
+        "top-right": "Superior Derecha",
+        "bottom-left": "Inferior Izquierda",
+        "bottom-right": "Inferior Derecha"
+      }
+    }
+  },
+  "metrics": {
+    "dateRange": {
+      "1d": "Hoy",
+      "7d": "7 dias",
+      "30d": "30 dias",
+      "90d": "90 dias",
+      "ytd": "Ano",
+      "all": "Todo el Periodo",
+      "custom": "Personalizado",
+      "from": "Desde",
+      "to": "Hasta",
+      "apply": "Aplicar"
+    },
+    "revenue": {
+      "title": "Ingresos",
+      "mrr": "MRR",
+      "newMrr": "Nuevo MRR",
+      "expansionMrr": "MRR de Expansion",
+      "contractionMrr": "MRR de Contraccion",
+      "churnedMrr": "MRR Cancelado",
+      "reactivationMrr": "MRR de Reactivacion",
+      "creditRevenue": "Ingresos de Creditos",
+      "totalRevenue": "Ingresos Totales"
+    },
+    "subscriptions": {
+      "title": "Suscripciones",
+      "active": "Activas",
+      "new": "Nuevas",
+      "churned": "Canceladas",
+      "churnRate": "Tasa de Churn",
+      "byPlan": "Por Plan",
+      "byProvider": "Por Proveedor",
+      "byBilling": "Por Periodo de Facturacion",
+      "monthly": "Mensual",
+      "yearly": "Anual"
+    },
+    "users": {
+      "title": "Usuarios",
+      "total": "Total de Usuarios",
+      "totalHint": "Cantidad total en la tabla",
+      "newInPeriod": "Nuevos Usuarios",
+      "verifiedEmails": "Emails Verificados",
+      "socialAccounts": "Cuentas Sociales"
+    },
+    "content": {
+      "title": "Contenido",
+      "totalProjects": "Total de Proyectos",
+      "completed": "Completados",
+      "failed": "Fallidos",
+      "scheduledPosts": "Posts Programados",
+      "published": "Publicados",
+      "failedPosts": "Posts Fallidos",
+      "byAiType": "Por Tipo de IA",
+      "clips": "Clips",
+      "highlights": "Highlights",
+      "shorts": "Shorts",
+      "byProvider": "Por Proveedor"
+    },
+    "credits": {
+      "title": "Creditos & Transacciones",
+      "totalIssued": "Total Emitidos",
+      "totalUsed": "Total Usados",
+      "expired": "Expirados",
+      "byType": "Por Tipo",
+      "transactionVolume": "Volumen de Transacciones",
+      "refunds": "Reembolsos"
+    }
+  },
+  "providers": {
+    "title": "Proveedores Soportados",
+    "name": "Nombre",
+    "type": "Tipo",
+    "enabled": "Activo",
+    "toggle": "Alternar",
+    "types": {
+      "social": "Social",
+      "publishing": "Publicacion",
+      "ai": "IA",
+      "processing": "Procesamiento"
+    }
+  }
+}
