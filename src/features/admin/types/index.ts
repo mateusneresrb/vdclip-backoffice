@@ -11,6 +11,15 @@ export interface DateRange {
   to: string
 }
 
+export interface CreditPackage {
+  id: string
+  type: CreditType
+  amount: number
+  used: number
+  startDate: string
+  expiresAt: string
+}
+
 export interface AdminUser {
   id: string
   name: string
@@ -22,6 +31,7 @@ export interface AdminUser {
   planExpiresAt: string | null
   subscriptionId: string | null
   credits: number
+  creditPackages: CreditPackage[]
   mediaCreated: number
   mediaPosted: number
   socialLogins: SocialProvider[]

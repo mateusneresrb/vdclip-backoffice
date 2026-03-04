@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  Calendar,
   CreditCard,
   FileText,
   Film,
@@ -8,6 +9,7 @@ import {
   Key,
   Link2,
   Mail,
+  Package,
   Plus,
   Save,
   Shield,
@@ -267,80 +269,126 @@ export function UserDetail({ userId }: { userId: string }) {
         {/* Credits */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Key className="h-4 w-4" />
-              {t('userDetail.credits')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{user.credits}</p>
-            <Dialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="mt-3">
-                  <Plus className="mr-1 h-3 w-3" />
-                  {t('userDetail.addCredit')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t('userDetail.addCreditTitle')}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-2">
-                  <div className="space-y-2">
-                    <Label>{t('userDetail.creditType')}</Label>
-                    <Select
-                      value={creditType}
-                      onValueChange={(v) => setCreditType(v as CreditType)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {creditTypes.map((ct) => (
-                          <SelectItem key={ct} value={ct}>
-                            {t(`creditTypes.${ct}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('userDetail.creditAmount')}</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="100"
-                      value={creditAmount}
-                      onChange={(e) => setCreditAmount(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('userDetail.creditValidDays')}</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="30"
-                      value={creditDays}
-                      onChange={(e) => setCreditDays(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {t('userDetail.creditValidDaysHint')}
-                    </p>
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => {
-                      setCreditDialogOpen(false)
-                      setCreditAmount('')
-                      setCreditDays('')
-                      setCreditType('plan_cycle')
-                    }}
-                  >
-                    {t('userDetail.confirmAddCredit')}
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Key className="h-4 w-4" />
+                {t('userDetail.credits')}
+              </CardTitle>
+              <Dialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                    <Plus className="mr-1 h-3 w-3" />
+                    {t('userDetail.addCredit')}
                   </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t('userDetail.addCreditTitle')}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-2">
+                    <div className="space-y-2">
+                      <Label>{t('userDetail.creditType')}</Label>
+                      <Select
+                        value={creditType}
+                        onValueChange={(v) => setCreditType(v as CreditType)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {creditTypes.map((ct) => (
+                            <SelectItem key={ct} value={ct}>
+                              {t(`creditTypes.${ct}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t('userDetail.creditAmount')}</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        placeholder="100"
+                        value={creditAmount}
+                        onChange={(e) => setCreditAmount(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t('userDetail.creditValidDays')}</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        placeholder="30"
+                        value={creditDays}
+                        onChange={(e) => setCreditDays(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t('userDetail.creditValidDaysHint')}
+                      </p>
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        setCreditDialogOpen(false)
+                        setCreditAmount('')
+                        setCreditDays('')
+                        setCreditType('plan_cycle')
+                      }}
+                    >
+                      {t('userDetail.confirmAddCredit')}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Total + packages count */}
+            <div className="flex items-baseline justify-between">
+              <p className="text-3xl font-bold">{user.credits}</p>
+              <span className="text-xs text-muted-foreground">
+                {user.creditPackages.length} {t('userDetail.creditPackages')}
+              </span>
+            </div>
+
+            {/* Packages list */}
+            {user.creditPackages.length > 0 && (
+              <div className="rounded-lg border divide-y">
+                {user.creditPackages.map((pkg) => {
+                  const isExpired = new Date(pkg.expiresAt) < new Date()
+                  return (
+                    <div key={pkg.id} className={`p-3 space-y-1.5 ${isExpired ? 'opacity-50' : ''}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Badge variant="outline" className="text-[10px] capitalize">
+                            {t(`creditTypes.${pkg.type}`)}
+                          </Badge>
+                          {isExpired && (
+                            <Badge variant="secondary" className="text-[10px] bg-destructive/15 text-destructive">
+                              {t('userDetail.expired')}
+                            </Badge>
+                          )}
+                        </div>
+                        <span className="text-sm font-semibold">
+                          {pkg.amount}
+                        </span>
+                      </div>
+                      {/* Dates */}
+                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {pkg.startDate}
+                        </span>
+                        <span>→</span>
+                        <span>{pkg.expiresAt}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 

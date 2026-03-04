@@ -11,19 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminProvidersRouteImport } from './routes/admin/providers'
 import { Route as AdminMetricsRouteImport } from './routes/admin/metrics'
-import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
-import { Route as AuthenticatedAffiliateRouteImport } from './routes/_authenticated/affiliate'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
-import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects/index'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin/users/$userId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -34,10 +26,6 @@ const LoginRoute = LoginRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -60,47 +48,11 @@ const AdminMetricsRoute = AdminMetricsRouteImport.update({
   path: '/metrics',
   getParentRoute: () => AdminRoute,
 } as any)
-const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
-  id: '/templates',
-  path: '/templates',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
-  id: '/calendar',
-  path: '/calendar',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedAffiliateRoute = AuthenticatedAffiliateRouteImport.update({
-  id: '/affiliate',
-  path: '/affiliate',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AuthenticatedProjectsIndexRoute =
-  AuthenticatedProjectsIndexRouteImport.update({
-    id: '/projects/',
-    path: '/projects/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AdminUsersUserIdRoute = AdminUsersUserIdRouteImport.update({
   id: '/users/$userId',
   path: '/users/$userId',
@@ -111,52 +63,30 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
-  '/affiliate': typeof AuthenticatedAffiliateRoute
-  '/calendar': typeof AuthenticatedCalendarRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/profile': typeof AuthenticatedProfileRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/templates': typeof AuthenticatedTemplatesRoute
   '/admin/metrics': typeof AdminMetricsRoute
   '/admin/providers': typeof AdminProvidersRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
-  '/projects/': typeof AuthenticatedProjectsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/affiliate': typeof AuthenticatedAffiliateRoute
-  '/calendar': typeof AuthenticatedCalendarRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/profile': typeof AuthenticatedProfileRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/templates': typeof AuthenticatedTemplatesRoute
   '/admin/metrics': typeof AdminMetricsRoute
   '/admin/providers': typeof AdminProvidersRoute
   '/admin': typeof AdminIndexRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
-  '/projects': typeof AuthenticatedProjectsIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
-  '/_authenticated/affiliate': typeof AuthenticatedAffiliateRoute
-  '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
   '/admin/metrics': typeof AdminMetricsRoute
   '/admin/providers': typeof AdminProvidersRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
-  '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRouteTypes {
@@ -165,57 +95,34 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/login'
-    | '/affiliate'
-    | '/calendar'
-    | '/dashboard'
-    | '/profile'
-    | '/settings'
-    | '/templates'
     | '/admin/metrics'
     | '/admin/providers'
     | '/admin/'
     | '/admin/users/$userId'
-    | '/projects/'
     | '/admin/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
-    | '/affiliate'
-    | '/calendar'
-    | '/dashboard'
-    | '/profile'
-    | '/settings'
-    | '/templates'
     | '/admin/metrics'
     | '/admin/providers'
     | '/admin'
     | '/admin/users/$userId'
-    | '/projects'
     | '/admin/users'
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
     | '/admin'
     | '/login'
-    | '/_authenticated/affiliate'
-    | '/_authenticated/calendar'
-    | '/_authenticated/dashboard'
-    | '/_authenticated/profile'
-    | '/_authenticated/settings'
-    | '/_authenticated/templates'
     | '/admin/metrics'
     | '/admin/providers'
     | '/admin/'
     | '/admin/users/$userId'
-    | '/_authenticated/projects/'
     | '/admin/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
 }
@@ -234,13 +141,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -271,61 +171,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMetricsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_authenticated/templates': {
-      id: '/_authenticated/templates'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof AuthenticatedTemplatesRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/calendar': {
-      id: '/_authenticated/calendar'
-      path: '/calendar'
-      fullPath: '/calendar'
-      preLoaderRoute: typeof AuthenticatedCalendarRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/affiliate': {
-      id: '/_authenticated/affiliate'
-      path: '/affiliate'
-      fullPath: '/affiliate'
-      preLoaderRoute: typeof AuthenticatedAffiliateRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/admin/users/': {
       id: '/admin/users/'
       path: '/users'
       fullPath: '/admin/users/'
       preLoaderRoute: typeof AdminUsersIndexRouteImport
       parentRoute: typeof AdminRoute
-    }
-    '/_authenticated/projects/': {
-      id: '/_authenticated/projects/'
-      path: '/projects'
-      fullPath: '/projects/'
-      preLoaderRoute: typeof AuthenticatedProjectsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
     }
     '/admin/users/$userId': {
       id: '/admin/users/$userId'
@@ -336,30 +187,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface AuthenticatedRouteChildren {
-  AuthenticatedAffiliateRoute: typeof AuthenticatedAffiliateRoute
-  AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
-  AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
-}
-
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAffiliateRoute: AuthenticatedAffiliateRoute,
-  AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
-  AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
-}
-
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
 
 interface AdminRouteChildren {
   AdminMetricsRoute: typeof AdminMetricsRoute
@@ -381,7 +208,6 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
 }

@@ -15,7 +15,7 @@ function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    navigate({ to: '/dashboard' })
+    navigate({ to: '/admin' })
   }
 
   return (
