@@ -3,6 +3,7 @@ export { UserDetail } from './components/UserDetail'
 export { MetricsOverview } from './components/MetricsOverview'
 export { ProvidersManager } from './components/ProvidersManager'
 export { TemplateManager } from './components/TemplateManager'
+export { MediaManager } from './components/MediaManager'
 
 export {
   useAdminUsers,
@@ -11,6 +12,10 @@ export {
   useAdminTeamSettings,
 } from './hooks/use-admin-users'
 export { useAdminMetrics } from './hooks/use-admin-metrics'
+export {
+  useAdminUserMedia,
+  useAdminMediaResults,
+} from './hooks/use-admin-media'
 export { useAdminProviders } from './hooks/use-admin-providers'
 export {
   useAdminUserTemplates,
@@ -39,4 +44,9 @@ export type {
   TeamMember,
   AdminTemplate,
   TemplateSettings,
+  AdminMedia,
+  MediaResult,
+  MediaStatus,
+  AiType,
+  RenderingStatus,
 } from './types'

@@ -4,10 +4,10 @@
     "dashboard": "Painel",
     "projects": "Projetos",
     "templates": "Modelos",
-    "calendar": "Calendario",
+    "calendar": "Calendário",
     "affiliate": "Afiliado",
     "profile": "Perfil",
-    "settings": "Configuracoes"
+    "settings": "Configurações"
   },
   "theme": {
     "light": "Claro",
@@ -17,8 +17,8 @@
   },
   "language": {
     "label": "Idioma",
-    "en": "Ingles",
-    "pt-BR": "Portugues",
+    "en": "Inglês",
+    "pt-BR": "Português",
     "es": "Espanhol"
   },
   "common": {

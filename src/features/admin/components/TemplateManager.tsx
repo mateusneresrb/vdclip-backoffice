@@ -397,7 +397,7 @@ function TemplateSettingsView({ template, editing }: { template: AdminTemplate; 
         {/* Aspect Ratio Cards */}
         <div>
           <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.layout.aspectRatio')}</p>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {aspectRatioOptions.map((ar) => {
               const Icon = ar.icon
               const selected = aspectRatio === ar.value
@@ -492,7 +492,7 @@ function TemplateSettingsView({ template, editing }: { template: AdminTemplate; 
             {/* Preset */}
             <div>
               <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.caption.preset')}</p>
-              <div className="grid grid-cols-5 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
                 {presetOptions.map((p) => (
                   <button
                     key={p}
@@ -788,7 +788,7 @@ function TemplateReadOnlyView(props: {
           <Layers className="h-4 w-4 text-primary" />
           <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('templates.layout.title')}</h4>
         </div>
-        <div className="grid grid-cols-3 gap-x-4 gap-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2">
           <ReadOnlyField label={t('templates.layout.aspectRatio')} value={props.aspectRatio} />
           <ReadOnlyField label={t('templates.layout.faceTracking')}>
             <StatusDot enabled={props.faceTracking} />
@@ -880,7 +880,7 @@ function TemplateReadOnlyView(props: {
       </div>
 
       {/* Hook + Logo compact row */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

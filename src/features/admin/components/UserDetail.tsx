@@ -51,6 +51,7 @@ import {
   useAdminTeamSettings,
 } from '../hooks/use-admin-users'
 import type { CreditType, UserPlan, UserStatus } from '../types'
+import { MediaManager } from './MediaManager'
 import { TemplateManager } from './TemplateManager'
 
 const statusVariant: Record<UserStatus, string> = {
@@ -85,6 +86,7 @@ export function UserDetail({ userId }: { userId: string }) {
   // Inline panels
   const [showAffiliate, setShowAffiliate] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [mediaOpen, setMediaOpen] = useState(false)
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
 
   // Create affiliate
@@ -106,6 +108,7 @@ export function UserDetail({ userId }: { userId: string }) {
 
   const { data: userTemplates, isLoading: userTemplatesLoading } =
     useAdminUserTemplates(userId, showTemplates)
+
 
   const { data: teamSettings, isLoading: teamLoading } =
     useAdminTeamSettings(selectedTeamId ?? '', !!selectedTeamId)
@@ -159,7 +162,7 @@ export function UserDetail({ userId }: { userId: string }) {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">{user.email}</p>
-          <div className="mt-1 flex gap-4 text-xs text-muted-foreground">
+          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
             <span>
               {t('userDetail.createdAt')}: {user.createdAt}
             </span>
@@ -376,7 +379,7 @@ export function UserDetail({ userId }: { userId: string }) {
                         </span>
                       </div>
                       {/* Dates */}
-                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {pkg.startDate}
@@ -413,9 +416,21 @@ export function UserDetail({ userId }: { userId: string }) {
               </span>
               <span className="font-semibold">{user.mediaPosted}</span>
             </div>
-            <Button variant="outline" size="sm" className="mt-2 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 w-full"
+              onClick={() => setMediaOpen(true)}
+            >
               {t('userDetail.viewMedia')}
             </Button>
+
+
+
+
+
+
+
           </CardContent>
         </Card>
 
@@ -685,6 +700,7 @@ export function UserDetail({ userId }: { userId: string }) {
         </Card>
       )}
 
+
       {/* User Templates (inline) */}
       {showTemplates && (
         <Card>
@@ -725,7 +741,7 @@ export function UserDetail({ userId }: { userId: string }) {
             ) : (
               <div className="space-y-6">
                 {/* Team Info Cards */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">
                       {t('teamSettings.name')}
@@ -992,6 +1008,9 @@ export function UserDetail({ userId }: { userId: string }) {
           </CardContent>
         </Card>
       )}
+
+      {/* Media Dialog */}
+      <MediaManager userId={userId} open={mediaOpen} onOpenChange={setMediaOpen} />
     </div>
   )
 }

@@ -1,13 +1,13 @@
 {
   "nav": {
-    "menu": "Menu",
+    "menu": "Menú",
     "dashboard": "Panel",
     "projects": "Proyectos",
     "templates": "Plantillas",
     "calendar": "Calendario",
     "affiliate": "Afiliado",
     "profile": "Perfil",
-    "settings": "Configuracion"
+    "settings": "Configuración"
   },
   "theme": {
     "light": "Claro",
@@ -17,15 +17,15 @@
   },
   "language": {
     "label": "Idioma",
-    "en": "Ingles",
-    "pt-BR": "Portugues",
-    "es": "Espanol"
+    "en": "Inglés",
+    "pt-BR": "Portugués",
+    "es": "Español"
   },
   "common": {
-    "comingSoon": "Proximamente",
+    "comingSoon": "Próximamente",
     "loading": "Cargando...",
-    "error": "Algo salio mal",
-    "login": "Iniciar sesion",
-    "logout": "Cerrar sesion"
+    "error": "Algo salió mal",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión"
   }
 }

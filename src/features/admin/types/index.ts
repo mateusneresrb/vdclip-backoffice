@@ -208,3 +208,38 @@ export interface SupportedProvider {
   enabled: boolean
   type: 'social' | 'publishing' | 'ai' | 'processing'
 }
+
+// Media types (mirrors projects + project_results tables)
+
+export type MediaStatus = 'completed' | 'processing' | 'failed' | 'pending'
+export type AiType = 'clips' | 'highlights' | 'shorts'
+export type RenderingStatus = 'pending' | 'rendering' | 'completed' | 'failed'
+
+export interface AdminMedia {
+  id: string
+  title: string
+  url: string | null
+  thumbnailUrl: string | null
+  status: MediaStatus
+  aiType: AiType | null
+  aspectRatio: string
+  category: string | null
+  language: string
+  provider: string | null
+  processStep: number
+  clipLengths: string[] | null
+  errorCode: string | null
+  deletedAt: string | null
+  resultsCount: number
+}
+
+export interface MediaResult {
+  id: string
+  title: string
+  description: string | null
+  highlightTags: string[] | null
+  thumbnailUrl: string | null
+  viralityScore: number | null
+  projectVersion: number
+  renderingStatus: RenderingStatus
+}

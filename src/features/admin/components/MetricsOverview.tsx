@@ -52,7 +52,7 @@ export function MetricsOverview() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {Array.from({ length: 7 }).map((_, i) => (
             <Skeleton key={i} className="h-9 w-16" />
           ))}
@@ -102,7 +102,7 @@ export function MetricsOverview() {
               <Label className="text-xs">{t('metrics.dateRange.from')}</Label>
               <Input
                 type="date"
-                className="h-9 w-40"
+                className="h-9 w-full sm:w-40"
                 value={customFrom}
                 onChange={(e) => setCustomFrom(e.target.value)}
               />
@@ -111,7 +111,7 @@ export function MetricsOverview() {
               <Label className="text-xs">{t('metrics.dateRange.to')}</Label>
               <Input
                 type="date"
-                className="h-9 w-40"
+                className="h-9 w-full sm:w-40"
                 value={customTo}
                 onChange={(e) => setCustomTo(e.target.value)}
               />
