@@ -61,7 +61,7 @@ Component: $ARGUMENTS
 
 - ALL user-facing strings must use `t('key')` from `useTranslation()`
 - Use the `common` namespace for shared UI text, feature namespace for feature-specific text
-- Add the translation keys to ALL 3 locale files: `en`, `pt-BR`, `es`
+- Add the translation keys to pt-BR locale
 - Never hardcode text strings (including aria-labels and placeholders)
 
 ### Dark Mode — MANDATORY
@@ -81,7 +81,7 @@ Component: $ARGUMENTS
 - Use `cn()` from `@/lib/utils` for conditional class merging
 - Prefer composition over configuration (slots/children over many props)
 
-4. **Add translations**: Create or update translation files in `public/locales/{en,pt-BR,es}/`
+4. **Add translations**: Create or update translation files in `public/locales/pt-BR/`
 
 5. **Verify**: Mentally walk through the component at 3 viewport sizes:
    - Mobile (320px) — everything stacks, readable, tappable

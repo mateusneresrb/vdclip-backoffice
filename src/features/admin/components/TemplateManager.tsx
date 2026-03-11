@@ -1,24 +1,36 @@
-import { useState } from 'react'
+import type {
+  AdminTemplate,
+  AspectRatio,
+  CaptionAnimation,
+  CaptionPosition,
+  CaptionsPerPage,
+  LayoutOption,
+  LogoPosition,
+  TemplateCaptionSettings,
+  TemplateLayoutSettings,
+  TemplateSettings,
+} from '../types'
 import {
   Check,
-  ChevronUp,
-  Edit2,
-  Eye,
-  FileText,
+  ChevronDown,
+  EllipsisVertical,
+  Grid2x2,
   Image,
   Layers,
-  LetterText,
+  Monitor,
   MonitorPlay,
+  Pencil,
   Plus,
-  RectangleHorizontal,
-  RectangleVertical,
-  Square,
+  Scan,
   Sparkles,
   Star,
   Trash2,
+  X,
+  Zap,
 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -28,8 +40,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Select,
   SelectContent,
@@ -41,42 +61,127 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
-import type {
-  AdminTemplate,
-  AspectRatio,
-  CaptionAnimation,
-  CaptionPosition,
-  CaptionsPerPage,
-  LayoutOption,
-  LogoPosition,
-} from '../types'
+import { cn } from '@/lib/utils'
 
-const animationOptions: CaptionAnimation[] = [
-  'none', 'bounce', 'underline', 'karaoke', 'pulse', 'scale', 'box', 'word-box', 'one-word',
-]
-const positionOptions: CaptionPosition[] = ['auto', 'top', 'middle', 'bottom']
+/* ──────────────── Static Data ──────────────── */
+
+const animationItems = [
+  { value: 'none', labelKey: 'templates.caption.animations.none' },
+  { value: 'bounce', labelKey: 'templates.caption.animations.bounce' },
+  { value: 'underline', labelKey: 'templates.caption.animations.underline' },
+  { value: 'karaoke', labelKey: 'templates.caption.animations.karaoke' },
+  { value: 'pulse', labelKey: 'templates.caption.animations.pulse' },
+  { value: 'scale', labelKey: 'templates.caption.animations.scale' },
+  { value: 'box', labelKey: 'templates.caption.animations.box' },
+  { value: 'word-box', labelKey: 'templates.caption.animations.wordBox' },
+  { value: 'one-word', labelKey: 'templates.caption.animations.oneWord' },
+] as const
+
+const positionItems = [
+  { value: 'auto', labelKey: 'templates.caption.positions.auto' },
+  { value: 'top', labelKey: 'templates.caption.positions.top' },
+  { value: 'middle', labelKey: 'templates.caption.positions.middle' },
+  { value: 'bottom', labelKey: 'templates.caption.positions.bottom' },
+] as const
+
 const captionsPerPageOptions: CaptionsPerPage[] = ['auto', 'one-word']
-const aspectRatioOptions: { value: AspectRatio; label: string; icon: typeof Square }[] = [
-  { value: 'auto', label: 'Auto', icon: Sparkles },
-  { value: '9:16', label: '9:16', icon: RectangleVertical },
-  { value: '16:9', label: '16:9', icon: RectangleHorizontal },
-  { value: '1:1', label: '1:1', icon: Square },
-]
-const layoutOptionsTracking: LayoutOption[] = ['fit', 'fill', 'split', 'three', 'four', 'react']
-const layoutOptionsNoTracking: LayoutOption[] = ['fit', 'fill']
-const logoPositionOptions: LogoPosition[] = ['top-left', 'top-right', 'bottom-left', 'bottom-right']
+
+const ratioCards = [
+  { value: 'auto' as AspectRatio, labelKey: 'templates.layout.ratios.auto', descKey: 'templates.layout.ratios.autoDesc', icon: Sparkles, recommended: true },
+  { value: '9:16' as AspectRatio, labelKey: 'templates.layout.ratios.portrait', descKey: 'templates.layout.ratios.portraitDesc', icon: Scan },
+  { value: '16:9' as AspectRatio, labelKey: 'templates.layout.ratios.landscape', descKey: 'templates.layout.ratios.landscapeDesc', icon: Monitor },
+  { value: '1:1' as AspectRatio, labelKey: 'templates.layout.ratios.square', descKey: 'templates.layout.ratios.squareDesc', icon: Grid2x2 },
+] as const
+
+function FitIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <rect x="2" y="2" width="20" height="20" rx="2" />
+      <rect x="6" y="5" width="12" height="14" rx="1" />
+    </svg>
+  )
+}
+
+function SplitIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <rect x="2" y="2" width="20" height="20" rx="2" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+    </svg>
+  )
+}
+
+function ReactIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <rect x="2" y="2" width="20" height="20" rx="2" />
+      <line x1="2" y1="9" x2="22" y2="9" />
+    </svg>
+  )
+}
+
+function ThreeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+      <rect x="2" y="2" width="20" height="20" rx="2" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+      <line x1="12" y1="12" x2="12" y2="22" />
+    </svg>
+  )
+}
+
+const layoutItems = [
+  { value: 'fill' as LayoutOption, labelKey: 'templates.layout.types.fill', icon: Scan },
+  { value: 'fit' as LayoutOption, labelKey: 'templates.layout.types.fit', icon: FitIcon },
+  { value: 'split' as LayoutOption, labelKey: 'templates.layout.types.split', icon: SplitIcon },
+  { value: 'three' as LayoutOption, labelKey: 'templates.layout.types.three', icon: ThreeIcon },
+  { value: 'four' as LayoutOption, labelKey: 'templates.layout.types.four', icon: Grid2x2 },
+  { value: 'react' as LayoutOption, labelKey: 'templates.layout.types.react', icon: ReactIcon },
+] as const
+
+const TRACKING_OFF_LAYOUTS: LayoutOption[] = ['fit', 'fill']
+
+const logoPositionItems = [
+  { value: 'top-left' as LogoPosition, labelKey: 'templates.logo.pos.top-left' },
+  { value: 'top-right' as LogoPosition, labelKey: 'templates.logo.pos.top-right' },
+  { value: 'bottom-left' as LogoPosition, labelKey: 'templates.logo.pos.bottom-left' },
+  { value: 'bottom-right' as LogoPosition, labelKey: 'templates.logo.pos.bottom-right' },
+] as const
+
 const fontFamilyOptions = ['Inter', 'Roboto', 'Montserrat', 'Open Sans', 'Poppins', 'Oswald', 'Bebas Neue'] as const
-const presetOptions = ['none', 'karaoke', 'beasty', 'deep-diver', 'youshaei', 'pod-p', 'clean', 'neon', 'bounce', 'one-word'] as const
+
+const presetOptions = [
+  { id: 'none', color: '#666666' },
+  { id: 'karaoke', color: '#FACC15' },
+  { id: 'beasty', color: '#EF4444' },
+  { id: 'deep-diver', color: '#22D3EE' },
+  { id: 'youshaei', color: '#A3E635' },
+  { id: 'pod-p', color: '#A855F7' },
+  { id: 'clean', color: '#FFFFFF' },
+  { id: 'neon', color: '#F472B6' },
+  { id: 'bounce', color: '#FB923C' },
+  { id: 'one-word', color: '#FACC15' },
+] as const
+
+/* ──────────────── Props ──────────────── */
 
 interface TemplateManagerProps {
   templates: AdminTemplate[] | undefined
   isLoading: boolean
 }
 
+/* ──────────────── Main Component ──────────────── */
+
 export function TemplateManager({ templates, isLoading }: TemplateManagerProps) {
   const { t } = useTranslation('admin')
 
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () => templates?.find((tpl) => tpl.isDefault)?.id ?? templates?.[0]?.id ?? null,
+  )
+  const [selectorOpen, setSelectorOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [newName, setNewName] = useState('')
   const [renameOpen, setRenameOpen] = useState(false)
@@ -84,145 +189,229 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
   const [renameName, setRenameName] = useState('')
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [defaultId, setDefaultId] = useState<string | null>(
-    () => templates?.find((tpl) => tpl.isDefault)?.id ?? null,
-  )
+  const [editingSettings, setEditingSettings] = useState<TemplateSettings | null>(null)
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
-        {Array.from({ length: 2 }).map((_, i) => (
-          <Skeleton key={i} className="h-14" />
-        ))}
+      <div className="space-y-3">
+        <Skeleton className="h-12 rounded-xl" />
+        <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
+          <Skeleton className="h-[460px] rounded-xl" />
+          <Skeleton className="h-[460px] rounded-xl" />
+        </div>
       </div>
     )
   }
 
   const templateList = templates ?? []
+  const selectedTemplate = templateList.find((tpl) => tpl.id === selectedId)
   const deleteTarget = templateList.find((tpl) => tpl.id === deleteId)
+  const hasTemplates = templateList.length > 0
+
+  // Current settings (editing or saved)
+  const currentSettings = editingSettings ?? selectedTemplate?.settings
+
+  const handleSelect = (id: string) => {
+    setSelectedId(id)
+    setEditingSettings(null)
+    setSelectorOpen(false)
+  }
+
+  const handleSettingsChange = (settings: TemplateSettings) => {
+    setEditingSettings(settings)
+  }
+
+  const handleSetDefault = (_id: string) => {
+    setSelectorOpen(false)
+  }
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {templateList.length} {t('templates.count')}
-        </p>
+      {/* ── Toolbar ── */}
+      <div className="flex items-center gap-3 rounded-xl border bg-card p-3 shadow-sm">
+        {hasTemplates ? (
+          <Popover open={selectorOpen} onOpenChange={setSelectorOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="border-input flex h-9 min-w-0 flex-1 items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-colors outline-none hover:bg-accent/50"
+              >
+                <span className="truncate">
+                  {selectedTemplate?.name ?? t('templates.selectTemplate')}
+                </span>
+                <ChevronDown className="size-4 shrink-0 opacity-50" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              className="w-[var(--radix-popover-trigger-width)] min-w-[220px] space-y-1 p-1"
+            >
+              {templateList.map((tpl) => (
+                <div
+                  key={tpl.id}
+                  className={cn(
+                    'group relative flex cursor-default items-center rounded-md py-2 pl-3 pr-9 text-sm select-none',
+                    tpl.id === selectedId
+                      ? 'bg-accent text-accent-foreground'
+                      : 'hover:bg-accent hover:text-accent-foreground',
+                  )}
+                >
+                  <button
+                    type="button"
+                    className="flex min-w-0 flex-1 items-center gap-2"
+                    onClick={() => handleSelect(tpl.id)}
+                  >
+                    <span className="shrink-0 text-[10px] text-muted-foreground">
+                      {tpl.aspectRatio === 'auto' ? 'Auto' : tpl.aspectRatio}
+                    </span>
+                    <span className="truncate">{tpl.name}</span>
+                    {tpl.isDefault && (
+                      <span className="shrink-0 rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                        {t('templates.default')}
+                      </span>
+                    )}
+                  </button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground transition-opacity hover:text-foreground lg:opacity-0 lg:group-hover:opacity-100 data-[state=open]:opacity-100"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <EllipsisVertical className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start" sideOffset={8}>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectorOpen(false)
+                          setRenameId(tpl.id)
+                          setRenameName(tpl.name)
+                          setRenameOpen(true)
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        {t('templates.rename')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={tpl.isDefault}
+                        onClick={() => handleSetDefault(tpl.id)}
+                      >
+                        <Star className="h-4 w-4" />
+                        {t('templates.setDefault')}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        disabled={tpl.isDefault}
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => {
+                          setSelectorOpen(false)
+                          setDeleteId(tpl.id)
+                          setDeleteOpen(true)
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {t('templates.delete')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </PopoverContent>
+          </Popover>
+        ) : (
+          <button
+            type="button"
+            className="border-input text-muted-foreground flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none"
+            onClick={() => { setNewName(''); setCreateOpen(true) }}
+          >
+            <Plus className="size-4 shrink-0" />
+            <span className="truncate">{t('templates.createFirst')}</span>
+          </button>
+        )}
+
         <Button
           variant="outline"
           size="sm"
+          className="gap-1.5 rounded-lg"
           onClick={() => { setNewName(''); setCreateOpen(true) }}
         >
-          <Plus className="mr-1 h-3 w-3" />
-          {t('templates.create')}
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">{t('templates.create')}</span>
         </Button>
       </div>
 
-      {templateList.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-4">
-          {t('templates.empty')}
-        </p>
-      ) : (
-        <div className="rounded-lg border divide-y">
-          {templateList.map((tpl) => (
-            <div key={tpl.id}>
-              <div className="flex items-center gap-3 p-3">
-                <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium truncate">{tpl.name}</p>
-                    {defaultId === tpl.id && (
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                        {t('templates.default')}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <Badge variant="outline" className="text-xs">{tpl.aspectRatio}</Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {t('templates.updated')}: {tpl.updatedAt}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost" size="sm"
-                    className={`h-7 w-7 p-0 ${defaultId === tpl.id ? 'text-amber-500' : 'text-muted-foreground'}`}
-                    title={t('templates.setDefault')}
-                    disabled={defaultId === tpl.id}
-                    onClick={() => setDefaultId(tpl.id)}
-                  >
-                    <Star className={`h-3.5 w-3.5 ${defaultId === tpl.id ? 'fill-amber-500' : ''}`} />
-                  </Button>
-                  <Button
-                    variant="ghost" size="sm" className="h-7 w-7 p-0"
-                    title={t('templates.viewSettings')}
-                    onClick={() => setExpandedId(expandedId === tpl.id ? null : tpl.id)}
-                  >
-                    {expandedId === tpl.id ? <ChevronUp className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                  </Button>
-                  <Button
-                    variant="ghost" size="sm" className="h-7 w-7 p-0"
-                    title={t('templates.rename')}
-                    onClick={() => { setRenameId(tpl.id); setRenameName(tpl.name); setRenameOpen(true) }}
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost" size="sm"
-                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                    title={t('templates.delete')}
-                    disabled={defaultId === tpl.id}
-                    onClick={() => { setDeleteId(tpl.id); setDeleteOpen(true) }}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+      {/* ── Main Content ── */}
+      {hasTemplates && currentSettings && (
+        <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
+          {/* Preview — fixed height, centered */}
+          <div className="flex items-start justify-center rounded-xl border bg-card p-4 shadow-sm lg:sticky lg:top-4 lg:self-start">
+            <TemplateStaticPreview settings={currentSettings} t={t} />
+          </div>
+
+          {/* Editor Tabs — fixed max-height with internal scroll */}
+          <div className="flex flex-col rounded-xl border bg-card shadow-sm max-h-[520px]">
+            <Tabs defaultValue="layout" className="flex min-h-0 flex-1 flex-col">
+              <div className="shrink-0 border-b px-2 py-2">
+                <TabsList className="h-9 w-full bg-transparent p-0 gap-1">
+                  <TabsTrigger value="layout" className="flex-1 rounded-md text-xs data-[state=active]:bg-background data-[state=active]:shadow sm:text-sm">
+                    {t('templates.tabs.layout')}
+                  </TabsTrigger>
+                  <TabsTrigger value="caption" className="flex-1 rounded-md text-xs data-[state=active]:bg-background data-[state=active]:shadow sm:text-sm">
+                    {t('templates.tabs.captions')}
+                  </TabsTrigger>
+                  <TabsTrigger value="others" className="flex-1 rounded-md text-xs data-[state=active]:bg-background data-[state=active]:shadow sm:text-sm">
+                    {t('templates.tabs.other')}
+                  </TabsTrigger>
+                </TabsList>
               </div>
 
-              {expandedId === tpl.id && (
-                <div className="border-t bg-muted/30 p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h5 className="text-sm font-medium">{t('templates.settings')}</h5>
-                    {editingId === tpl.id ? (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm" className="h-7 text-xs"
-                          onClick={() => setEditingId(null)}
-                        >
-                          {t('userDetail.cancel')}
-                        </Button>
-                        <Button
-                          variant="default"
-                          size="sm" className="h-7 text-xs"
-                          onClick={() => setEditingId(null)}
-                        >
-                          <Check className="mr-1 h-3 w-3" />
-                          {t('templates.save')}
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm" className="h-7 text-xs"
-                        onClick={() => setEditingId(tpl.id)}
-                      >
-                        <Edit2 className="mr-1 h-3 w-3" />
-                        {t('templates.edit')}
-                      </Button>
-                    )}
-                  </div>
-                  <TemplateSettingsView template={tpl} editing={editingId === tpl.id} />
-                </div>
-              )}
-            </div>
-          ))}
+              <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                <TabsContent value="layout" className="mt-0">
+                  <LayoutTab
+                    settings={currentSettings.layout}
+                    onChange={(layout) => handleSettingsChange({ ...currentSettings, layout })}
+                    t={t}
+                  />
+                </TabsContent>
+                <TabsContent value="caption" className="mt-0">
+                  <CaptionTab
+                    settings={currentSettings.caption}
+                    onChange={(caption) => handleSettingsChange({ ...currentSettings, caption })}
+                    t={t}
+                  />
+                </TabsContent>
+                <TabsContent value="others" className="mt-0">
+                  <OthersTab
+                    settings={currentSettings}
+                    onChange={handleSettingsChange}
+                    t={t}
+                  />
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
         </div>
       )}
 
-      {/* Create Dialog */}
+      {!hasTemplates && (
+        <div className="flex flex-col items-center justify-center rounded-xl border bg-card py-12 shadow-sm">
+          <Layers className="mb-3 h-10 w-10 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">{t('templates.empty')}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => { setNewName(''); setCreateOpen(true) }}
+          >
+            <Plus className="mr-1 h-3 w-3" />
+            {t('templates.create')}
+          </Button>
+        </div>
+      )}
+
+      {/* ── Dialogs ── */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
           <DialogHeader>
@@ -241,7 +430,6 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
         </DialogContent>
       </Dialog>
 
-      {/* Rename Dialog */}
       <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
         <DialogContent>
           <DialogHeader>
@@ -259,7 +447,6 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
           <DialogHeader>
@@ -276,647 +463,796 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
   )
 }
 
-/* ──────────────── Settings View ──────────────── */
+/* ──────────────── Static Preview ──────────────── */
 
-function TemplateSettingsView({ template, editing }: { template: AdminTemplate; editing: boolean }) {
-  const { t } = useTranslation('admin')
-  const s = template.settings
+function TemplateStaticPreview({ settings, t }: { settings: TemplateSettings; t: (key: string) => string }) {
+  const { caption, layout, hook, logo } = settings
 
-  // ── Layout state ──
-  const [aspectRatio, setAspectRatio] = useState(s.layout.aspectRatio)
-  const [faceTracking, setFaceTracking] = useState(s.layout.faceTracking)
-  const [selectedLayouts, setSelectedLayouts] = useState<string[]>(s.layout.layouts)
+  const isPortrait = layout.aspectRatio === '9:16' || layout.aspectRatio === 'auto'
+  const isSquare = layout.aspectRatio === '1:1'
 
-  // ── Caption state ──
-  const [captionEnabled, setCaptionEnabled] = useState(s.caption.enabled)
-  const [preset, setPreset] = useState(s.caption.presetModel ?? 'karaoke')
-  const [animation, setAnimation] = useState(s.caption.animation)
-  const [position, setPosition] = useState(s.caption.position)
-  const [captionsPerPage, setCaptionsPerPage] = useState(s.caption.captionsPerPage)
-  const [fontFamily, setFontFamily] = useState(s.caption.fontFamily)
-  const [fontSize, setFontSize] = useState(s.caption.fontSize)
-  const [bold, setBold] = useState(s.caption.bold)
-  const [italic, setItalic] = useState(s.caption.italic)
-  const [underline, setUnderline] = useState(s.caption.underline)
-  const [uppercaseAll, setUppercaseAll] = useState(s.caption.uppercaseAll)
-  const [removePunctuation, setRemovePunctuation] = useState(s.caption.removePunctuation)
-  const [removeProfanity, setRemoveProfanity] = useState(s.caption.removeProfanity)
-  const [fontColor, setFontColor] = useState(s.caption.fontColor)
-  const [highlightColor, setHighlightColor] = useState(s.caption.highlightColor)
-  const [outlineEnabled, setOutlineEnabled] = useState(s.caption.outlineEnabled)
-  const [outlineColor, setOutlineColor] = useState(s.caption.outlineColor)
-  const [outlineWidth, setOutlineWidth] = useState(s.caption.outlineWidth)
-  const [shadowEnabled, setShadowEnabled] = useState(s.caption.shadowEnabled)
-  const [shadowColor, setShadowColor] = useState(s.caption.shadowColor)
-  const [shadowBlur, setShadowBlur] = useState(s.caption.shadowBlur)
+  // Caption position → CSS
+  const captionPositionClass = caption.position === 'top'
+    ? 'top-[15%]'
+    : caption.position === 'middle'
+      ? 'top-1/2 -translate-y-1/2'
+      : 'bottom-[12%]'
 
-  // ── Hook state ──
-  const [hookEnabled, setHookEnabled] = useState(s.hook.enabled)
+  // Logo position
+  const logoPos = logo.positions?.[0] ?? 'top-right'
+  const logoPositionClass = cn(
+    logoPos.includes('top') ? 'top-3' : 'bottom-3',
+    logoPos.includes('left') ? 'left-3' : 'right-3',
+  )
 
-  // ── Logo state ──
-  const [logoEnabled, setLogoEnabled] = useState(s.logo.enabled)
-  const [logoUrl, setLogoUrl] = useState(s.logo.imageUrl ?? '')
-  const [logoScale, setLogoScale] = useState(s.logo.scale)
-  const [logoOpacity, setLogoOpacity] = useState(s.logo.opacity)
-  const [alternatePosition, setAlternatePosition] = useState(s.logo.alternatePosition)
-  const [logoPositions, setLogoPositions] = useState<string[]>(s.logo.positions)
-
-  // ── Layout handlers ──
-  const handleFaceTrackingChange = (checked: boolean) => {
-    setFaceTracking(checked)
-    if (checked) {
-      if (!selectedLayouts.includes('fit')) {
-        setSelectedLayouts((prev) => ['fit', ...prev])
-      }
-    } else {
-      const hasFill = selectedLayouts.includes('fill')
-      setSelectedLayouts(hasFill ? ['fill'] : ['fit'])
-    }
-  }
-
-  const handleLayoutToggle = (lo: string) => {
-    if (faceTracking) {
-      if (lo === 'fit') return
-      setSelectedLayouts((prev) =>
-        prev.includes(lo) ? prev.filter((l) => l !== lo) : [...prev, lo],
-      )
-    } else {
-      setSelectedLayouts([lo])
-    }
-  }
-
-  const handleLogoPositionToggle = (pos: string) => {
-    setLogoPositions((prev) =>
-      prev.includes(pos) ? prev.filter((p) => p !== pos) : [...prev, pos],
-    )
-  }
-
-  if (!editing) {
-    return <TemplateReadOnlyView
-      t={t}
-      aspectRatio={aspectRatio}
-      faceTracking={faceTracking}
-      selectedLayouts={selectedLayouts}
-      captionEnabled={captionEnabled}
-      preset={preset}
-      animation={animation}
-      position={position}
-      captionsPerPage={captionsPerPage}
-      fontFamily={fontFamily}
-      fontSize={fontSize}
-      bold={bold}
-      italic={italic}
-      underline={underline}
-      uppercaseAll={uppercaseAll}
-      removePunctuation={removePunctuation}
-      removeProfanity={removeProfanity}
-      fontColor={fontColor}
-      highlightColor={highlightColor}
-      outlineEnabled={outlineEnabled}
-      outlineColor={outlineColor}
-      outlineWidth={outlineWidth}
-      shadowEnabled={shadowEnabled}
-      shadowColor={shadowColor}
-      shadowBlur={shadowBlur}
-      hookEnabled={hookEnabled}
-      logoEnabled={logoEnabled}
-      logoUrl={logoUrl}
-      logoScale={logoScale}
-      logoOpacity={logoOpacity}
-      alternatePosition={alternatePosition}
-      logoPositions={logoPositions}
-    />
-  }
+  // Feature summary badges
+  const features = [
+    caption.enabled && { label: t('templates.caption.title'), color: 'bg-blue-500/20 text-blue-400' },
+    hook.enabled && { label: t('templates.hook.title'), color: 'bg-amber-500/20 text-amber-400' },
+    logo.enabled && { label: t('templates.logo.title'), color: 'bg-emerald-500/20 text-emerald-400' },
+    layout.faceTracking && { label: 'Face Tracking', color: 'bg-purple-500/20 text-purple-400' },
+  ].filter(Boolean) as { label: string; color: string }[]
 
   return (
-    <div className="space-y-6">
-      {/* ── Layout ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={Layers} label={t('templates.layout.title')} />
+    <div className="flex w-full flex-col items-center gap-3">
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-800 [contain:paint]',
+          isPortrait
+            ? 'aspect-[9/16] w-full max-w-[200px]'
+            : isSquare
+              ? 'aspect-square w-full max-w-[260px]'
+              : 'aspect-video w-full max-w-[300px]',
+        )}
+      >
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }} />
 
-        {/* Aspect Ratio Cards */}
-        <div>
-          <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.layout.aspectRatio')}</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {aspectRatioOptions.map((ar) => {
-              const Icon = ar.icon
-              const selected = aspectRatio === ar.value
-              return (
-                <button
-                  key={ar.value}
-                  type="button"
-                  onClick={() => setAspectRatio(ar.value)}
-                  className={`flex flex-col items-center justify-center gap-1 rounded-lg border-2 p-3 transition-colors ${
-                    selected
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/40'
-                  }`}
-                >
-                  <Icon className={`h-5 w-5 ${selected ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <span className={`text-xs font-medium ${selected ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {ar.label}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Face Tracking */}
-        <ClickableRow label={t('templates.layout.faceTracking')} editing onToggle={() => handleFaceTrackingChange(!faceTracking)}>
-          <Switch checked={faceTracking} onCheckedChange={handleFaceTrackingChange} />
-        </ClickableRow>
-
-        {/* Layout Options */}
-        <div>
-          <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.layout.layouts')}</p>
-          {faceTracking ? (
-            <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6">
-              {layoutOptionsTracking.map((lo) => {
-                const selected = selectedLayouts.includes(lo)
-                const locked = lo === 'fit'
-                return (
-                  <button
-                    key={lo}
-                    type="button"
-                    onClick={() => handleLayoutToggle(lo)}
-                    disabled={locked}
-                    className={`flex items-center justify-center rounded-lg border-2 px-2 py-2 text-xs font-medium capitalize transition-colors ${
-                      selected
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-border text-muted-foreground hover:border-primary/40'
-                    } ${locked ? 'opacity-80 cursor-not-allowed' : ''}`}
-                  >
-                    {lo}
-                    {locked && <Check className="ml-1 h-3 w-3" />}
-                  </button>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-1.5 max-w-xs">
-              {layoutOptionsNoTracking.map((lo) => {
-                const selected = selectedLayouts.includes(lo)
-                return (
-                  <button
-                    key={lo}
-                    type="button"
-                    onClick={() => handleLayoutToggle(lo)}
-                    className={`flex items-center justify-center rounded-lg border-2 px-2 py-2 text-xs font-medium capitalize transition-colors ${
-                      selected
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-border text-muted-foreground hover:border-primary/40'
-                    }`}
-                  >
-                    {lo}
-                  </button>
-                )
-              })}
+        {/* Layout indicator */}
+        <div className="absolute inset-x-0 top-0 z-[1]">
+          {layout.faceTracking && (
+            <div className="mx-3 mt-3 flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 backdrop-blur-sm w-fit">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[9px] font-medium text-white/70">{t('templates.preview.faceTracking')}</span>
             </div>
           )}
         </div>
-      </section>
 
-      <Separator />
-
-      {/* ── Captions ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={LetterText} label={t('templates.caption.title')} />
-
-        <ClickableRow label={t('templates.caption.enabled')} editing onToggle={() => setCaptionEnabled(!captionEnabled)}>
-          <Switch checked={captionEnabled} onCheckedChange={setCaptionEnabled} />
-        </ClickableRow>
-
-        {captionEnabled && (
-          <>
-            {/* Preset */}
-            <div>
-              <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.caption.preset')}</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
-                {presetOptions.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPreset(p)}
-                    className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium capitalize transition-colors ${
-                      preset === p
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-border text-muted-foreground hover:border-primary/40'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
+        {/* Video placeholder content */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2 opacity-20">
+            <MonitorPlay className="h-8 w-8 text-white" />
+            <div className="flex gap-1">
+              {layout.layouts.map((lo) => (
+                <Badge key={lo} variant="secondary" className="bg-white/20 text-[8px] text-white/70 capitalize px-1.5 py-0 border-0">
+                  {lo}
+                </Badge>
+              ))}
             </div>
+          </div>
+        </div>
 
-            {/* Animation */}
-            <div>
-              <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.caption.animation')}</p>
-              <div className="grid w-full grid-cols-3 gap-1.5 sm:grid-cols-5">
-                {animationOptions.map((a) => (
-                  <button
-                    key={a}
-                    type="button"
-                    onClick={() => setAnimation(a)}
-                    className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium capitalize transition-colors ${
-                      animation === a
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-border text-muted-foreground hover:border-primary/40'
-                    }`}
-                  >
-                    {a}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Position */}
-            <div>
-              <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.caption.position')}</p>
-              <div className="grid w-full grid-cols-4 gap-1.5">
-                {positionOptions.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPosition(p)}
-                    className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium capitalize transition-colors ${
-                      position === p
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-border text-muted-foreground hover:border-primary/40'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Captions Per Page */}
-            <div>
-              <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.caption.captionsPerPage')}</p>
-              <div className="grid w-full grid-cols-2 gap-1.5 max-w-xs">
-                {captionsPerPageOptions.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setCaptionsPerPage(c)}
-                    className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium capitalize transition-colors ${
-                      captionsPerPage === c
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-border text-muted-foreground hover:border-primary/40'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Separator className="!my-3" />
-
-            {/* Font */}
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('templates.caption.font')}</p>
-              <div className="flex items-center gap-3">
-                <Select value={fontFamily} onValueChange={setFontFamily}>
-                  <SelectTrigger className="h-9 flex-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fontFamilyOptions.map((f) => (
-                      <SelectItem key={f} value={f}>{f}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="number"
-                  value={fontSize}
-                  onChange={(e) => setFontSize(Number(e.target.value))}
-                  min={8}
-                  max={72}
-                  className="h-9 w-20 text-center"
-                />
-              </div>
-
-              {/* Style Toggles */}
-              <div className="flex gap-1">
-                <Button variant={bold ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 font-bold" onClick={() => setBold(!bold)}>B</Button>
-                <Button variant={italic ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 italic" onClick={() => setItalic(!italic)}>I</Button>
-                <Button variant={underline ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 underline" onClick={() => setUnderline(!underline)}>U</Button>
-                <Button variant={uppercaseAll ? 'default' : 'outline'} size="sm" className="h-8 px-3 text-xs font-semibold" onClick={() => setUppercaseAll(!uppercaseAll)}>AA</Button>
-              </div>
-            </div>
-
-            <Separator className="!my-3" />
-
-            {/* Filters */}
-            <div className="space-y-2">
-              <ClickableRow label={t('templates.caption.removePunctuation')} editing onToggle={() => setRemovePunctuation(!removePunctuation)}>
-                <Switch checked={removePunctuation} onCheckedChange={setRemovePunctuation} />
-              </ClickableRow>
-              <ClickableRow label={t('templates.caption.removeProfanity')} editing onToggle={() => setRemoveProfanity(!removeProfanity)}>
-                <Switch checked={removeProfanity} onCheckedChange={setRemoveProfanity} />
-              </ClickableRow>
-            </div>
-
-            <Separator className="!my-3" />
-
-            {/* Colors */}
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('templates.caption.colors')}</p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ColorInput label={t('templates.caption.fontColor')} value={fontColor} onChange={setFontColor} editing />
-                <ColorInput label={t('templates.caption.highlightColor')} value={highlightColor} onChange={setHighlightColor} editing />
-              </div>
-            </div>
-
-            {/* Outline */}
-            <div className="rounded-lg border bg-muted/20 p-3 space-y-3">
-              <ClickableRow label={t('templates.caption.outline')} editing onToggle={() => setOutlineEnabled(!outlineEnabled)}>
-                <Switch checked={outlineEnabled} onCheckedChange={setOutlineEnabled} />
-              </ClickableRow>
-              {outlineEnabled && (
-                <div className="space-y-3 pt-1">
-                  <ColorInput label={t('templates.caption.outlineColor')} value={outlineColor} onChange={setOutlineColor} editing />
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs text-muted-foreground">{t('templates.caption.outlineWidth')}</span>
-                      <span className="text-xs font-medium">{outlineWidth}px</span>
-                    </div>
-                    <Slider value={[outlineWidth]} onValueChange={([v]) => setOutlineWidth(v)} min={0} max={10} step={1} />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Shadow */}
-            <div className="rounded-lg border bg-muted/20 p-3 space-y-3">
-              <ClickableRow label={t('templates.caption.shadow')} editing onToggle={() => setShadowEnabled(!shadowEnabled)}>
-                <Switch checked={shadowEnabled} onCheckedChange={setShadowEnabled} />
-              </ClickableRow>
-              {shadowEnabled && (
-                <div className="space-y-3 pt-1">
-                  <ColorInput label={t('templates.caption.shadowColor')} value={shadowColor} onChange={setShadowColor} editing />
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs text-muted-foreground">{t('templates.caption.shadowBlur')}</span>
-                      <span className="text-xs font-medium">{shadowBlur}px</span>
-                    </div>
-                    <Slider value={[shadowBlur]} onValueChange={([v]) => setShadowBlur(v)} min={0} max={20} step={1} />
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
+        {/* Hook banner */}
+        {hook.enabled && (
+          <div className="absolute inset-x-3 top-[8%] z-[2] flex items-center gap-2 rounded-lg bg-amber-500/20 px-3 py-2 backdrop-blur-sm">
+            <Zap className="h-3.5 w-3.5 text-amber-400" />
+            <span className="text-[10px] font-semibold text-amber-300">HOOK</span>
+          </div>
         )}
-      </section>
 
-      <Separator />
-
-      {/* ── Hook ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={MonitorPlay} label={t('templates.hook.title')} />
-        <ClickableRow label={t('templates.hook.enabled')} editing onToggle={() => setHookEnabled(!hookEnabled)}>
-          <Switch checked={hookEnabled} onCheckedChange={setHookEnabled} />
-        </ClickableRow>
-      </section>
-
-      <Separator />
-
-      {/* ── Logo ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={Image} label={t('templates.logo.title')} />
-
-        <ClickableRow label={t('templates.logo.enabled')} editing onToggle={() => setLogoEnabled(!logoEnabled)}>
-          <Switch checked={logoEnabled} onCheckedChange={setLogoEnabled} />
-        </ClickableRow>
-
-        {logoEnabled && (
-          <>
-            {/* Image URL */}
-            <div>
-              <p className="mb-1.5 text-xs text-muted-foreground">{t('templates.logo.image')}</p>
-              <Input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://..." className="h-9" />
+        {/* Caption preview */}
+        {caption.enabled && (
+          <div className={cn('absolute inset-x-4 z-[3] text-center', captionPositionClass)}>
+            <div
+              className="inline-block rounded-lg px-3 py-2"
+              style={{
+                backgroundColor: 'rgba(0,0,0,0.4)',
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              <span
+                className="leading-tight"
+                style={{
+                  fontFamily: caption.fontFamily,
+                  fontSize: `${Math.min(caption.fontSize * 0.35, 16)}px`,
+                  fontWeight: caption.bold ? 700 : 400,
+                  fontStyle: caption.italic ? 'italic' : 'normal',
+                  textDecoration: caption.underline ? 'underline' : 'none',
+                  textTransform: caption.uppercaseAll ? 'uppercase' : 'none',
+                  color: caption.fontColor,
+                  textShadow: caption.shadowEnabled
+                    ? `0 0 ${caption.shadowBlur}px ${caption.shadowColor}`
+                    : 'none',
+                  WebkitTextStroke: caption.outlineEnabled
+                    ? `${Math.max(caption.outlineWidth * 0.3, 0.5)}px ${caption.outlineColor}`
+                    : 'none',
+                }}
+              >
+                {t('templates.preview.sampleWord1')}{' '}
+                <span style={{ color: caption.highlightColor }}>
+                  {t('templates.preview.sampleWord2')}
+                </span>{' '}
+                {t('templates.preview.sampleWord3')}
+              </span>
             </div>
 
-            {/* Scale */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs text-muted-foreground">{t('templates.logo.scale')}</span>
-                <span className="text-xs font-medium">{logoScale}%</span>
-              </div>
-              <Slider value={[logoScale]} onValueChange={([v]) => setLogoScale(v)} min={10} max={100} step={5} />
+            {/* Preset + animation badge */}
+            <div className="mt-1.5 flex items-center justify-center gap-1">
+              {caption.presetModel && caption.presetModel !== 'none' && (
+                <span
+                  className="rounded px-1.5 py-0.5 text-[8px] font-bold uppercase text-white"
+                  style={{ backgroundColor: presetOptions.find((p) => p.id === caption.presetModel)?.color ?? '#666' }}
+                >
+                  {caption.presetModel}
+                </span>
+              )}
+              {caption.animation !== 'none' && (
+                <span className="rounded bg-white/15 px-1.5 py-0.5 text-[8px] font-medium text-white/60">
+                  {caption.animation}
+                </span>
+              )}
             </div>
+          </div>
+        )}
 
-            {/* Opacity */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs text-muted-foreground">{t('templates.logo.opacity')}</span>
-                <span className="text-xs font-medium">{logoOpacity}%</span>
-              </div>
-              <Slider value={[logoOpacity]} onValueChange={([v]) => setLogoOpacity(v)} min={0} max={100} step={5} />
-            </div>
-
-            {/* Alternate Position */}
-            <ClickableRow label={t('templates.logo.alternatePosition')} editing onToggle={() => setAlternatePosition(!alternatePosition)}>
-              <Switch checked={alternatePosition} onCheckedChange={setAlternatePosition} />
-            </ClickableRow>
-
-            {/* Positions */}
-            {alternatePosition && (
-              <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">{t('templates.logo.positions')}</p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {logoPositionOptions.map((pos) => {
-                    const selected = logoPositions.includes(pos)
-                    return (
-                      <button
-                        key={pos}
-                        type="button"
-                        onClick={() => handleLogoPositionToggle(pos)}
-                        className={`rounded-lg border-2 px-3 py-2 text-xs font-medium transition-colors ${
-                          selected
-                            ? 'border-primary bg-primary/5 text-primary'
-                            : 'border-border text-muted-foreground hover:border-primary/40'
-                        }`}
-                      >
-                        {t(`templates.logo.pos.${pos}`)}
-                      </button>
-                    )
-                  })}
-                </div>
+        {/* Logo preview */}
+        {logo.enabled && (
+          <div className={cn('absolute z-[4]', logoPositionClass)}>
+            {logo.imageUrl ? (
+              <img
+                src={logo.imageUrl}
+                alt="Logo"
+                className="block max-h-8 max-w-12 object-contain"
+                style={{ opacity: logo.opacity / 100 }}
+                draggable={false}
+              />
+            ) : (
+              <div
+                className="flex h-7 w-7 items-center justify-center rounded-md border border-white/20 bg-white/10"
+                style={{ opacity: logo.opacity / 100 }}
+              >
+                <Image className="h-3.5 w-3.5 text-white/50" />
               </div>
             )}
-          </>
+          </div>
         )}
-      </section>
+
+        {/* Aspect ratio badge */}
+        <div className="absolute bottom-2 right-2 z-[5] rounded-md bg-black/40 px-2 py-0.5 backdrop-blur-sm">
+          <span className="text-[9px] font-semibold tabular-nums text-white/60">
+            {layout.aspectRatio === 'auto' ? 'AUTO' : layout.aspectRatio}
+          </span>
+        </div>
+      </div>
+
+      {/* Feature summary */}
+      {features.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
+          {features.map((f) => (
+            <span key={f.label} className={cn('rounded-full px-2.5 py-0.5 text-[10px] font-medium', f.color)}>
+              {f.label}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-/* ──────────────── Read-Only View ──────────────── */
+/* ──────────────── Layout Tab ──────────────── */
 
-function TemplateReadOnlyView(props: {
+function LayoutTab({ settings, onChange, t }: {
+  settings: TemplateLayoutSettings
+  onChange: (s: TemplateLayoutSettings) => void
   t: (key: string) => string
-  aspectRatio: string; faceTracking: boolean; selectedLayouts: string[]
-  captionEnabled: boolean; preset: string; animation: string; position: string
-  captionsPerPage: string; fontFamily: string; fontSize: number
-  bold: boolean; italic: boolean; underline: boolean; uppercaseAll: boolean
-  removePunctuation: boolean; removeProfanity: boolean
-  fontColor: string; highlightColor: string
-  outlineEnabled: boolean; outlineColor: string; outlineWidth: number
-  shadowEnabled: boolean; shadowColor: string; shadowBlur: number
-  hookEnabled: boolean
-  logoEnabled: boolean; logoUrl: string; logoScale: number; logoOpacity: number
-  alternatePosition: boolean; logoPositions: string[]
 }) {
-  const { t } = props
+  const handleFaceTrackingChange = (checked: boolean) => {
+    if (checked) {
+      const next = settings.layouts.includes('fill')
+        ? settings.layouts
+        : ['fill' as LayoutOption, ...settings.layouts]
+      onChange({ ...settings, faceTracking: true, layouts: next })
+    } else {
+      const kept = settings.layouts.find((l) => TRACKING_OFF_LAYOUTS.includes(l)) ?? 'fit'
+      onChange({ ...settings, faceTracking: false, layouts: [kept as LayoutOption] })
+    }
+  }
 
-  const styleLabels = [
-    props.bold && 'B',
-    props.italic && 'I',
-    props.underline && 'U',
-    props.uppercaseAll && 'AA',
-  ].filter(Boolean) as string[]
+  const handleLayoutToggle = (value: LayoutOption) => {
+    if (settings.faceTracking) {
+      if (value === 'fill') 
+return
+      const isSelected = settings.layouts.includes(value)
+      const next = isSelected
+        ? settings.layouts.filter((l) => l !== value)
+        : [...settings.layouts, value]
+      if (next.length === 0) 
+return
+      onChange({ ...settings, layouts: next })
+    } else {
+      if (!TRACKING_OFF_LAYOUTS.includes(value)) 
+return
+      onChange({ ...settings, layouts: [value] })
+    }
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Layout */}
-      <div className="rounded-lg border p-4 space-y-3">
-        <div className="flex items-center gap-2 mb-1">
-          <Layers className="h-4 w-4 text-primary" />
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('templates.layout.title')}</h4>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-2">
-          <ReadOnlyField label={t('templates.layout.aspectRatio')} value={props.aspectRatio} />
-          <ReadOnlyField label={t('templates.layout.faceTracking')}>
-            <StatusDot enabled={props.faceTracking} />
-          </ReadOnlyField>
-          <ReadOnlyField label={t('templates.layout.layouts')}>
-            <div className="flex gap-1 flex-wrap">
-              {props.selectedLayouts.map((lo) => (
-                <Badge key={lo} variant="secondary" className="text-[10px] capitalize px-1.5 py-0">{lo}</Badge>
-              ))}
-            </div>
-          </ReadOnlyField>
-        </div>
-      </div>
-
-      {/* Captions */}
-      <div className="rounded-lg border p-4 space-y-3">
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
-            <LetterText className="h-4 w-4 text-primary" />
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('templates.caption.title')}</h4>
-          </div>
-          <StatusDot enabled={props.captionEnabled} />
-        </div>
-        {props.captionEnabled && (
-          <>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-              <ReadOnlyField label={t('templates.caption.preset')} value={props.preset} capitalize />
-              <ReadOnlyField label={t('templates.caption.animation')} value={props.animation} capitalize />
-              <ReadOnlyField label={t('templates.caption.position')} value={props.position} capitalize />
-              <ReadOnlyField label={t('templates.caption.captionsPerPage')} value={props.captionsPerPage} capitalize />
-              <ReadOnlyField label={t('templates.caption.font')}>
-                <span className="text-sm font-medium" style={{ fontFamily: props.fontFamily }}>{props.fontFamily}</span>
-                <span className="text-xs text-muted-foreground ml-1">{props.fontSize}px</span>
-              </ReadOnlyField>
-              <ReadOnlyField label={t('templates.caption.style')}>
-                {styleLabels.length > 0 ? (
-                  <div className="flex gap-1">
-                    {styleLabels.map((s) => (
-                      <span key={s} className={`inline-flex items-center justify-center h-5 w-5 rounded bg-muted text-[10px] font-semibold ${
-                        s === 'I' ? 'italic' : s === 'U' ? 'underline' : ''
-                      }`}>{s}</span>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-xs text-muted-foreground">—</span>
+    <div className="space-y-5">
+      {/* Aspect Ratio */}
+      <div className="space-y-3">
+        <SectionHeader>{t('templates.layout.aspectRatio')}</SectionHeader>
+        <div className="grid w-full grid-cols-2 gap-2">
+          {ratioCards.map((card) => {
+            const isSelected = settings.aspectRatio === card.value
+            return (
+              <button
+                key={card.value}
+                type="button"
+                onClick={() => onChange({ ...settings, aspectRatio: card.value })}
+                className={cn(
+                  'flex min-h-24 flex-col items-center justify-center gap-1.5 overflow-hidden whitespace-normal rounded-lg border-2 px-3 py-3 text-center transition-colors',
+                  isSelected
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/40',
                 )}
-              </ReadOnlyField>
-            </div>
-
-            <Separator className="!my-2" />
-
-            {/* Colors row */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
-              <ReadOnlyField label={t('templates.caption.fontColor')}>
-                <ReadOnlyColor value={props.fontColor} />
-              </ReadOnlyField>
-              <ReadOnlyField label={t('templates.caption.highlightColor')}>
-                <ReadOnlyColor value={props.highlightColor} />
-              </ReadOnlyField>
-              {props.outlineEnabled && (
-                <ReadOnlyField label={t('templates.caption.outline')}>
-                  <div className="flex items-center gap-1.5">
-                    <ReadOnlyColor value={props.outlineColor} />
-                    <span className="text-xs text-muted-foreground">{props.outlineWidth}px</span>
-                  </div>
-                </ReadOnlyField>
-              )}
-              {props.shadowEnabled && (
-                <ReadOnlyField label={t('templates.caption.shadow')}>
-                  <div className="flex items-center gap-1.5">
-                    <ReadOnlyColor value={props.shadowColor} />
-                    <span className="text-xs text-muted-foreground">{props.shadowBlur}px</span>
-                  </div>
-                </ReadOnlyField>
-              )}
-            </div>
-
-            {/* Filters */}
-            <div className="flex gap-4 pt-1">
-              <ReadOnlyField label={t('templates.caption.removePunctuation')}>
-                <StatusDot enabled={props.removePunctuation} />
-              </ReadOnlyField>
-              <ReadOnlyField label={t('templates.caption.removeProfanity')}>
-                <StatusDot enabled={props.removeProfanity} />
-              </ReadOnlyField>
-            </div>
-          </>
-        )}
+              >
+                <card.icon className={cn('h-5 w-5 shrink-0', isSelected ? 'text-primary' : 'text-muted-foreground')} />
+                {card.value !== 'auto' && (
+                  <span className={cn('text-[11px] font-semibold tabular-nums', isSelected ? 'text-primary' : 'text-muted-foreground/70')}>
+                    {card.value}
+                  </span>
+                )}
+                <div className="min-w-0 w-full">
+                  <span className={cn('text-sm font-semibold', isSelected && 'text-primary')}>
+                    {t(card.labelKey)}
+                  </span>
+                  <span className="block text-[11px] leading-snug text-muted-foreground break-words">
+                    {t(card.descKey)}
+                  </span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Hook + Logo compact row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-lg border p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MonitorPlay className="h-4 w-4 text-primary" />
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('templates.hook.title')}</h4>
+      <Separator />
+
+      {/* Face Tracking */}
+      <SettingRow
+        label={t('templates.layout.faceTracking')}
+        onClick={() => handleFaceTrackingChange(!settings.faceTracking)}
+      >
+        <Switch
+          checked={settings.faceTracking}
+          onCheckedChange={(checked) => handleFaceTrackingChange(checked === true)}
+        />
+      </SettingRow>
+
+      <Separator />
+
+      {/* Layouts */}
+      <div className="space-y-3">
+        <SectionHeader>{t('templates.layout.layouts')}</SectionHeader>
+        <div className="grid w-full grid-cols-3 gap-1.5">
+          {layoutItems.map((item) => {
+            const isSelected = settings.layouts.includes(item.value)
+            const isDisabled = !settings.faceTracking && !TRACKING_OFF_LAYOUTS.includes(item.value)
+            const isLocked = settings.faceTracking && item.value === 'fill'
+
+            return (
+              <button
+                key={item.value}
+                type="button"
+                disabled={isDisabled}
+                onClick={() => handleLayoutToggle(item.value)}
+                className={cn(
+                  'flex min-h-14 flex-col items-center justify-center gap-1 overflow-hidden whitespace-normal rounded-lg border-2 px-1 py-2 text-center transition-colors',
+                  isSelected
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/40',
+                  isDisabled && 'cursor-not-allowed opacity-40 hover:border-border',
+                  isLocked && 'cursor-default',
+                )}
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                <span className="w-full break-words text-[10px] font-medium leading-tight">{t(item.labelKey)}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ──────────────── Caption Tab ──────────────── */
+
+function CaptionTab({ settings, onChange, t }: {
+  settings: TemplateCaptionSettings
+  onChange: (s: TemplateCaptionSettings) => void
+  t: (key: string) => string
+}) {
+  const [presetOpen, setPresetOpen] = useState(false)
+  const currentPreset = presetOptions.find((p) => p.id === settings.presetModel)
+
+  const update = <K extends keyof TemplateCaptionSettings>(key: K, value: TemplateCaptionSettings[K]) => {
+    onChange({ ...settings, [key]: value })
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Master toggle */}
+      <SettingRow
+        label={t('templates.caption.enabled')}
+        onClick={() => update('enabled', !settings.enabled)}
+      >
+        <Switch
+          checked={settings.enabled}
+          onCheckedChange={(checked) => update('enabled', checked === true)}
+        />
+      </SettingRow>
+
+      {settings.enabled && (
+        <>
+          <Separator />
+
+          {/* Preset Selector */}
+          <div className="space-y-2">
+            <SectionHeader>{t('templates.caption.preset')}</SectionHeader>
+            <Popover open={presetOpen} onOpenChange={setPresetOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex h-auto w-full items-center justify-between rounded-lg border bg-muted/30 px-3 py-2.5 text-left transition-colors hover:bg-muted/60"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-8 w-8 items-center justify-center rounded-md"
+                      style={{ backgroundColor: currentPreset?.color ?? '#FACC15' }}
+                    >
+                      <span className="text-xs font-bold text-foreground">Aa</span>
+                    </div>
+                    <span className="text-sm font-medium capitalize">
+                      {settings.presetModel ?? 'karaoke'}
+                    </span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="left" align="center" sideOffset={8} className="w-[300px] p-0">
+                <div className="border-b px-4 py-3">
+                  <h4 className="text-sm font-semibold">{t('templates.caption.presetTitle')}</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-2 overflow-y-auto p-3">
+                  {presetOptions.map((preset) => {
+                    const isSelected = settings.presetModel === preset.id
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          update('presetModel', preset.id)
+                          setPresetOpen(false)
+                        }}
+                        className={cn(
+                          'relative flex flex-col items-stretch overflow-hidden rounded-lg border-2 transition-colors',
+                          isSelected
+                            ? 'border-primary'
+                            : 'border-transparent hover:border-primary/30',
+                        )}
+                      >
+                        {isSelected && (
+                          <div className="absolute right-1.5 top-1.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-primary">
+                            <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                          </div>
+                        )}
+                        <div className="flex h-16 items-end justify-center bg-muted pb-2">
+                          {preset.id === 'none' ? (
+                            <X className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <div className="flex items-center gap-0.5">
+                              <span style={{ color: 'var(--muted-foreground)', fontWeight: 700, fontSize: '10px', textTransform: 'uppercase' }}>Aa</span>
+                              <span style={{ color: preset.color, fontWeight: 700, fontSize: '10px', textTransform: 'uppercase' }}>Bb</span>
+                              <span style={{ color: 'var(--muted-foreground)', fontWeight: 700, fontSize: '10px', textTransform: 'uppercase' }}>Cc</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="bg-muted/30 px-2 py-1.5 text-center">
+                          <span className="text-[10px] font-semibold capitalize">{preset.id}</span>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <Separator />
+
+          {/* Text settings */}
+          <div className="space-y-4">
+            <SectionHeader>{t('templates.caption.textSettings')}</SectionHeader>
+
+            <SettingRow
+              label={t('templates.caption.removePunctuation')}
+              onClick={() => update('removePunctuation', !settings.removePunctuation)}
+            >
+              <Switch
+                checked={settings.removePunctuation}
+                onCheckedChange={(checked) => update('removePunctuation', checked === true)}
+              />
+            </SettingRow>
+
+            <SettingRow
+              label={t('templates.caption.removeProfanity')}
+              onClick={() => update('removeProfanity', !settings.removeProfanity)}
+            >
+              <Switch
+                checked={settings.removeProfanity}
+                onCheckedChange={(checked) => update('removeProfanity', checked === true)}
+              />
+            </SettingRow>
+
+            <SettingRow
+              label={t('templates.caption.uppercase')}
+              onClick={() => update('uppercaseAll', !settings.uppercaseAll)}
+            >
+              <Switch
+                checked={settings.uppercaseAll}
+                onCheckedChange={(checked) => update('uppercaseAll', checked === true)}
+              />
+            </SettingRow>
+          </div>
+
+          <Separator />
+
+          {/* Display settings */}
+          <div className="space-y-4">
+            <SectionHeader>{t('templates.caption.displaySettings')}</SectionHeader>
+
+            {/* Captions Per Page */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">{t('templates.caption.captionsPerPage')}</Label>
+              <ToggleGroup
+                type="single"
+                value={settings.captionsPerPage}
+                onValueChange={(val) => { if (val) 
+update('captionsPerPage', val as CaptionsPerPage) }}
+                className="grid w-full grid-cols-2 gap-1.5"
+              >
+                {captionsPerPageOptions.map((val) => (
+                  <ToggleGroupItem
+                    key={val}
+                    value={val}
+                    className="h-auto whitespace-normal rounded-md border-2 px-3 py-1.5 text-center text-xs font-medium capitalize data-[state=on]:border-primary data-[state=on]:bg-primary/5 data-[state=on]:text-primary data-[state=off]:border-transparent data-[state=off]:bg-muted/30 data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-accent/50"
+                  >
+                    {val}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </div>
-            <StatusDot enabled={props.hookEnabled} />
+
+            {/* Animation */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">{t('templates.caption.animation')}</Label>
+              <ToggleGroup
+                type="single"
+                value={settings.animation}
+                onValueChange={(val) => { if (val) 
+update('animation', val as CaptionAnimation) }}
+                className="grid w-full grid-cols-3 gap-1.5"
+              >
+                {animationItems.map((item) => (
+                  <ToggleGroupItem
+                    key={item.value}
+                    value={item.value}
+                    className="h-full whitespace-normal rounded-md border-2 px-1.5 py-1.5 text-center text-[10px] font-medium data-[state=on]:border-primary data-[state=on]:bg-primary/5 data-[state=on]:text-primary data-[state=off]:border-transparent data-[state=off]:bg-muted/30 data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-accent/50"
+                  >
+                    {t(item.labelKey)}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+
+            {/* Highlight Color */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">{t('templates.caption.highlightColor')}</Label>
+              <ColorInput
+                value={settings.highlightColor}
+                onChange={(value) => update('highlightColor', value)}
+              />
+            </div>
+
+            {/* Position */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">{t('templates.caption.position')}</Label>
+              <ToggleGroup
+                type="single"
+                value={settings.position}
+                onValueChange={(val) => { if (val) 
+update('position', val as CaptionPosition) }}
+                className="grid w-full grid-cols-4 gap-1.5"
+              >
+                {positionItems.map((item) => (
+                  <ToggleGroupItem
+                    key={item.value}
+                    value={item.value}
+                    className="h-auto whitespace-normal rounded-md border-2 px-2 py-1.5 text-center text-xs font-medium data-[state=on]:border-primary data-[state=on]:bg-primary/5 data-[state=on]:text-primary data-[state=off]:border-transparent data-[state=off]:bg-muted/30 data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-accent/50"
+                  >
+                    {t(item.labelKey)}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Font settings */}
+          <div className="space-y-4">
+            <SectionHeader>{t('templates.caption.font')}</SectionHeader>
+
+            <div className="flex items-center gap-2">
+              <Select value={settings.fontFamily} onValueChange={(value) => update('fontFamily', value)}>
+                <SelectTrigger className="min-w-0 flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {fontFamilyOptions.map((font) => (
+                    <SelectItem key={font} value={font}>{font}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                type="number"
+                value={settings.fontSize}
+                onChange={(e) => update('fontSize', Number(e.target.value))}
+                className="h-9 w-16 shrink-0 text-xs"
+                min={8}
+                max={72}
+              />
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Button type="button" variant={settings.bold ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 font-bold" onClick={() => update('bold', !settings.bold)}>B</Button>
+              <Button type="button" variant={settings.italic ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 italic" onClick={() => update('italic', !settings.italic)}>I</Button>
+              <Button type="button" variant={settings.underline ? 'default' : 'outline'} size="sm" className="h-8 w-8 p-0 underline" onClick={() => update('underline', !settings.underline)}>U</Button>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">{t('templates.caption.fontColor')}</Label>
+              <ColorInput value={settings.fontColor} onChange={(value) => update('fontColor', value)} />
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Effects */}
+          <div className="space-y-4">
+            <SectionHeader>{t('templates.caption.effects')}</SectionHeader>
+
+            <div className="space-y-3">
+              <SettingRow
+                label={t('templates.caption.outline')}
+                onClick={() => update('outlineEnabled', !settings.outlineEnabled)}
+              >
+                <Switch
+                  checked={settings.outlineEnabled}
+                  onCheckedChange={(checked) => update('outlineEnabled', checked === true)}
+                />
+              </SettingRow>
+              {settings.outlineEnabled && (
+                <div className="space-y-3 rounded-lg border bg-muted/20 p-3">
+                  <ColorInput value={settings.outlineColor} onChange={(value) => update('outlineColor', value)} />
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{t('templates.caption.outlineWidth')}</span>
+                      <span className="text-xs font-medium">{settings.outlineWidth}px</span>
+                    </div>
+                    <Slider value={[settings.outlineWidth]} onValueChange={([v]) => update('outlineWidth', v)} min={0} max={10} step={1} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <SettingRow
+                label={t('templates.caption.shadow')}
+                onClick={() => update('shadowEnabled', !settings.shadowEnabled)}
+              >
+                <Switch
+                  checked={settings.shadowEnabled}
+                  onCheckedChange={(checked) => update('shadowEnabled', checked === true)}
+                />
+              </SettingRow>
+              {settings.shadowEnabled && (
+                <div className="space-y-3 rounded-lg border bg-muted/20 p-3">
+                  <ColorInput value={settings.shadowColor} onChange={(value) => update('shadowColor', value)} />
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{t('templates.caption.shadowBlur')}</span>
+                      <span className="text-xs font-medium">{settings.shadowBlur}px</span>
+                    </div>
+                    <Slider value={[settings.shadowBlur]} onValueChange={([v]) => update('shadowBlur', v)} min={0} max={20} step={1} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ──────────────── Others Tab (Hook + Logo) ──────────────── */
+
+function OthersTab({ settings, onChange, t }: {
+  settings: TemplateSettings
+  onChange: (s: TemplateSettings) => void
+  t: (key: string) => string
+}) {
+  const hookSettings = settings.hook
+  const logoSettings = settings.logo
+
+  const updateHook = (hook: typeof hookSettings) => onChange({ ...settings, hook })
+  const updateLogo = (logo: typeof logoSettings) => onChange({ ...settings, logo })
+
+  return (
+    <div className="space-y-6">
+      {/* Hook */}
+      <div className="space-y-4">
+        <div className="flex items-start gap-3">
+          <div
+            className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-amber-500/10"
+            onClick={() => updateHook({ ...hookSettings, enabled: !hookSettings.enabled })}
+          >
+            <Zap className="h-4 w-4 text-amber-500" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-1">
+            <div
+              className="flex cursor-pointer items-center justify-between"
+              onClick={() => updateHook({ ...hookSettings, enabled: !hookSettings.enabled })}
+            >
+              <h3 className="text-sm font-semibold">{t('templates.hook.title')}</h3>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Switch
+                  checked={hookSettings.enabled}
+                  onCheckedChange={(checked) => updateHook({ ...hookSettings, enabled: checked === true })}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t('templates.hook.description')}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Logo */}
+      <div className="space-y-4">
+        <div className="flex items-start gap-3">
+          <div
+            className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-blue-500/10"
+            onClick={() => updateLogo({ ...logoSettings, enabled: !logoSettings.enabled })}
+          >
+            <Image className="h-4 w-4 text-blue-500" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-1">
+            <div
+              className="flex cursor-pointer items-center justify-between"
+              onClick={() => updateLogo({ ...logoSettings, enabled: !logoSettings.enabled })}
+            >
+              <h3 className="text-sm font-semibold">{t('templates.logo.title')}</h3>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Switch
+                  checked={logoSettings.enabled}
+                  onCheckedChange={(checked) => updateLogo({ ...logoSettings, enabled: checked === true })}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t('templates.logo.description')}
+            </p>
           </div>
         </div>
 
-        <div className="rounded-lg border p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Image className="h-4 w-4 text-primary" />
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('templates.logo.title')}</h4>
+        {logoSettings.enabled && (
+          <div className="space-y-4 pl-12">
+            {/* Image URL */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">{t('templates.logo.image')}</Label>
+              <Input
+                type="text"
+                value={logoSettings.imageUrl ?? ''}
+                onChange={(e) => updateLogo({ ...logoSettings, imageUrl: e.target.value })}
+                placeholder="https://..."
+                className="h-9"
+              />
             </div>
-            <StatusDot enabled={props.logoEnabled} />
-          </div>
-          {props.logoEnabled && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              <ReadOnlyField label={t('templates.logo.scale')} value={`${props.logoScale}%`} />
-              <ReadOnlyField label={t('templates.logo.opacity')} value={`${props.logoOpacity}%`} />
-              {props.alternatePosition && (
-                <ReadOnlyField label={t('templates.logo.positions')}>
-                  <div className="flex gap-1 flex-wrap">
-                    {props.logoPositions.map((pos) => (
-                      <Badge key={pos} variant="secondary" className="text-[10px] px-1.5 py-0">
-                        {t(`templates.logo.pos.${pos}`)}
-                      </Badge>
-                    ))}
-                  </div>
-                </ReadOnlyField>
+
+            {/* Opacity */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">{t('templates.logo.opacity')}</Label>
+                <span className="text-xs text-muted-foreground">{Math.round(logoSettings.opacity)}%</span>
+              </div>
+              <Slider
+                value={[Math.round(logoSettings.opacity)]}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={([v]) => updateLogo({ ...logoSettings, opacity: v })}
+              />
+            </div>
+
+            {/* Scale */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">{t('templates.logo.scale')}</Label>
+                <span className="text-xs text-muted-foreground">{Math.round(logoSettings.scale)}%</span>
+              </div>
+              <Slider
+                value={[Math.round(logoSettings.scale)]}
+                min={10}
+                max={100}
+                step={1}
+                onValueChange={([v]) => updateLogo({ ...logoSettings, scale: v })}
+              />
+            </div>
+
+            <Separator />
+
+            {/* Alternate Position */}
+            <div className="space-y-3">
+              <SettingRow
+                label={t('templates.logo.alternatePosition')}
+                onClick={() => updateLogo({ ...logoSettings, alternatePosition: !logoSettings.alternatePosition })}
+              >
+                <Switch
+                  checked={logoSettings.alternatePosition}
+                  onCheckedChange={(checked) => updateLogo({ ...logoSettings, alternatePosition: checked === true })}
+                />
+              </SettingRow>
+
+              {logoSettings.alternatePosition && (
+                <ToggleGroup
+                  type="multiple"
+                  value={logoSettings.positions}
+                  onValueChange={(val) => {
+                    if (val.length >= 2) 
+updateLogo({ ...logoSettings, positions: val as LogoPosition[] })
+                  }}
+                  className="grid w-full grid-cols-2 gap-1.5"
+                >
+                  {logoPositionItems.map((item, i) => (
+                    <ToggleGroupItem
+                      key={item.value}
+                      value={item.value}
+                      className="h-auto whitespace-normal border-2 px-3 py-2 text-center text-xs font-medium data-[state=on]:border-primary data-[state=on]:bg-primary/5 data-[state=on]:text-primary data-[state=off]:border-transparent data-[state=off]:bg-muted/30 data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-accent/50"
+                      style={{
+                        borderRadius: 0,
+                        ...(i === 0 && { borderTopLeftRadius: '0.5rem' }),
+                        ...(i === 1 && { borderTopRightRadius: '0.5rem' }),
+                        ...(i === 2 && { borderBottomLeftRadius: '0.5rem' }),
+                        ...(i === 3 && { borderBottomRightRadius: '0.5rem' }),
+                      }}
+                    >
+                      {t(item.labelKey)}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -924,72 +1260,54 @@ function TemplateReadOnlyView(props: {
 
 /* ──────────────── Shared Components ──────────────── */
 
-function SectionHeader({ icon: Icon, label }: { icon: typeof Layers; label: string }) {
+function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 text-primary" />
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</h4>
-    </div>
+    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      {children}
+    </h4>
   )
 }
 
-function ClickableRow({ label, editing, onToggle, children }: { label: string; editing: boolean; onToggle?: () => void; children: React.ReactNode }) {
+function SettingRow({ label, onClick, children }: {
+  label: string
+  onClick?: () => void
+  children: React.ReactNode
+}) {
   return (
     <div
-      onClick={onToggle}
-      className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition-colors ${
-        editing && onToggle ? 'cursor-pointer hover:bg-muted/50' : ''
-      }`}
+      className={cn('flex items-center justify-between gap-4', onClick && 'cursor-pointer')}
+      onClick={onClick}
     >
-      <span className="text-sm">{label}</span>
-      <div className="flex items-center">{children}</div>
-    </div>
-  )
-}
-
-
-
-function ColorInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void; editing?: boolean }) {
-  return (
-    <div className="space-y-1.5">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <div className="flex items-center gap-2">
-        <label className="relative h-8 w-8 shrink-0 cursor-pointer rounded-md border overflow-hidden" style={{ backgroundColor: value }}>
-          <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
-        </label>
-        <Input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="h-8 flex-1 font-mono text-xs" />
+      <span className="text-sm font-medium">{label}</span>
+      <div onClick={onClick ? (e) => e.stopPropagation() : undefined}>
+        {children}
       </div>
     </div>
   )
 }
 
-function ReadOnlyField({ label, value, capitalize, children }: { label: string; value?: string; capitalize?: boolean; children?: React.ReactNode }) {
+function ColorInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
-    <div className="space-y-0.5">
-      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      {children ?? (
-        <p className={`text-sm font-medium ${capitalize ? 'capitalize' : ''}`}>{value}</p>
-      )}
-    </div>
-  )
-}
-
-function ReadOnlyColor({ value }: { value: string }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="h-4 w-4 rounded-sm border shrink-0" style={{ backgroundColor: value }} />
-      <span className="text-xs font-mono text-muted-foreground">{value}</span>
-    </div>
-  )
-}
-
-function StatusDot({ enabled }: { enabled: boolean }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className={`h-2 w-2 rounded-full ${enabled ? 'bg-emerald-500' : 'bg-muted-foreground/40'}`} />
-      <span className={`text-xs ${enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>
-        {enabled ? 'On' : 'Off'}
-      </span>
+    <div className="flex items-center gap-2">
+      <div className="relative h-8 w-8 shrink-0">
+        <div
+          className="h-full w-full cursor-pointer rounded-md border"
+          style={{ backgroundColor: value }}
+          onClick={() => {
+            const input = document.createElement('input')
+            input.type = 'color'
+            input.value = value
+            input.addEventListener('input', (e) => onChange((e.target as HTMLInputElement).value))
+            input.click()
+          }}
+        />
+      </div>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-8 w-24 font-mono text-xs"
+        maxLength={7}
+      />
     </div>
   )
 }

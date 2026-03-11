@@ -54,7 +54,7 @@ Read the target file(s) and evaluate each category below. For each issue found, 
 
 - [ ] All user-facing text uses `t('key')` from `useTranslation()`
 - [ ] No hardcoded strings (including placeholders, titles, aria-labels)
-- [ ] Translation keys exist in all 3 locale files (en, pt-BR, es)
+- [ ] Translation keys exist in pt-BR locale
 - [ ] Text containers handle varying text lengths (Portuguese/Spanish can be 30% longer than English)
 
 ### 5. Code Quality (Weight: Medium)

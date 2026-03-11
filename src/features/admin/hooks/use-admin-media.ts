@@ -1,18 +1,37 @@
-import { useQuery } from '@tanstack/react-query'
-
 import type { AdminMedia, MediaResult } from '../types'
+
+import { useQuery } from '@tanstack/react-query'
 
 export const adminMediaKeys = {
   all: ['admin-media'] as const,
   user: (userId: string) => [...adminMediaKeys.all, 'user', userId] as const,
+  team: (teamId: string) => [...adminMediaKeys.all, 'team', teamId] as const,
   results: (mediaId: string) =>
     [...adminMediaKeys.all, 'results', mediaId] as const,
+}
+
+const mockTeamMedia: Record<string, AdminMedia[]> = {
+  '1': [
+    { id: 'tm1', externalId: 'ext_tm_a1b2c3d4', title: 'VDClip Product Demo 2025', url: 'https://youtube.com/watch?v=vd001', thumbnailUrl: 'https://picsum.photos/seed/tm1/640/360', status: 'completed', aiType: 'clips', aspectRatio: '9:16', category: 'Technology', language: 'pt', provider: 'youtube', processStep: 5, clipLengths: ['30-60'], errorCode: null, deletedAt: null, resultsCount: 12 },
+    { id: 'tm2', externalId: 'ext_tm_e5f6g7h8', title: 'Tutorial: Como usar o VDClip', url: 'https://youtube.com/watch?v=vd002', thumbnailUrl: 'https://picsum.photos/seed/tm2/640/360', status: 'completed', aiType: 'shorts', aspectRatio: '9:16', category: 'Tutorial', language: 'pt', provider: 'youtube', processStep: 5, clipLengths: ['15-30'], errorCode: null, deletedAt: null, resultsCount: 7 },
+    { id: 'tm3', externalId: 'ext_tm_i9j0k1l2', title: 'VDClip Feature Showcase', url: null, thumbnailUrl: 'https://picsum.photos/seed/tm3/640/360', status: 'processing', aiType: 'highlights', aspectRatio: 'auto', category: 'Marketing', language: 'en', provider: null, processStep: 2, clipLengths: null, errorCode: null, deletedAt: null, resultsCount: 0 },
+  ],
+  '6': [
+    { id: 'tm6-1', externalId: 'ext_tm_m3n4o5p6', title: 'Best Music Compilation 2025', url: 'https://youtube.com/watch?v=mc001', thumbnailUrl: 'https://picsum.photos/seed/tm6a/640/360', status: 'completed', aiType: 'clips', aspectRatio: '9:16', category: 'Music', language: 'pt', provider: 'youtube', processStep: 5, clipLengths: ['60-90'], errorCode: null, deletedAt: null, resultsCount: 18 },
+    { id: 'tm6-2', externalId: 'ext_tm_q7r8s9t0', title: 'Top Hits January Highlights', url: 'https://youtube.com/watch?v=mc002', thumbnailUrl: 'https://picsum.photos/seed/tm6b/640/360', status: 'completed', aiType: 'highlights', aspectRatio: '16:9', category: 'Music', language: 'pt', provider: 'youtube', processStep: 5, clipLengths: ['30-60'], errorCode: null, deletedAt: null, resultsCount: 9 },
+  ],
+  '9': [
+    { id: 'tm9-1', externalId: 'ext_tm_u1v2w3x4', title: 'React 19 Deep Dive Review', url: 'https://youtube.com/watch?v=tr001', thumbnailUrl: 'https://picsum.photos/seed/tm9a/640/360', status: 'completed', aiType: 'clips', aspectRatio: '9:16', category: 'Technology', language: 'en', provider: 'youtube', processStep: 5, clipLengths: ['30-60', '60-90'], errorCode: null, deletedAt: null, resultsCount: 15 },
+    { id: 'tm9-2', externalId: 'ext_tm_y5z6a7b8', title: 'Best Budget Laptops 2025', url: 'https://youtube.com/watch?v=tr002', thumbnailUrl: 'https://picsum.photos/seed/tm9b/640/360', status: 'completed', aiType: 'shorts', aspectRatio: '9:16', category: 'Technology', language: 'en', provider: 'youtube', processStep: 5, clipLengths: ['15-30'], errorCode: null, deletedAt: null, resultsCount: 6 },
+    { id: 'tm9-3', externalId: 'ext_tm_c9d0e1f2', title: 'AI Tools Comparison 2025', url: null, thumbnailUrl: null, status: 'failed', aiType: 'clips', aspectRatio: '9:16', category: 'Technology', language: 'en', provider: null, processStep: 1, clipLengths: null, errorCode: 'PROVIDER_ERROR', deletedAt: null, resultsCount: 0 },
+  ],
 }
 
 const mockMedia: Record<string, AdminMedia[]> = {
   '1': [
     {
       id: '1',
+      externalId: 'ext_md_ab12cd34',
       title: 'How to Build a SaaS in 2024 - Complete Guide',
       url: 'https://youtube.com/watch?v=abc123',
       thumbnailUrl: 'https://picsum.photos/seed/m1/640/360',
@@ -30,6 +49,7 @@ const mockMedia: Record<string, AdminMedia[]> = {
     },
     {
       id: '2',
+      externalId: 'ext_md_ef56gh78',
       title: 'Podcast Episode #45 - The Future of AI',
       url: 'https://youtube.com/watch?v=def456',
       thumbnailUrl: 'https://picsum.photos/seed/m2/640/360',
@@ -47,6 +67,7 @@ const mockMedia: Record<string, AdminMedia[]> = {
     },
     {
       id: '3',
+      externalId: 'ext_md_ij90kl12',
       title: 'React 19 New Features Explained',
       url: 'https://twitch.tv/videos/xyz',
       thumbnailUrl: 'https://picsum.photos/seed/m3/640/360',
@@ -393,6 +414,17 @@ export function useAdminUserMedia(userId: string, enabled: boolean) {
     queryFn: async () => {
       await new Promise((r) => setTimeout(r, 400))
       return mockMedia[userId] ?? []
+    },
+    enabled,
+  })
+}
+
+export function useAdminTeamMedia(teamId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: adminMediaKeys.team(teamId),
+    queryFn: async () => {
+      await new Promise((r) => setTimeout(r, 400))
+      return mockTeamMedia[teamId] ?? []
     },
     enabled,
   })

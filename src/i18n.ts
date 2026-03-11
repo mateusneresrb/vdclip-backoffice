@@ -8,9 +8,10 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: 'en',
-    supportedLngs: ['en', 'pt-BR', 'es'],
-    ns: ['common', 'dashboard', 'admin'],
+    lng: 'pt-BR',
+    fallbackLng: 'pt-BR',
+    supportedLngs: ['pt-BR'],
+    ns: ['common', 'admin'],
     defaultNS: 'common',
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',

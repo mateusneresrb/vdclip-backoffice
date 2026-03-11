@@ -33,7 +33,7 @@ paths:
 
 - ALL user-facing text must use `t('key')` from `useTranslation()`
 - NEVER hardcode text (including placeholders, aria-labels, titles)
-- Update ALL 3 locale files: `en`, `pt-BR`, `es`
+- ONLY pt-BR: update `public/locales/pt-BR/` — no other languages exist in this project
 
 ## Code Style
 

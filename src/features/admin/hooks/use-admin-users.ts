@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
-
 import type { AdminUser, AffiliateInfo, TeamSettings } from '../types'
+
+import { useQuery } from '@tanstack/react-query'
 
 const mockUsers: AdminUser[] = [
   {
     id: '1',
+    external_id: 'ext_usr_a1b2c3d4e5',
     name: 'Alice Johnson',
     email: 'alice@example.com',
     avatar: 'https://i.pravatar.cc/150?u=alice',
@@ -33,6 +34,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '2',
+    external_id: 'ext_usr_f6g7h8i9j0',
     name: 'Bruno Silva',
     email: 'bruno@example.com',
     status: 'active',
@@ -58,6 +60,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '3',
+    external_id: 'ext_usr_k1l2m3n4o5',
     name: 'Carmen Rodriguez',
     email: 'carmen@example.com',
     avatar: 'https://i.pravatar.cc/150?u=carmen',
@@ -81,6 +84,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '4',
+    external_id: 'ext_usr_p6q7r8s9t0',
     name: 'David Chen',
     email: 'david@example.com',
     avatar: 'https://i.pravatar.cc/150?u=david',
@@ -106,6 +110,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '5',
+    external_id: 'ext_usr_u1v2w3x4y5',
     name: 'Elena Petrova',
     email: 'elena@example.com',
     status: 'inactive',
@@ -128,6 +133,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '6',
+    external_id: 'ext_usr_z6a7b8c9d0',
     name: 'Felipe Gomez',
     email: 'felipe@example.com',
     avatar: 'https://i.pravatar.cc/150?u=felipe',
@@ -153,6 +159,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '7',
+    external_id: 'ext_usr_e1f2g3h4i5',
     name: 'Grace Kim',
     email: 'grace@example.com',
     avatar: 'https://i.pravatar.cc/150?u=grace',
@@ -181,6 +188,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '8',
+    external_id: 'ext_usr_j6k7l8m9n0',
     name: 'Hugo Martinez',
     email: 'hugo@example.com',
     status: 'active',
@@ -203,6 +211,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '9',
+    external_id: 'ext_usr_o1p2q3r4s5',
     name: 'Isabela Santos',
     email: 'isabela@example.com',
     avatar: 'https://i.pravatar.cc/150?u=isabela',
@@ -229,6 +238,7 @@ const mockUsers: AdminUser[] = [
   },
   {
     id: '10',
+    external_id: 'ext_usr_t6u7v8w9x0',
     name: 'James Wilson',
     email: 'james@example.com',
     status: 'suspended',
@@ -245,6 +255,125 @@ const mockUsers: AdminUser[] = [
     isSocialAccount: false,
     createdAt: '2025-07-12',
     lastLoginAt: '2026-01-05',
+    teams: [],
+  },
+  {
+    id: '11',
+    external_id: 'ext_usr_y1z2a3b4c5',
+    name: 'Karen Oliveira',
+    email: 'karen@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=karen',
+    status: 'active',
+    plan: 'premium',
+    planProvider: 'paddle',
+    planExpiresAt: '2026-10-31',
+    subscriptionId: 'sub_kar123',
+    credits: 80,
+    creditPackages: [
+      { id: 'cp16', type: 'plan_cycle', amount: 80, used: 20, startDate: '2026-03-01', expiresAt: '2026-03-31' },
+    ],
+    mediaCreated: 67,
+    mediaPosted: 53,
+    socialLogins: ['google'],
+    emailVerified: true,
+    isSocialAccount: true,
+    createdAt: '2025-05-10',
+    lastLoginAt: '2026-03-01',
+    teams: [],
+  },
+  {
+    id: '12',
+    external_id: 'ext_usr_d6e7f8g9h0',
+    name: 'Luca Ferrari',
+    email: 'luca@example.com',
+    status: 'active',
+    plan: 'ultimate',
+    planProvider: 'paddle',
+    planExpiresAt: '2027-01-31',
+    subscriptionId: 'sub_luc456',
+    credits: 750,
+    creditPackages: [
+      { id: 'cp17', type: 'plan_cycle', amount: 500, used: 150, startDate: '2026-03-01', expiresAt: '2026-03-31' },
+      { id: 'cp18', type: 'purchased', amount: 250, used: 0, startDate: '2026-02-01', expiresAt: '2026-08-01' },
+    ],
+    mediaCreated: 312,
+    mediaPosted: 290,
+    socialLogins: ['github'],
+    emailVerified: true,
+    isSocialAccount: false,
+    createdAt: '2024-10-15',
+    lastLoginAt: '2026-03-02',
+    teams: [],
+  },
+  {
+    id: '13',
+    external_id: 'ext_usr_i1j2k3l4m5',
+    name: 'Mariana Costa',
+    email: 'mariana@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=mariana',
+    status: 'inactive',
+    plan: 'free',
+    planProvider: 'internal',
+    planExpiresAt: null,
+    subscriptionId: null,
+    credits: 0,
+    creditPackages: [],
+    mediaCreated: 2,
+    mediaPosted: 1,
+    socialLogins: [],
+    emailVerified: false,
+    isSocialAccount: false,
+    createdAt: '2026-01-20',
+    lastLoginAt: '2026-01-22',
+    teams: [],
+  },
+  {
+    id: '14',
+    external_id: 'ext_usr_n6o7p8q9r0',
+    name: 'Nathan Brooks',
+    email: 'nathan@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=nathan',
+    status: 'active',
+    plan: 'lite',
+    planProvider: 'pix',
+    planExpiresAt: '2026-08-31',
+    subscriptionId: 'hot_nat789',
+    credits: 30,
+    creditPackages: [
+      { id: 'cp19', type: 'plan_cycle', amount: 30, used: 10, startDate: '2026-03-01', expiresAt: '2026-03-31' },
+    ],
+    mediaCreated: 22,
+    mediaPosted: 18,
+    socialLogins: ['google', 'discord'],
+    emailVerified: true,
+    isSocialAccount: false,
+    createdAt: '2025-08-05',
+    lastLoginAt: '2026-02-25',
+    teams: [],
+  },
+  {
+    id: '15',
+    external_id: 'ext_usr_s1t2u3v4w5',
+    name: 'Olivia Zhang',
+    email: 'olivia@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=olivia',
+    status: 'active',
+    plan: 'premium',
+    planProvider: 'paddle',
+    planExpiresAt: '2027-02-28',
+    subscriptionId: 'sub_olv321',
+    credits: 120,
+    creditPackages: [
+      { id: 'cp20', type: 'plan_cycle', amount: 100, used: 40, startDate: '2026-03-01', expiresAt: '2026-03-31' },
+      { id: 'cp21', type: 'promotional', amount: 20, used: 0, startDate: '2026-02-01', expiresAt: '2026-05-01' },
+    ],
+    mediaCreated: 98,
+    mediaPosted: 82,
+    socialLogins: ['google', 'github'],
+    emailVerified: true,
+    isSocialAccount: true,
+    createdAt: '2025-02-14',
+    lastLoginAt: '2026-03-03',
     teams: [],
   },
 ]
@@ -389,26 +518,37 @@ const mockTeamSettings: Record<string, TeamSettings> = {
   },
 }
 
+export type UserSearchField = 'name' | 'email' | 'externalId'
+export interface UserSearchQuery {
+  field: UserSearchField
+  value: string
+}
+
 const adminUserKeys = {
   all: ['admin-users'] as const,
-  list: (search: string) => [...adminUserKeys.all, 'list', search] as const,
+  list: (q: UserSearchQuery) => [...adminUserKeys.all, 'list', q.field, q.value] as const,
   detail: (id: string) => [...adminUserKeys.all, 'detail', id] as const,
   affiliate: (id: string) => [...adminUserKeys.all, 'affiliate', id] as const,
   team: (teamId: string) => [...adminUserKeys.all, 'team', teamId] as const,
 }
 
-export function useAdminUsers(search: string) {
+export function useAdminUsers(query: UserSearchQuery = { field: 'name', value: '' }) {
   return useQuery({
-    queryKey: adminUserKeys.list(search),
+    queryKey: adminUserKeys.list(query),
     queryFn: async () => {
       await new Promise((resolve) => setTimeout(resolve, 400))
-      if (!search) return mockUsers
-      const q = search.toLowerCase()
-      return mockUsers.filter(
-        (u) =>
-          u.name.toLowerCase().includes(q) ||
-          u.email.toLowerCase().includes(q),
-      )
+      if (!query.value.trim()) 
+return mockUsers
+      const q = query.value.trim().toLowerCase()
+      return mockUsers.filter((u) => {
+        if (query.field === 'name') 
+return u.name.toLowerCase().includes(q)
+        if (query.field === 'email') 
+return u.email.toLowerCase().includes(q)
+        if (query.field === 'externalId') 
+return u.external_id.toLowerCase().includes(q)
+        return true
+      })
     },
   })
 }
@@ -419,7 +559,8 @@ export function useAdminUser(userId: string) {
     queryFn: async () => {
       await new Promise((resolve) => setTimeout(resolve, 300))
       const user = mockUsers.find((u) => u.id === userId)
-      if (!user) throw new Error('User not found')
+      if (!user) 
+throw new Error('User not found')
       return user
     },
   })
@@ -442,7 +583,8 @@ export function useAdminTeamSettings(teamId: string, enabled: boolean) {
     queryFn: async () => {
       await new Promise((resolve) => setTimeout(resolve, 400))
       const team = mockTeamSettings[teamId]
-      if (!team) throw new Error('Team not found')
+      if (!team) 
+throw new Error('Team not found')
       return team
     },
     enabled,

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import type { MetricsDateRange, PlanProvider, UserPlan } from '../types'
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -15,24 +15,24 @@ import {
   Users,
   XCircle,
 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+
 import { Skeleton } from '@/components/ui/skeleton'
-
 import { useAdminMetrics } from '../hooks/use-admin-metrics'
-import type { MetricsDateRange, PlanProvider, UserPlan } from '../types'
 
-const dateRangePresets: MetricsDateRange[] = ['1d', '7d', '30d', '90d', 'ytd', 'all']
+const dateRangePresets: MetricsDateRange[] = ['1d', '3d', '7d', '30d', '90d', 'ytd']
 
 const planColors: Record<UserPlan, string> = {
   free: 'bg-muted',
   lite: 'bg-blue-500/15',
-  premium: 'bg-violet-500/15',
-  ultimate: 'bg-amber-500/15',
+  premium: 'bg-orange-500/15',
+  ultimate: 'bg-violet-600/15',
 }
 
 const providerColors: Record<PlanProvider, string> = {
@@ -66,7 +66,8 @@ export function MetricsOverview() {
     )
   }
 
-  if (!metrics) return null
+  if (!metrics) 
+return null
 
   return (
     <div className="space-y-8">

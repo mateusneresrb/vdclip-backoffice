@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import type { CreditType, UserPlan, UserStatus } from '../types'
 import {
   Calendar,
   CreditCard,
@@ -13,11 +13,12 @@ import {
   Plus,
   Save,
   Shield,
-  UserX,
   Users,
+  UserX,
 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 
+import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -39,18 +40,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import {
-  useAdminUserTemplates,
   useAdminTeamTemplates,
+  useAdminUserTemplates,
 } from '../hooks/use-admin-templates'
 import {
+  useAdminTeamSettings,
   useAdminUser,
   useAdminUserAffiliate,
-  useAdminTeamSettings,
 } from '../hooks/use-admin-users'
-import type { CreditType, UserPlan, UserStatus } from '../types'
 import { MediaManager } from './MediaManager'
 import { TemplateManager } from './TemplateManager'
 
@@ -135,7 +135,8 @@ export function UserDetail({ userId }: { userId: string }) {
     )
   }
 
-  if (!user) return null
+  if (!user) 
+return null
 
   const initials = user.name
     .split(' ')

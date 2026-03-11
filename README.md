@@ -1,6 +1,6 @@
-# VDClip Dashboard
+# VDClip BackOffice
 
-Dashboard SPA para a plataforma VDClip de gerenciamento de video clips.
+SPA backoffice para gestão interna do VDClip.
 
 ## Requisitos
 
@@ -9,99 +9,115 @@ Dashboard SPA para a plataforma VDClip de gerenciamento de video clips.
 ## Setup
 
 ```bash
-# Instalar dependencias
 bun install
-
-# Iniciar servidor de desenvolvimento
-bun dev
+bun dev       # http://localhost:5173/
 ```
-
-O servidor inicia em `http://localhost:5173/`.
 
 ## Scripts
 
-| Comando            | Descricao                          |
-|--------------------|------------------------------------|
-| `bun dev`          | Servidor de desenvolvimento + HMR  |
-| `bun run build`    | Type-check + build de producao     |
-| `bun run preview`  | Preview do build de producao       |
-| `bun run lint`     | Verificar codigo com ESLint        |
-| `bun run lint:fix` | Corrigir erros do ESLint           |
-| `bun run format`   | Formatar codigo com Prettier       |
+| Comando | Descrição |
+|---------|-----------|
+| `bun dev` | Dev server + gera `routeTree.gen.ts` |
+| `bun run build` | Type-check + build de produção |
+| `bun run lint` | ESLint |
+| `bun run lint:fix` | ESLint --fix |
+| `bun run format` | Prettier |
 
 ## Stack
 
-| Camada         | Tecnologia                                     |
-|----------------|-------------------------------------------------|
-| Runtime        | Bun                                             |
-| Framework      | React 19 + TypeScript (strict)                  |
-| Build          | Vite 7                                          |
-| Estilo         | Tailwind CSS 4 + shadcn/ui                      |
-| Roteamento     | TanStack Router (file-based)                    |
-| Server State   | TanStack Query                                  |
-| Client State   | Zustand                                         |
-| i18n           | react-i18next (EN, PT-BR, ES)                   |
-| Formularios    | react-hook-form + Zod                           |
-| Icones         | Lucide React                                    |
-| Lint/Format    | ESLint (@antfu/eslint-config) + Prettier        |
+| Camada | Tecnologia |
+|--------|-----------|
+| Runtime | Bun |
+| Framework | React 19 + TypeScript (strict) |
+| Build | Vite 7 |
+| Estilo | Tailwind CSS 4 + shadcn/ui (New York) |
+| Roteamento | TanStack Router (file-based) |
+| Server State | TanStack Query |
+| Client State | Zustand (persist) |
+| i18n | react-i18next — apenas PT-BR |
+| Formulários | react-hook-form + Zod |
+| Ícones | Lucide React |
+| Charts | ApexCharts (wrappers próprios) |
+| Lint/Format | @antfu/eslint-config + Prettier |
 
-## Estrutura do Projeto
+## Estrutura
 
 ```
 src/
   components/
-    layout/             # Sidebar, header, theme, language switcher
-    ui/                 # Componentes shadcn/ui (nao editar manualmente)
-  features/             # Modulos por feature (componentes, hooks, types)
-  hooks/                # Hooks compartilhados
-  lib/                  # Utilitarios (cn, etc.)
-  providers/            # Context providers (QueryProvider)
-  routes/               # Rotas file-based (TanStack Router)
-    _authenticated/     # Rotas protegidas (layout com sidebar)
-  stores/               # Zustand stores
-  types/                # Tipos TypeScript compartilhados
+    charts/     → wrappers ApexCharts (AreaChart, BarChart, etc.)
+    layout/     → AdminSidebar, AdminHeader, ThemeProvider
+    shared/     → PageHeader, EmptyState, PaginationControls
+    ui/         → shadcn/ui — NUNCA editar manualmente
+  features/     → módulos por domínio (componentes, hooks, types)
+  hooks/        → hooks compartilhados (usePagination, useIsMobile, etc.)
+  lib/          → utils.ts (cn)
+  providers/    → QueryProvider
+  routes/       → TanStack Router file-based
+    _app.tsx    → layout protegido (auth guard + sidebar)
+    _app/       → rotas protegidas
+    login.tsx   → rota pública
+  stores/       → Zustand stores (sidebar, product filter)
+public/
+  locales/
+    pt-BR/
+      admin.json    → traduções do backoffice
+      common.json   → traduções globais
 ```
-
-## Funcionalidades
-
-- **Tema**: Dark / Light / System com persistencia em localStorage
-- **Multi-idioma**: Ingles, Portugues (BR), Espanhol — troca em tempo real
-- **Sidebar responsiva**: Collapsa automaticamente em mobile (Sheet)
-- **Layout responsivo**: Mobile-first com breakpoints Tailwind
 
 ## Rotas
 
-| Rota          | Descricao                  |
-|---------------|----------------------------|
-| `/`           | Redirect para `/dashboard` |
-| `/login`      | Pagina de login            |
-| `/dashboard`  | Painel principal           |
-| `/projects`   | Projetos                   |
-| `/templates`  | Modelos                    |
-| `/calendar`   | Calendario                 |
-| `/profile`    | Perfil                     |
-| `/settings`   | Configuracoes              |
-| `/affiliate`  | Afiliado                   |
+| Rota | Feature |
+|------|---------|
+| `/` | Redirect para `/dashboard` |
+| `/login` | Login |
+| `/dashboard` | Dashboard geral |
+| `/revenue` | Métricas SaaS |
+| `/finance` | Contabilidade interna |
+| `/users` / `/users/:id` | Usuários VDClip |
+| `/teams` / `/teams/:id` | Times |
+| `/business/companies` / `/business/users` | VDClip Business (B2B) |
+| `/admin` | Gestão de admins do backoffice |
+| `/audit` | Logs de auditoria |
+| `/providers` | Integrações externas |
+| `/profile` | Perfil do admin logado |
+
+## Features Principais
+
+| Feature | Descrição |
+|---------|-----------|
+| `dashboard` | Visão geral: usuários, projetos, créditos, MRR básico |
+| `revenue` | Métricas SaaS: LTV/CAC, NRR, churn, unit economics |
+| `finance` | Contabilidade interna: fluxo de caixa, custos, contas |
+| `users` | Gestão de usuários do VDClip |
+| `teams` | Times e membros |
+| `auth` | Login, perfil, RBAC por role |
+| `admin-users` | Admins do backoffice: contas, roles, sessões |
+| `audit` | Logs de auditoria e autenticação |
+| `business` | VDClip Business (B2B) |
+| `providers` | Integrações: AI, pagamento, publicação |
 
 ## Adicionar Componente shadcn/ui
 
 ```bash
-bunx shadcn@latest add <nome-do-componente>
+bunx shadcn@latest add <nome>
 ```
 
-## Adicionar Nova Rota
+## Adicionar Nova Rota (checklist)
 
-1. Criar arquivo em `src/routes/_authenticated/{nome}.tsx`
-2. Adicionar item no sidebar (`app-sidebar.tsx`)
-3. Adicionar label no header (`header.tsx`)
-4. Adicionar traducoes nos 3 idiomas (`public/locales/`)
-5. Rodar `bun dev` para gerar route tree
+1. Criar `src/routes/_app/{nome}.tsx`
+2. Adicionar item em `src/components/layout/admin-sidebar.tsx`
+3. Adicionar label em `src/components/layout/admin-header.tsx` (`routeLabels`)
+4. Adicionar `nav.{nome}` em `public/locales/pt-BR/admin.json`
+5. Rodar `bun dev` para regenerar `routeTree.gen.ts`
 
-## AI (Claude Code)
+## Claude Code
 
-O projeto inclui configuracao para Claude Code em `.claude/`:
+Configuração em `.claude/`:
 
-- **`CLAUDE.md`** — Contexto do projeto, regras e gotchas
-- **`.claude/rules/`** — Regras por tipo de arquivo (componentes, rotas, traducoes, estilos, stores)
-- **`.claude/skills/`** — 9 skills: `ui-component`, `ui-review`, `create-feature`, `create-route`, `i18n-add`, `security-audit`, `create-test`, `accessibility-audit`, `performance-review`
-- **`.claude/settings.json`** — Permissoes de projeto
+- **`CLAUDE.md`** + **`src/*/CLAUDE.md`** — contexto detalhado por diretório
+- **`.claude/rules/`** — regras por tipo de arquivo (estilos, rotas, componentes, traduções, stores)
+- **`.claude/skills/`** — skills: `ui-component`, `create-feature`, `create-route`, `i18n-add`, etc.
+- **`.claude/settings.json`** — permissões de projeto
+
+> Estado atual: todos os hooks retornam mock data — sem integração de API real.

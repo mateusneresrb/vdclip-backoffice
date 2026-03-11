@@ -61,7 +61,7 @@ $ARGUMENTS
      '{route-name}': 'nav.{route-name}',
      ```
 
-4. **Add translations** to all 3 locale files in `public/locales/`:
+4. **Add translations to pt-BR locale in `public/locales/`:
    - `en/common.json`: Add `nav.{route-name}` key
    - `pt-BR/common.json`: Add `nav.{route-name}` key
    - `es/common.json`: Add `nav.{route-name}` key
