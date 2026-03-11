@@ -74,7 +74,7 @@ export function DateRangeFilter({ dateRange, onDateRangeChange, onAbsoluteChange
           variant="outline"
           size="sm"
           aria-label={t('metrics.dateRange.custom')}
-          className="h-9 gap-2 text-sm"
+          className="h-8.5 gap-1.5 text-[13px] sm:h-9 sm:gap-2 sm:text-sm"
         >
           <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span className="truncate">{triggerLabel()}</span>
@@ -82,11 +82,16 @@ export function DateRangeFilter({ dateRange, onDateRangeChange, onAbsoluteChange
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-auto max-w-[min(560px,calc(100vw-1rem))] p-0" align="end">
+      <PopoverContent
+        className="w-auto max-w-[min(560px,calc(100vw-2rem))] p-0"
+        align="end"
+        collisionPadding={16}
+      >
         <div className="flex flex-col">
           {/* Calendar on top */}
-          <div className="overflow-x-auto p-3">
+          <div className="flex justify-center p-2 sm:p-3">
             <Calendar
+              className="[--cell-size:--spacing(7)] sm:[--cell-size:--spacing(8)]"
               mode="range"
               selected={calendarRange}
               onSelect={handleCalendarSelect}
@@ -99,7 +104,7 @@ export function DateRangeFilter({ dateRange, onDateRangeChange, onAbsoluteChange
           <Separator />
 
           {/* Presets below */}
-          <div className="flex flex-wrap gap-1 p-3">
+          <div className="flex flex-wrap gap-1 p-2 sm:p-3">
             {presets.map((preset) => (
               <button
                 key={preset.key}
@@ -107,7 +112,7 @@ export function DateRangeFilter({ dateRange, onDateRangeChange, onAbsoluteChange
                 aria-pressed={dateRange === preset.key}
                 onClick={() => handlePresetClick(preset)}
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+                  'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm',
                   'hover:bg-accent hover:text-accent-foreground',
                   dateRange === preset.key
                     ? 'bg-primary font-medium text-primary-foreground'
@@ -116,7 +121,7 @@ export function DateRangeFilter({ dateRange, onDateRangeChange, onAbsoluteChange
               >
                 <span className="whitespace-nowrap">{preset.label}</span>
                 {dateRange === preset.key && (
-                  <Check className="h-3.5 w-3.5 shrink-0" />
+                  <Check className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
                 )}
               </button>
             ))}

@@ -82,7 +82,7 @@ export function BusinessCompanyDetail({ companyId }: { companyId: string }) {
             <Skeleton className="h-4 w-64" />
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-24" />
           ))}
@@ -98,7 +98,7 @@ export function BusinessCompanyDetail({ companyId }: { companyId: string }) {
   const initials = company.name.slice(0, 2).toUpperCase()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <Avatar className="h-16 w-16">
@@ -133,7 +133,7 @@ export function BusinessCompanyDetail({ companyId }: { companyId: string }) {
       <Separator />
 
       <Tabs value={tab} onValueChange={setTab}>
-        <div className="overflow-x-auto">
+        <div className="-mb-px overflow-x-auto overflow-y-hidden">
           <TabsList>
             <TabsTrigger value="overview">{t('business.companyDetail.tabs.overview')}</TabsTrigger>
             <TabsTrigger value="users">{t('business.companyDetail.tabs.users')}</TabsTrigger>
@@ -167,14 +167,14 @@ function OverviewTab({ company }: { company: CompanyDetailType }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t('business.companyDetail.overview.users')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{company.userCount}</p>
+            <p className="text-lg font-bold sm:text-2xl">{company.userCount}</p>
           </CardContent>
         </Card>
 
@@ -184,7 +184,7 @@ function OverviewTab({ company }: { company: CompanyDetailType }) {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{t(`business.companies.plan.${company.plan}`, company.plan)}</p>
+            <p className="text-lg font-bold sm:text-2xl">{t(`business.companies.plan.${company.plan}`, company.plan)}</p>
           </CardContent>
         </Card>
 
@@ -194,7 +194,7 @@ function OverviewTab({ company }: { company: CompanyDetailType }) {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="text-lg font-bold sm:text-2xl">
               {company.subscription.currency} {company.subscription.monthlyPrice.toFixed(2)}
             </p>
           </CardContent>
@@ -322,7 +322,7 @@ function SubscriptionTab({ company }: { company: CompanyDetailType }) {
           <CardTitle className="text-sm font-medium">{t('business.companyDetail.subscriptionTab.currentPlan')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             <div>
               <p className="text-xs text-muted-foreground">{t('business.companyDetail.subscriptionTab.planTier')}</p>
               <Badge variant="secondary" className={planVariants[subscription.planTier] ?? 'bg-muted text-muted-foreground'}>

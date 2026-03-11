@@ -41,6 +41,8 @@ export interface AdminUser {
   createdAt: string
   lastLoginAt: string
   teams: UserTeam[]
+  companyId: string | null
+  companyName: string | null
 }
 
 export interface UserTeam {

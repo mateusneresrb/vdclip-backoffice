@@ -77,6 +77,8 @@ Se qualquer série tiver `stackId`, o chart fica empilhado automaticamente.
     { label: 'Churn', value: -1200 },
   ]}
   formatValue={(v) => `$${v.toLocaleString()}`}
+  netLabel="Líquido"      // label da barra final (default: 'Net')
+  seriesLabel="MRR"       // nome da série no tooltip (default: 'Value')
 />
 ```
 

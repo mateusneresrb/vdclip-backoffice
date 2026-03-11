@@ -63,7 +63,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <MetricCard
           title={t('metrics.revenue.mrr')}
           value={`$${metrics.revenue.mrr.toLocaleString()}`}
@@ -97,7 +97,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <MetricCard
           title={t('metrics.content.totalProjects')}
           value={metrics.content.totalProjects.toLocaleString()}
@@ -170,7 +170,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <ChartCard
           title={t('charts.mrrTrend')}
           description={t('dashboard.chartDescriptions.mrrTrend')}
@@ -200,7 +200,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
         </ChartCard>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <ChartCard
           title={t('charts.subscriptionsByPlan')}
           description={t('dashboard.chartDescriptions.subscriptionsByPlan')}

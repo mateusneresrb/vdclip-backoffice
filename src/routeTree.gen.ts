@@ -22,11 +22,10 @@ import { Route as AppAuditRouteImport } from './routes/_app/audit'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppUsersIndexRouteImport } from './routes/_app/users/index'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
+import { Route as AppCompaniesIndexRouteImport } from './routes/_app/companies/index'
 import { Route as AppUsersUserIdRouteImport } from './routes/_app/users/$userId'
 import { Route as AppTeamsTeamIdRouteImport } from './routes/_app/teams/$teamId'
-import { Route as AppBusinessUsersRouteImport } from './routes/_app/business/users'
-import { Route as AppBusinessCompaniesRouteImport } from './routes/_app/business/companies'
-import { Route as AppBusinessCompaniesCompanyIdRouteImport } from './routes/_app/business/companies.$companyId'
+import { Route as AppCompaniesCompanyIdRouteImport } from './routes/_app/companies/$companyId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -92,6 +91,11 @@ const AppTeamsIndexRoute = AppTeamsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppTeamsRoute,
 } as any)
+const AppCompaniesIndexRoute = AppCompaniesIndexRouteImport.update({
+  id: '/companies/',
+  path: '/companies/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppUsersUserIdRoute = AppUsersUserIdRouteImport.update({
   id: '/users/$userId',
   path: '/users/$userId',
@@ -102,22 +106,11 @@ const AppTeamsTeamIdRoute = AppTeamsTeamIdRouteImport.update({
   path: '/$teamId',
   getParentRoute: () => AppTeamsRoute,
 } as any)
-const AppBusinessUsersRoute = AppBusinessUsersRouteImport.update({
-  id: '/business/users',
-  path: '/business/users',
+const AppCompaniesCompanyIdRoute = AppCompaniesCompanyIdRouteImport.update({
+  id: '/companies/$companyId',
+  path: '/companies/$companyId',
   getParentRoute: () => AppRoute,
 } as any)
-const AppBusinessCompaniesRoute = AppBusinessCompaniesRouteImport.update({
-  id: '/business/companies',
-  path: '/business/companies',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppBusinessCompaniesCompanyIdRoute =
-  AppBusinessCompaniesCompanyIdRouteImport.update({
-    id: '/$companyId',
-    path: '/$companyId',
-    getParentRoute: () => AppBusinessCompaniesRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -130,13 +123,12 @@ export interface FileRoutesByFullPath {
   '/providers': typeof AppProvidersRoute
   '/revenue': typeof AppRevenueRoute
   '/teams': typeof AppTeamsRouteWithChildren
-  '/business/companies': typeof AppBusinessCompaniesRouteWithChildren
-  '/business/users': typeof AppBusinessUsersRoute
+  '/companies/$companyId': typeof AppCompaniesCompanyIdRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRoute
   '/users/$userId': typeof AppUsersUserIdRoute
+  '/companies/': typeof AppCompaniesIndexRoute
   '/teams/': typeof AppTeamsIndexRoute
   '/users/': typeof AppUsersIndexRoute
-  '/business/companies/$companyId': typeof AppBusinessCompaniesCompanyIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -148,13 +140,12 @@ export interface FileRoutesByTo {
   '/providers': typeof AppProvidersRoute
   '/revenue': typeof AppRevenueRoute
   '/': typeof AppIndexRoute
-  '/business/companies': typeof AppBusinessCompaniesRouteWithChildren
-  '/business/users': typeof AppBusinessUsersRoute
+  '/companies/$companyId': typeof AppCompaniesCompanyIdRoute
   '/teams/$teamId': typeof AppTeamsTeamIdRoute
   '/users/$userId': typeof AppUsersUserIdRoute
+  '/companies': typeof AppCompaniesIndexRoute
   '/teams': typeof AppTeamsIndexRoute
   '/users': typeof AppUsersIndexRoute
-  '/business/companies/$companyId': typeof AppBusinessCompaniesCompanyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -169,13 +160,12 @@ export interface FileRoutesById {
   '/_app/revenue': typeof AppRevenueRoute
   '/_app/teams': typeof AppTeamsRouteWithChildren
   '/_app/': typeof AppIndexRoute
-  '/_app/business/companies': typeof AppBusinessCompaniesRouteWithChildren
-  '/_app/business/users': typeof AppBusinessUsersRoute
+  '/_app/companies/$companyId': typeof AppCompaniesCompanyIdRoute
   '/_app/teams/$teamId': typeof AppTeamsTeamIdRoute
   '/_app/users/$userId': typeof AppUsersUserIdRoute
+  '/_app/companies/': typeof AppCompaniesIndexRoute
   '/_app/teams/': typeof AppTeamsIndexRoute
   '/_app/users/': typeof AppUsersIndexRoute
-  '/_app/business/companies/$companyId': typeof AppBusinessCompaniesCompanyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,13 +180,12 @@ export interface FileRouteTypes {
     | '/providers'
     | '/revenue'
     | '/teams'
-    | '/business/companies'
-    | '/business/users'
+    | '/companies/$companyId'
     | '/teams/$teamId'
     | '/users/$userId'
+    | '/companies/'
     | '/teams/'
     | '/users/'
-    | '/business/companies/$companyId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -208,13 +197,12 @@ export interface FileRouteTypes {
     | '/providers'
     | '/revenue'
     | '/'
-    | '/business/companies'
-    | '/business/users'
+    | '/companies/$companyId'
     | '/teams/$teamId'
     | '/users/$userId'
+    | '/companies'
     | '/teams'
     | '/users'
-    | '/business/companies/$companyId'
   id:
     | '__root__'
     | '/_app'
@@ -228,13 +216,12 @@ export interface FileRouteTypes {
     | '/_app/revenue'
     | '/_app/teams'
     | '/_app/'
-    | '/_app/business/companies'
-    | '/_app/business/users'
+    | '/_app/companies/$companyId'
     | '/_app/teams/$teamId'
     | '/_app/users/$userId'
+    | '/_app/companies/'
     | '/_app/teams/'
     | '/_app/users/'
-    | '/_app/business/companies/$companyId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -335,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTeamsIndexRouteImport
       parentRoute: typeof AppTeamsRoute
     }
+    '/_app/companies/': {
+      id: '/_app/companies/'
+      path: '/companies'
+      fullPath: '/companies/'
+      preLoaderRoute: typeof AppCompaniesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/users/$userId': {
       id: '/_app/users/$userId'
       path: '/users/$userId'
@@ -349,26 +343,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTeamsTeamIdRouteImport
       parentRoute: typeof AppTeamsRoute
     }
-    '/_app/business/users': {
-      id: '/_app/business/users'
-      path: '/business/users'
-      fullPath: '/business/users'
-      preLoaderRoute: typeof AppBusinessUsersRouteImport
+    '/_app/companies/$companyId': {
+      id: '/_app/companies/$companyId'
+      path: '/companies/$companyId'
+      fullPath: '/companies/$companyId'
+      preLoaderRoute: typeof AppCompaniesCompanyIdRouteImport
       parentRoute: typeof AppRoute
-    }
-    '/_app/business/companies': {
-      id: '/_app/business/companies'
-      path: '/business/companies'
-      fullPath: '/business/companies'
-      preLoaderRoute: typeof AppBusinessCompaniesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/business/companies/$companyId': {
-      id: '/_app/business/companies/$companyId'
-      path: '/$companyId'
-      fullPath: '/business/companies/$companyId'
-      preLoaderRoute: typeof AppBusinessCompaniesCompanyIdRouteImport
-      parentRoute: typeof AppBusinessCompaniesRoute
     }
   }
 }
@@ -387,17 +367,6 @@ const AppTeamsRouteWithChildren = AppTeamsRoute._addFileChildren(
   AppTeamsRouteChildren,
 )
 
-interface AppBusinessCompaniesRouteChildren {
-  AppBusinessCompaniesCompanyIdRoute: typeof AppBusinessCompaniesCompanyIdRoute
-}
-
-const AppBusinessCompaniesRouteChildren: AppBusinessCompaniesRouteChildren = {
-  AppBusinessCompaniesCompanyIdRoute: AppBusinessCompaniesCompanyIdRoute,
-}
-
-const AppBusinessCompaniesRouteWithChildren =
-  AppBusinessCompaniesRoute._addFileChildren(AppBusinessCompaniesRouteChildren)
-
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppAuditRoute: typeof AppAuditRoute
@@ -408,9 +377,9 @@ interface AppRouteChildren {
   AppRevenueRoute: typeof AppRevenueRoute
   AppTeamsRoute: typeof AppTeamsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
-  AppBusinessCompaniesRoute: typeof AppBusinessCompaniesRouteWithChildren
-  AppBusinessUsersRoute: typeof AppBusinessUsersRoute
+  AppCompaniesCompanyIdRoute: typeof AppCompaniesCompanyIdRoute
   AppUsersUserIdRoute: typeof AppUsersUserIdRoute
+  AppCompaniesIndexRoute: typeof AppCompaniesIndexRoute
   AppUsersIndexRoute: typeof AppUsersIndexRoute
 }
 
@@ -424,9 +393,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppRevenueRoute: AppRevenueRoute,
   AppTeamsRoute: AppTeamsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
-  AppBusinessCompaniesRoute: AppBusinessCompaniesRouteWithChildren,
-  AppBusinessUsersRoute: AppBusinessUsersRoute,
+  AppCompaniesCompanyIdRoute: AppCompaniesCompanyIdRoute,
   AppUsersUserIdRoute: AppUsersUserIdRoute,
+  AppCompaniesIndexRoute: AppCompaniesIndexRoute,
   AppUsersIndexRoute: AppUsersIndexRoute,
 }
 

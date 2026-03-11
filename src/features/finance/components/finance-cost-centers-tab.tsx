@@ -63,7 +63,7 @@ export function FinanceCostCentersTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <p className="text-sm text-muted-foreground">{t('finance.tabDescriptions.costCenters')}</p>
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -102,7 +102,7 @@ export function FinanceCostCentersTab() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-48" />
           ))}
@@ -110,7 +110,7 @@ export function FinanceCostCentersTab() {
       ) : !costCenters?.length ? (
         <EmptyState icon={Target} title={t('finance.costCenters.noResults')} />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {costCenters.map((cc) => {
             const percentage = cc.budget > 0 ? (cc.spent / cc.budget) * 100 : 0
             const clampedPercentage = Math.min(percentage, 100)

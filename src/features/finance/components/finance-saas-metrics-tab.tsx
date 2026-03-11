@@ -91,7 +91,7 @@ function MetricCard({
         <Icon className={cn('size-4', iconColor)} />
       </CardHeader>
       <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-lg font-bold sm:text-2xl">{value}</p>
         {trend && trendLabel && (
           <div className="mt-1 flex items-center gap-1">
             {trend === 'up' && <ArrowUpRight className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />}
@@ -234,15 +234,15 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="space-y-4 md:space-y-6">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}
         </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Skeleton className="h-80" />
-          <Skeleton className="h-80" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-64 md:h-80" />
+          <Skeleton className="h-64 md:h-80" />
         </div>
       </div>
     )
@@ -261,7 +261,7 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
   const nrrTrend = computeTrend(latest.nrrPct, previous?.nrrPct)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Health Overview */}
       <Card className={cn(
         'border-l-4',
@@ -288,7 +288,7 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
         <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           {t('saasMetrics.section.revenueGrowth')}
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             label={t('saasMetrics.grossRevenue')}
             value={formatCurrency(latest.grossRevenue, currency)}
@@ -331,7 +331,7 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
         <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           {t('saasMetrics.section.unitEconomics')}
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             label="LTV"
             value={formatCurrency(latest.ltv, currency)}
@@ -374,7 +374,7 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
         <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           {t('saasMetrics.section.customers')}
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             label={t('saasMetrics.totalCustomers')}
             value={latest.totalCustomers.toLocaleString()}
@@ -417,7 +417,7 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
         <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
           {t('saasMetrics.section.cashRunway')}
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             label={t('saasMetrics.cashBalance')}
             value={formatCurrency(latest.cashBalance, currency)}
@@ -452,7 +452,7 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
       </div>
 
       {/* Charts */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <ChartCard title={t('saasMetrics.charts.revenueTrend')} tooltip={t('saasMetrics.charts.revenueTrendTooltip')}>
           <BarChart
             data={revenueChartData}
@@ -494,7 +494,8 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
           <CardDescription>{t('saasMetrics.historicalTableDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden overflow-x-auto md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -540,6 +541,51 @@ export function FinanceSaasMetricsTab({ currency = 'USD' }: { currency?: Currenc
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="space-y-3 md:hidden">
+            {pagination.paginatedItems.length === 0 && (
+              <p className="py-6 text-center text-sm text-muted-foreground">{t('saasMetrics.noData')}</p>
+            )}
+            {pagination.paginatedItems.map((s) => (
+              <div key={s.id} className="rounded-lg border p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold">{s.month}</span>
+                  <Badge variant={s.ltvCacRatio >= 3 ? 'default' : 'secondary'} className="text-xs">
+                    LTV/CAC {s.ltvCacRatio.toFixed(1)}x
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('saasMetrics.grossRevenue')}</span>
+                    <span className="font-medium font-mono">{formatCurrency(s.grossRevenue, currency)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('saasMetrics.grossMargin')}</span>
+                    <span className="font-medium font-mono">{formatPct(s.grossMarginPct)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('saasMetrics.netIncome')}</span>
+                    <span className={cn('font-medium font-mono', s.netIncome >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400')}>
+                      {formatCurrency(s.netIncome, currency)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">NRR</span>
+                    <span className="font-medium font-mono">{formatPct(s.nrrPct)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('saasMetrics.churnRate')}</span>
+                    <span className="font-medium font-mono">{formatPct(s.churnRatePct)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('saasMetrics.totalCustomers')}</span>
+                    <span className="font-medium font-mono">{s.totalCustomers.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
           <PaginationControls
             page={pagination.page}

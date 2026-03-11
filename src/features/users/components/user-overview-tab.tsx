@@ -1,12 +1,15 @@
 import type { AdminUser, CreditType, UserPlan } from '@/features/admin/types'
+import { Link } from '@tanstack/react-router'
 import {
   AlertTriangle,
   ArrowRight,
   Ban,
+  Building2,
   Calendar,
   CheckCircle2,
   Clock,
   CreditCard,
+  ExternalLink,
   Film,
   Infinity as InfinityIcon,
   Key,
@@ -96,14 +99,14 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
   return (
     <div className="space-y-6">
       {/* Quick Stats Cards */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <Card className="border-dashed">
           <CardContent className="flex items-center gap-3 p-4">
             <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/10">
               <Video className="size-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{user.mediaCreated}</p>
+              <p className="text-lg font-bold sm:text-2xl">{user.mediaCreated}</p>
               <p className="text-xs text-muted-foreground">{t('userDetail.quickStats.totalMedia')}</p>
             </div>
           </CardContent>
@@ -115,7 +118,7 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
               <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{postRate}%</p>
+              <p className="text-lg font-bold sm:text-2xl">{postRate}%</p>
               <p className="text-xs text-muted-foreground">{t('userDetail.quickStats.successRate')}</p>
             </div>
           </CardContent>
@@ -127,7 +130,7 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
               <Clock className="size-5 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{daysSinceCreation}</p>
+              <p className="text-lg font-bold sm:text-2xl">{daysSinceCreation}</p>
               <p className="text-xs text-muted-foreground">{t('userDetail.quickStats.activeDays')}</p>
             </div>
           </CardContent>
@@ -139,14 +142,14 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
               <TrendingUp className="size-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{user.credits}</p>
+              <p className="text-lg font-bold sm:text-2xl">{user.credits}</p>
               <p className="text-xs text-muted-foreground">{t('userDetail.quickStats.creditsAvailable')}</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {/* Plan Info */}
         <Card>
           <CardHeader className="pb-3">
@@ -289,7 +292,7 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
           <CardContent className="space-y-4">
             <div>
               <div className="flex items-baseline justify-between">
-                <p className="text-3xl font-bold">{user.credits}</p>
+                <p className="text-2xl font-bold sm:text-3xl">{user.credits}</p>
                 <span className="text-xs text-muted-foreground">{usagePercent}% {t('userDetail.creditsUsed').toLowerCase()}</span>
               </div>
               <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
@@ -380,6 +383,31 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
             )}
           </CardContent>
         </Card>
+
+        {/* Company Info */}
+        {user.companyName && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Building2 className="h-4 w-4" />{t('userDetail.company')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t('userDetail.companyName')}</span>
+                <span className="font-medium">{user.companyName}</span>
+              </div>
+              <Link
+                to="/companies/$companyId"
+                params={{ companyId: user.companyId! }}
+                className="mt-2 flex items-center gap-1.5 text-xs text-primary hover:underline"
+              >
+                <ExternalLink className="h-3 w-3" />
+                {t('userDetail.viewCompany')}
+              </Link>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Account Info */}
         <Card>

@@ -68,7 +68,7 @@ return users
               />
             </div>
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder={t('business.users.filterStatus')} />
               </SelectTrigger>
               <SelectContent>

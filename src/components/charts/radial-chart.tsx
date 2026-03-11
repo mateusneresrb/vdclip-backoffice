@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import ReactApexChart from 'react-apexcharts'
 
-import { resolveChartColor, useChartTheme } from './use-chart-theme'
+import { hexToRgba, resolveChartColor, useChartTheme } from './use-chart-theme'
 
 interface RadialChartProps {
   value: number
@@ -36,7 +36,7 @@ export function RadialChart({
           endAngle: 135,
           hollow: { size: '65%' },
           track: {
-            background: theme.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            background: hexToRgba(theme.border, theme.isDark ? 0.4 : 0.3),
             strokeWidth: '100%',
           },
           dataLabels: {
@@ -51,7 +51,7 @@ export function RadialChart({
               show: true,
               fontSize: '24px',
               fontWeight: 700,
-              color: theme.isDark ? '#f5f5f5' : '#1a1a1a',
+              color: theme.foreground,
               offsetY: -12,
               formatter: (val) => {
                 const num = Number(val)

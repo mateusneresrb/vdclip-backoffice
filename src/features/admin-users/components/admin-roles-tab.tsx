@@ -70,7 +70,7 @@ export function AdminRolesTab() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <Skeleton key={i} className="h-36" />
         ))}
@@ -91,7 +91,7 @@ export function AdminRolesTab() {
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {roles.map((role) => (
           <RoleCard
             key={role.id}

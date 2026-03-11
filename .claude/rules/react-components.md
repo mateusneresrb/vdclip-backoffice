@@ -6,14 +6,38 @@ paths:
 
 # React Component Rules
 
-## Responsive Design (Mobile-First)
+## Responsive Design (Mobile-First) — ESSENCIAL
 
-- Start with mobile, add breakpoints: `sm:` (640), `md:` (768), `lg:` (1024), `xl:` (1280)
-- Grids: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`
-- Spacing: responsive (`gap-3 sm:gap-4`, `p-4 md:p-6`)
-- Typography: scale (`text-sm sm:text-base`, `text-xl sm:text-2xl`)
-- Full-height: `min-h-svh` NOT `min-h-screen`
-- Use `flex-wrap` when items could overflow
+Breakpoints: `sm:` (640), `md:` (768), `lg:` (1024), `xl:` (1280). Sem prefixo = mobile.
+
+### Grids (NUNCA pular breakpoints intermediários)
+- 4 colunas: `grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`
+- 3 colunas: `grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3`
+- 5 colunas: `grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5`
+- Charts lado a lado: `grid gap-4 md:grid-cols-2`
+- **PROIBIDO**: `sm:grid-cols-2 lg:grid-cols-4` (pular `md:` causa salto visual em tablets)
+
+### Texto
+- Valores grandes DEVEM escalar: `text-lg sm:text-2xl` (não `text-2xl` fixo)
+- Nomes/emails DEVEM ter `truncate` para evitar overflow
+- Badges: mínimo `text-[10px]` aceitável, mas preferir `text-xs`
+
+### Layout
+- Headers com controles: `flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between`
+- TabsList: `<div className="overflow-x-auto"><TabsList className="w-max sm:w-auto">` (scroll horizontal no mobile, NUNCA flex-wrap)
+- Spacing principal: `space-y-4 md:space-y-6`
+- Full-height: `min-h-svh` NUNCA `min-h-screen`
+
+### Tabelas
+- 5+ colunas: usar `hidden md:block` (desktop) + card view `md:hidden` (mobile)
+- Colunas secundárias: `hidden sm:table-cell`, `hidden md:table-cell`, `hidden lg:table-cell`
+- Mostrar dados ocultos inline no mobile (ex: email abaixo do nome com classe `sm:hidden`)
+- Sempre envolver tabela com `overflow-x-auto`
+
+### Inputs & Controles
+- Select/Input width: `w-full sm:w-44` (full mobile, fixo desktop)
+- Touch targets: mínimo `h-7 w-7` para botões de ação (28px)
+- Flex com items que empilham: `flex flex-col gap-2 sm:flex-row sm:items-center`
 
 ## Accessibility
 

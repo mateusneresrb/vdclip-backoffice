@@ -21,7 +21,7 @@ export function AuditPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader title={t('nav.auditoria')} description={t('audit.pageDescription')} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>

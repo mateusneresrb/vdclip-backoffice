@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import QRCode from 'react-qr-code'
 
+import { EmptyState } from '@/components/shared/empty-state'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
@@ -275,7 +276,10 @@ return null
               ))}
             </div>
           ) : !sessions || sessions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t('profile.sessions.noSessions')}</p>
+            <EmptyState
+              icon={Monitor}
+              title={t('profile.sessions.noSessions')}
+            />
           ) : (
             <div className="space-y-3">
               {sessions.map((session, index) => (

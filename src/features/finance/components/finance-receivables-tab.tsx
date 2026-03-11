@@ -154,13 +154,13 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-1 pt-3 px-3">
             <CardDescription className="text-xs">{t('finance.receivables.totalPending')}</CardDescription>
           </CardHeader>
           <CardContent className="px-3 pb-3">
-            <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
+            <p className="text-base font-bold sm:text-lg text-amber-600 dark:text-amber-400">
               {formatCurrency(summaries.pending, 'BRL')}
             </p>
           </CardContent>
@@ -170,7 +170,7 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
             <CardDescription className="text-xs">{t('finance.receivables.totalReceived')}</CardDescription>
           </CardHeader>
           <CardContent className="px-3 pb-3">
-            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+            <p className="text-base font-bold sm:text-lg text-emerald-600 dark:text-emerald-400">
               {formatCurrency(summaries.received, 'BRL')}
             </p>
           </CardContent>
@@ -180,7 +180,7 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
             <CardDescription className="text-xs">{t('finance.receivables.totalOverdue')}</CardDescription>
           </CardHeader>
           <CardContent className="px-3 pb-3">
-            <p className="text-lg font-bold text-red-600 dark:text-red-400">
+            <p className="text-base font-bold sm:text-lg text-red-600 dark:text-red-400">
               {formatCurrency(summaries.overdue, 'BRL')}
             </p>
           </CardContent>
@@ -190,7 +190,7 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
             <CardDescription className="text-xs">{t('finance.receivables.totalCancelled')}</CardDescription>
           </CardHeader>
           <CardContent className="px-3 pb-3">
-            <p className="text-lg font-bold text-muted-foreground">
+            <p className="text-base font-bold sm:text-lg text-muted-foreground">
               {formatCurrency(summaries.cancelled, 'BRL')}
             </p>
           </CardContent>
@@ -233,11 +233,11 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
               {pagination.paginatedItems.map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-center justify-between rounded-md border p-3"
+                  className="flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">{entry.description}</p>
-                    <div className="flex items-center gap-1.5">
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p className="truncate text-sm font-medium">{entry.description}</p>
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-[11px] text-muted-foreground">
                         {entry.customerName}
                       </span>
@@ -257,8 +257,8 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold">
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <p className="whitespace-nowrap text-sm font-bold">
                       {formatCurrency(entry.amount, entry.currency)}
                     </p>
                     <Button
@@ -266,7 +266,7 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
                       size="sm"
                       className="h-7 w-7 p-0 text-muted-foreground"
                       onClick={() => setNotesEntry(entry)}
-                      title="Notas"
+                      title={t('finance.notes.title')}
                     >
                       <MessageSquare className="h-4 w-4" />
                     </Button>
@@ -274,7 +274,7 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-7 gap-1 text-xs"
+                        className="h-7 shrink-0 gap-1 text-xs"
                         onClick={() => handleOpenConfirm(entry)}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" />
@@ -301,16 +301,16 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
 
       <Sheet open={!!notesEntry} onOpenChange={(open) => { if (!open) 
 setNotesEntry(null) }}>
-        <SheetContent className="w-full sm:max-w-md">
+        <SheetContent className="sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Notas — {notesEntry?.description}</SheetTitle>
+            <SheetTitle>{t('finance.notes.title')} — {notesEntry?.description}</SheetTitle>
             <SheetDescription>{notesEntry?.customerName}</SheetDescription>
           </SheetHeader>
           {notesEntry && (
             <FinancialNotes
               entityType="receivable"
               entityId={notesEntry.id}
-              className="mt-4"
+              className="px-4 pb-4"
             />
           )}
         </SheetContent>

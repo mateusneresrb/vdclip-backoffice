@@ -38,6 +38,7 @@ interface KpiCardProps {
 }
 
 function KpiCard({ label, value, subtitle, icon: Icon, status = 'neutral', href }: KpiCardProps) {
+  const { t } = useTranslation('admin')
   const statusClass = {
     good: 'text-emerald-600 dark:text-emerald-400',
     warn: 'text-amber-600 dark:text-amber-400',
@@ -61,14 +62,14 @@ function KpiCard({ label, value, subtitle, icon: Icon, status = 'neutral', href 
         </div>
       </CardHeader>
       <CardContent>
-        <p className={cn('text-2xl font-bold', statusClass)}>{value}</p>
+        <p className={cn('text-lg font-bold sm:text-2xl', statusClass)}>{value}</p>
         {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
         {href && (
           <a
             href={href}
             className="mt-2 flex items-center gap-1 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
           >
-            Ver detalhe <ArrowRight className="size-3" />
+            {t('dashboard.viewDetail')} <ArrowRight className="size-3" />
           </a>
         )}
       </CardContent>
@@ -100,7 +101,7 @@ return null
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-4 w-16" />
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}
@@ -147,7 +148,7 @@ return null
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <p className="text-sm font-medium">{t('dashboard.financialKpis', { defaultValue: 'KPIs Financeiros' })}</p>
+        <p className="text-sm font-medium">{t('dashboard.financialKpis')}</p>
         <Badge variant="outline" className="text-xs">
           {new Date(latest.month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
         </Badge>
@@ -155,13 +156,13 @@ return null
           href="/revenue?tab=saas-metrics"
           className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
         >
-          {t('dashboard.viewAll', { defaultValue: 'Ver tudo' })} <ArrowRight className="size-3" />
+          {t('dashboard.viewAll')} <ArrowRight className="size-3" />
         </a>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         <KpiCard
-          label={t('saasMetrics.runway', { defaultValue: 'Runway' })}
+          label={t('saasMetrics.runway')}
           value={`${latest.runwayMonths}m`}
           subtitle={formatCurrency(latest.cashBalance, latest.currency)}
           icon={Wallet}
@@ -169,11 +170,11 @@ return null
           href="/finance"
         />
         <KpiCard
-          label="MRR"
+          label={t('saasMetrics.mrr')}
           value={formatCurrency(latest.grossRevenue, latest.currency)}
           subtitle={
             mrrChange !== null
-              ? `${mrrChange >= 0 ? '+' : ''}${mrrChange.toFixed(1)}% vs mês anterior`
+              ? `${mrrChange >= 0 ? '+' : ''}${mrrChange.toFixed(1)}% ${t('dashboard.vsLastMonth')}`
               : undefined
           }
           icon={mrrChange !== null && mrrChange >= 0 ? TrendingUp : TrendingDown}
@@ -181,7 +182,7 @@ return null
           href="/revenue"
         />
         <KpiCard
-          label="LTV/CAC"
+          label={t('saasMetrics.ltvCac')}
           value={`${latest.ltvCacRatio.toFixed(1)  }x`}
           subtitle={`CAC ${formatCurrency(latest.cac, latest.currency)} · LTV ${formatCurrency(latest.ltv, latest.currency)}`}
           icon={BarChart2}
@@ -189,25 +190,25 @@ return null
           href="/revenue"
         />
         <KpiCard
-          label={t('saasMetrics.churnRate', { defaultValue: 'Churn' })}
+          label={t('saasMetrics.churnRate')}
           value={formatPct(latest.churnRatePct)}
-          subtitle={`${latest.churnedCustomers} clientes`}
+          subtitle={`${latest.churnedCustomers} ${t('dashboard.customers')}`}
           icon={TrendingDown}
           status={churnStatus}
           href="/revenue"
         />
         <KpiCard
-          label={t('saasMetrics.nrr', { defaultValue: 'NRR' })}
+          label={t('saasMetrics.nrr')}
           value={formatPct(latest.nrrPct)}
-          subtitle="Net Revenue Retention"
+          subtitle={t('dashboard.nrr')}
           icon={Gauge}
           status={nrrStatus}
           href="/revenue"
         />
         <KpiCard
-          label={t('saasMetrics.activeCustomers', { defaultValue: 'Clientes Ativos' })}
+          label={t('saasMetrics.activeCustomers')}
           value={latest.totalCustomers.toLocaleString('pt-BR')}
-          subtitle={`+${latest.newCustomers} novos`}
+          subtitle={`+${latest.newCustomers} ${t('dashboard.new')}`}
           icon={Users}
           status="neutral"
           href="/revenue"
@@ -216,7 +217,7 @@ return null
 
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Zap className="size-3" />
-        {t('dashboard.kpiClickable', { defaultValue: 'Passe o cursor sobre um card para navegar até o detalhe' })}
+        {t('dashboard.kpiClickable')}
       </div>
     </div>
   )

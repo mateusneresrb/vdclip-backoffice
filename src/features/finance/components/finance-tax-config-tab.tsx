@@ -65,7 +65,7 @@ export function FinanceTaxConfigTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">{t('finance.tabDescriptions.taxes')}</p>
         <Button size="sm" onClick={() => { setEditTax(undefined); setFormOpen(true) }}>
           <Plus className="mr-1 h-4 w-4" />
@@ -85,7 +85,8 @@ export function FinanceTaxConfigTab() {
             <CardTitle className="text-sm font-medium">{t('finance.taxConfiguration')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
+            {/* Desktop table */}
+            <div className="hidden md:block">
               <div className="space-y-1">
                 <div className="grid grid-cols-7 gap-2 border-b px-3 py-2 text-[11px] font-medium text-muted-foreground">
                   <span>{t('finance.taxTable.name')}</span>
@@ -130,6 +131,47 @@ export function FinanceTaxConfigTab() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="space-y-2 md:hidden">
+              {pagination.paginatedItems.map((tax) => (
+                <div key={tax.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{tax.name}</span>
+                      <span className="text-sm font-bold text-primary">{tax.rate}%</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className={cn('inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium', taxTypeColors[tax.type])}>
+                        {t(`finance.taxType.${tax.type}`)}
+                      </span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {t(appliesToLabels[tax.appliesTo])}
+                      </Badge>
+                      <span className="font-mono text-[10px] text-muted-foreground">{tax.code}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={tax.isActive} />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => { setEditTax(tax); setFormOpen(true) }}>
+                          <Pencil className="mr-2 h-4 w-4" />{t('common.edit', { ns: 'common' })}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(tax.id)}>
+                          <Trash2 className="mr-2 h-4 w-4" />{t('common.delete', { ns: 'common' })}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))}
             </div>
             <PaginationControls
               page={pagination.page}

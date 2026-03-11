@@ -36,7 +36,7 @@ useUserMutations()  → {
 
 ## Types (de `@/features/admin/types`)
 ```ts
-AdminUser      // { id, name, email, status, plan, planProvider, credits, creditPackages, ... }
+AdminUser      // { id, name, email, status, plan, planProvider, credits, creditPackages, companyId?, companyName?, ... }
 UserStatus     // 'active' | 'inactive' | 'suspended'
 UserPlan       // 'free' | 'lite' | 'premium' | 'ultimate'
 PlanProvider   // 'paddle' | 'pix' | 'internal'

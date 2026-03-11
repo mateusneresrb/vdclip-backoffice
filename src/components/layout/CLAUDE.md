@@ -35,13 +35,13 @@ O `search` é passado via `<Link to={item.to} search={item.search}>`.
 Header com comportamento diferente por breakpoint.
 
 ### Mobile (< sm)
-- `[≡ SidebarTrigger]` + `[vdclip-logo.svg + badge "BackOffice"]` (clicável, vai para /dashboard)
-- Quick links **ocultos** no mobile
+- `[≡ SidebarTrigger]` + `[vdclip-logo.svg + badge "BackOffice"]` + `[Quick links]`
 - Breadcrumb oculto no mobile
+- SidebarTrigger abre sidebar como Sheet (menu hamburger nativo do shadcn)
 
 ### Desktop (≥ sm)
 - `[≡ SidebarTrigger]` + `|` + `[Breadcrumb]` + `[Quick links]`
-- Quick links: Documentação, Tawk, Paddle, Woovi, AWS — `hidden sm:flex`
+- Quick links: Documentação, Paddle, Woovi (mobile) + Tawk, AWS (desktop only via `desktopOnly: true`)
 
 ### Quick links
 Definidos em `quickLinks: QuickLink[]`. Dois tipos via discriminated union:
@@ -55,11 +55,9 @@ Favicons via Google S2: `https://www.google.com/s2/favicons?domain=X&sz=32`
 ### Mapa de labels
 ```ts
 routeLabels: Record<string, string>    // segmento → chave i18n
-parentLabels: Record<string, string>   // segmento pai → label (ex: business)
-productRoutes: Record<string, string>  // segmento → grupo de produto
-childLabels: Record<string, Record<string, string>>  // pai.filho → label
+productRoutes: Record<string, string>  // segmento → grupo de produto (ex: users → nav.productVdclip)
 ```
-**Ao criar nova rota, sempre adicionar em `routeLabels`.**
+**Ao criar nova rota, sempre adicionar em `routeLabels`.** Se a rota pertence a um grupo de produto, adicionar também em `productRoutes`.
 
 ## Dev Banner (`_app.tsx`)
 Banner âmbar acima do header, visível apenas quando `import.meta.env.DEV === true`.

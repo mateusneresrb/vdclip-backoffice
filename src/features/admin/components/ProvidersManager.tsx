@@ -24,7 +24,7 @@ return null
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
         {providers.map((provider) => (
           <ProviderCard key={provider.id} provider={provider} onToggle={onToggle} />
         ))}
@@ -41,7 +41,7 @@ export function ProvidersManager() {
     return (
       <div className="space-y-6">
         <PageHeader title={t('providers.title')} description={t('providers.pageDescription')} />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}

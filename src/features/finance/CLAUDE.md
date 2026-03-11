@@ -66,6 +66,18 @@ CashFlowEntry, CashFlowSummary, Currency
 - Em prod: as mesmas chamadas vão para `VITE_API_URL` (real API)
 - Hooks de notas financeiras usam chave de query `['financial-notes', entityType, entityId]`
 
+## Responsive Design Patterns
+
+Todos os componentes finance seguem mobile-first:
+- **Tab icons**: `hidden sm:block` nos ícones das 7 tabs (reduz scroll no mobile)
+- **Entry rows**: `flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between` (empilha no mobile)
+- **Currency values**: `whitespace-nowrap text-sm font-bold` (evita quebra em valores formatados)
+- **Summary cards**: `grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4`
+- **Text scaling**: `text-base font-bold sm:text-lg` para valores de resumo
+- **Search inputs**: `w-full sm:w-56` (full width no mobile)
+- **Card headers**: `flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`
+- **Badges/metadata**: `flex flex-wrap items-center gap-1.5` para evitar overflow
+
 ## Importante
 - `finance-saas-metrics-tab.tsx` está nesta feature mas é **usada na página `/revenue`**, não aqui
 - A tab de SaaS Metrics foi intencionalmente separada da Contabilidade interna

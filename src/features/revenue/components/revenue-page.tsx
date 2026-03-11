@@ -33,28 +33,30 @@ export function RevenuePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title={t('revenue.title')}
         description={t('revenue.pageDescription')}
       />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <div className="flex items-start justify-between gap-4">
-          <TabsList className="flex-wrap">
-            <TabsTrigger value="saas-metrics" className="gap-1.5">
-              <BarChart3 className="h-4 w-4" />
-              {t('dashboard.tabs.saasMetrics')}
-            </TabsTrigger>
-            <TabsTrigger value="revenue" className="gap-1.5">
-              <CreditCard className="h-4 w-4" />
-              {t('revenue.tabSummary')}
-            </TabsTrigger>
-            <TabsTrigger value="transactions" className="gap-1.5">
-              <CreditCard className="h-4 w-4" />
-              {t('revenue.tabTransactions')}
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="-mb-px w-full overflow-x-auto overflow-y-hidden sm:w-auto">
+            <TabsList className="w-max sm:w-auto">
+              <TabsTrigger value="saas-metrics" className="gap-1.5">
+                <BarChart3 className="h-4 w-4" />
+                {t('dashboard.tabs.saasMetrics')}
+              </TabsTrigger>
+              <TabsTrigger value="revenue" className="gap-1.5">
+                <CreditCard className="h-4 w-4" />
+                {t('revenue.tabSummary')}
+              </TabsTrigger>
+              <TabsTrigger value="transactions" className="gap-1.5">
+                <CreditCard className="h-4 w-4" />
+                {t('revenue.tabTransactions')}
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {activeTab === 'saas-metrics' && (
             <div className="flex shrink-0 items-center rounded-md border bg-muted p-0.5">

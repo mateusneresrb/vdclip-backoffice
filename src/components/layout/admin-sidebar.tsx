@@ -98,14 +98,7 @@ const sections: NavSection[] = [
       { to: '/revenue', icon: DollarSign, labelKey: 'nav.saasMetrics', permission: PERMISSIONS.FINANCE_READ },
       { to: '/users', icon: Users, labelKey: 'nav.users', permission: PERMISSIONS.USERS_READ },
       { to: '/teams', icon: Network, labelKey: 'nav.teams', permission: PERMISSIONS.TEAMS_READ },
-    ],
-  },
-  {
-    labelKey: 'nav.productBusiness',
-    defaultOpen: true,
-    items: [
-      { to: '/business/companies', icon: Building2, labelKey: 'nav.businessCompanies', permission: PERMISSIONS.USERS_READ },
-      { to: '/business/users', icon: Users, labelKey: 'nav.businessUsers', permission: PERMISSIONS.USERS_READ },
+      { to: '/companies', icon: Building2, labelKey: 'nav.companies', permission: PERMISSIONS.USERS_READ },
     ],
   },
   {

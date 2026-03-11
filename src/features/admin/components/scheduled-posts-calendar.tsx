@@ -134,22 +134,13 @@ const platformColors: Record<string, string> = {
   facebook: 'bg-blue-700 text-white',
 }
 
-const MONTH_NAMES = [
-  'Janeiro', 
-'Fevereiro', 
-'Marco', 
-'Abril', 
-'Maio', 
-'Junho',
-  'Julho', 
-'Agosto', 
-'Setembro', 
-'Outubro', 
-'Novembro', 
-'Dezembro',
-]
+const MONTH_NAMES = Array.from({ length: 12 }, (_, i) =>
+  new Date(2024, i, 1).toLocaleDateString('pt-BR', { month: 'long' }).replace(/^\w/, (c) => c.toUpperCase()),
+)
 
-const WEEKDAY_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab']
+const WEEKDAY_SHORT = Array.from({ length: 7 }, (_, i) =>
+  new Date(2024, 0, i).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').replace(/^\w/, (c) => c.toUpperCase()),
+)
 
 // ─── Platform dot ─────────────────────────────────────────────────────────────
 
@@ -284,8 +275,9 @@ return
                   {formattedDate ?? t('scheduledPosts.edit.selectDate')}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0" align="start" collisionPadding={16}>
                 <Calendar
+                  className="[--cell-size:--spacing(7)] sm:[--cell-size:--spacing(8)]"
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => {

@@ -83,20 +83,20 @@ function KpiCard({
           {title}
           {tooltip && <InfoTooltip content={tooltip} />}
         </CardTitle>
-        <div className={cn('flex size-8 items-center justify-center rounded-lg', iconColor)}>
+        <div className={cn('flex size-7 items-center justify-center rounded-lg sm:size-8', iconColor)}>
           <Icon className="size-4" />
         </div>
       </CardHeader>
       <CardContent>
         <p className={cn(
-          'text-xl font-bold',
+          'text-lg font-bold sm:text-xl',
           positive && 'text-emerald-600 dark:text-emerald-400',
           negative && 'text-red-600 dark:text-red-400',
         )}>
           {valueUsd}
         </p>
         <p className={cn(
-          'text-sm font-semibold',
+          'text-xs font-semibold sm:text-sm',
           positive && 'text-emerald-600/70 dark:text-emerald-400/70',
           negative && 'text-red-600/70 dark:text-red-400/70',
           !positive && !negative && 'text-muted-foreground',
@@ -198,9 +198,9 @@ return []
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}
@@ -237,7 +237,7 @@ return []
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <p className="text-xs font-medium text-muted-foreground">{t('revenue.totalIncome')}</p>
-              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+              <p className="text-base font-bold text-emerald-600 sm:text-lg dark:text-emerald-400">
                 {formatCurrency(totalIncome.usd, 'USD')}
               </p>
               <p className="text-sm font-medium text-emerald-600/70 dark:text-emerald-400/70">
@@ -246,7 +246,7 @@ return []
             </div>
             <div>
               <p className="text-xs font-medium text-muted-foreground">{t('revenue.totalExpense')}</p>
-              <p className="text-lg font-bold text-red-600 dark:text-red-400">
+              <p className="text-base font-bold text-red-600 sm:text-lg dark:text-red-400">
                 {formatCurrency(totalExpense.usd, 'USD')}
               </p>
               <p className="text-sm font-medium text-red-600/70 dark:text-red-400/70">
@@ -275,7 +275,7 @@ return []
       {/* KPI Cards - Grouped USD + BRL */}
       <div>
         <h4 className="mb-3 text-sm font-medium text-muted-foreground">{t('revenue.incomeBreakdown')}</h4>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <KpiCard
             title={t('revenue.creditRevenue')}
             valueUsd={formatCurrency(latestUsd?.creditRevenue ?? 0, 'USD')}
@@ -321,7 +321,7 @@ return []
 
       <div>
         <h4 className="mb-3 text-sm font-medium text-muted-foreground">{t('revenue.expenseBreakdown')}</h4>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
           <KpiCard
             title={t('revenue.contractionLoss')}
             valueUsd={formatCurrency(latestUsd?.contractionMrr ?? 0, 'USD')}
@@ -355,7 +355,7 @@ return []
       </div>
 
       {/* Charts */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {combinedMrrData.length > 1 && (
           <ChartCard
             title={t('revenue.mrrTrendCombined')}

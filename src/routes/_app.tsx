@@ -29,7 +29,7 @@ function AdminLayout() {
   return (
     <SidebarProvider>
       <AdminSidebar />
-      <div className="flex min-h-svh flex-1 flex-col">
+      <div className="flex min-h-svh min-w-0 flex-1 flex-col">
         {isDev && (
           <div className="flex items-center justify-center gap-2 bg-amber-400/90 px-3 py-1 text-center text-xs font-medium text-amber-950 dark:bg-amber-500/30 dark:text-amber-300">
             <span>⚠️</span>
@@ -37,7 +37,7 @@ function AdminLayout() {
           </div>
         )}
         <AdminHeader />
-        <main className="flex flex-1 flex-col overflow-auto p-4 md:p-6">
+        <main className="flex min-w-0 flex-1 flex-col overflow-auto p-4 md:p-6">
           <Outlet />
         </main>
       </div>

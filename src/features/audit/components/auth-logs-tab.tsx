@@ -270,7 +270,6 @@ return false
             <SelectContent>
               <SelectItem value="all">{t('logs.allProducts')}</SelectItem>
               <SelectItem value="vdclip">{t('logs.productVdclip')}</SelectItem>
-              <SelectItem value="business">{t('logs.productBusiness')}</SelectItem>
             </SelectContent>
           </Select>
         </div>

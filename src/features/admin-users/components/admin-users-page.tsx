@@ -22,7 +22,7 @@ export function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader title={t('nav.administradores')} description={t('adminUsers.pageDescription')} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>

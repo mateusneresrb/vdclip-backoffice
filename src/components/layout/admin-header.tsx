@@ -1,6 +1,8 @@
 import { Link, useMatches } from '@tanstack/react-router'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
+import { cn } from '@/lib/utils'
 
 import {
   Breadcrumb,
@@ -11,7 +13,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import {
   Tooltip,
   TooltipContent,
@@ -23,6 +25,7 @@ const routeLabels: Record<string, string> = {
   dashboard: 'nav.dashboard',
   users: 'nav.users',
   teams: 'nav.teams',
+  companies: 'nav.companies',
   revenue: 'nav.saasMetrics',
   finance: 'nav.contabilidade',
   admin: 'nav.administradores',
@@ -31,27 +34,16 @@ const routeLabels: Record<string, string> = {
   profile: 'nav.profile',
 }
 
-const parentLabels: Record<string, string> = {
-  business: 'nav.productBusiness',
-}
-
 const productRoutes: Record<string, string> = {
   users: 'nav.productVdclip',
   teams: 'nav.productVdclip',
   revenue: 'nav.productVdclip',
-}
-
-/** Labels for child segments under a parent (e.g. business/users → nav.businessUsers) */
-const childLabels: Record<string, Record<string, string>> = {
-  business: {
-    users: 'nav.businessUsers',
-    companies: 'nav.businessCompanies',
-  },
+  companies: 'nav.productVdclip',
 }
 
 type QuickLink =
-  | { href: string; label: string; type: 'icon'; icon: typeof BookOpen; color: string }
-  | { href: string; label: string; type: 'favicon'; favicon: string }
+  | { href: string; label: string; type: 'icon'; icon: typeof BookOpen; color: string; desktopOnly?: boolean }
+  | { href: string; label: string; type: 'favicon'; favicon: string; desktopOnly?: boolean }
 
 const quickLinks: QuickLink[] = [
   {
@@ -66,6 +58,7 @@ const quickLinks: QuickLink[] = [
     type: 'favicon',
     favicon: 'https://www.google.com/s2/favicons?domain=tawk.to&sz=32',
     label: 'Tawk (Suporte)',
+    desktopOnly: true,
   },
   {
     href: 'https://vendors.paddle.com/',
@@ -84,6 +77,7 @@ const quickLinks: QuickLink[] = [
     type: 'favicon',
     favicon: 'https://www.google.com/s2/favicons?domain=aws.amazon.com&sz=32',
     label: 'AWS',
+    desktopOnly: true,
   },
 ]
 
@@ -97,25 +91,33 @@ function QuickLinkIcon({ link }: { link: QuickLink }) {
 
 export function AdminHeader() {
   const { t } = useTranslation('admin')
+  const { toggleSidebar } = useSidebar()
   const matches = useMatches()
   const lastMatch = matches[matches.length - 1]
   const segments = lastMatch?.pathname.split('/').filter(Boolean) ?? []
   const lastSegment = segments[segments.length - 1] ?? 'dashboard'
 
-  const isUserDetail = segments.includes('users') && !segments.includes('business') && segments.length > 1
+  const isUserDetail = segments.includes('users') && segments.length > 1
   const isTeamDetail = segments.includes('teams') && segments.length > 1
-  const isBusinessCompanyDetail = segments[0] === 'business' && segments[1] === 'companies' && segments.length > 2
-  const isDetailPage = isUserDetail || isTeamDetail || isBusinessCompanyDetail
-  const parentSegment = segments.length >= 2 ? segments[0] : undefined
-  const hasParent = !!parentSegment && !!parentLabels[parentSegment]
-  const productLabel = !hasParent ? productRoutes[segments[0]] : undefined
-  const labelKey = hasParent
-    ? (childLabels[parentSegment]?.[lastSegment] ?? routeLabels[lastSegment])
-    : routeLabels[lastSegment]
+  const isCompanyDetail = segments[0] === 'companies' && segments.length > 1
+  const isDetailPage = isUserDetail || isTeamDetail || isCompanyDetail
+  const productLabel = productRoutes[segments[0]]
+  const labelKey = routeLabels[lastSegment] ?? routeLabels[segments[0]]
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b px-3 md:px-4">
-      <SidebarTrigger className="-ml-1 shrink-0" />
+      {/* Hamburger menu — mobile only */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="-ml-1 size-7 shrink-0 sm:hidden"
+        onClick={toggleSidebar}
+        aria-label="Menu"
+      >
+        <Menu className="size-5" />
+      </Button>
+      {/* Panel toggle — desktop only */}
+      <SidebarTrigger className="-ml-1 hidden shrink-0 sm:inline-flex" />
 
       {/* Logo + BackOffice — mobile only */}
       <Link to="/dashboard" className="flex shrink-0 items-center gap-2 sm:hidden">
@@ -130,21 +132,21 @@ export function AdminHeader() {
       {/* Breadcrumb — desktop only */}
       <Breadcrumb className="hidden min-w-0 flex-1 sm:flex">
         <BreadcrumbList>
-          {(hasParent || productLabel) && (
+          {productLabel && (
             <>
               <BreadcrumbItem>
                 <span className="text-muted-foreground">
-                  {hasParent ? t(parentLabels[parentSegment!]) : t(productLabel!)}
+                  {t(productLabel)}
                 </span>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
             </>
           )}
-          {!isBusinessCompanyDetail && (
+          {!isCompanyDetail && (
             <BreadcrumbItem>
               {isDetailPage ? (
                 <span className="text-muted-foreground">
-                  {isUserDetail ? t('nav.users') : t('nav.teams')}
+                  {isUserDetail ? t('nav.users') : isTeamDetail ? t('nav.teams') : t('nav.companies')}
                 </span>
               ) : (
                 <BreadcrumbPage>
@@ -169,11 +171,11 @@ export function AdminHeader() {
               </BreadcrumbItem>
             </>
           )}
-          {isBusinessCompanyDetail && (
+          {isCompanyDetail && (
             <>
               <BreadcrumbItem>
                 <span className="text-muted-foreground">
-                  {t('nav.businessCompanies')}
+                  {t('nav.companies')}
                 </span>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -185,8 +187,8 @@ export function AdminHeader() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Quick access links — desktop only */}
-      <div className="ml-auto hidden items-center gap-0.5 sm:flex">
+      {/* Quick access links */}
+      <div className="ml-auto flex items-center gap-0.5">
         <TooltipProvider delayDuration={300}>
           {quickLinks.map((link) => (
             <Tooltip key={link.href}>
@@ -194,7 +196,7 @@ export function AdminHeader() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className={cn('h-8 w-8', link.desktopOnly && 'hidden sm:inline-flex')}
                   asChild
                 >
                   <a href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label}>

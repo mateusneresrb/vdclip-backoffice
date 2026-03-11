@@ -14,7 +14,7 @@ Módulos auto-contidos. Cada feature exporta via `index.ts` e tem seus próprios
 | `teams` | `/teams`, `/teams/:id` | `TEAMS_READ` | [ver](teams/CLAUDE.md) |
 | `admin-users` | `/admin` | `ADMIN_READ` | [ver](admin-users/CLAUDE.md) |
 | `audit` | `/audit` | `AUDIT_READ` | [ver](audit/CLAUDE.md) |
-| `business` | `/business/companies`, `/business/users` | `USERS_READ` | [ver](business/CLAUDE.md) |
+| `business` | `/companies`, `/companies/:id` | `USERS_READ` | [ver](business/CLAUDE.md) |
 | `providers` | `/providers` | `PROVIDERS_READ` | [ver](providers/CLAUDE.md) |
 | `admin` | (biblioteca central) | — | [ver](admin/CLAUDE.md) |
 

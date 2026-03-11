@@ -103,7 +103,7 @@ return entries
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="h-9 w-56 pl-8 text-sm"
+              className="h-9 w-full sm:w-56 pl-8 text-sm"
               placeholder={t('finance.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -133,10 +133,10 @@ return entries
           <CardContent>
             <div className="space-y-2">
               {pagination.paginatedItems.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between rounded-md border p-3">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">{entry.description}</p>
-                    <div className="flex items-center gap-1.5">
+                <div key={entry.id} className="flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p className="truncate text-sm font-medium">{entry.description}</p>
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-[11px] text-muted-foreground">{entry.categoryName}</span>
                       <span className={cn('inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium', typeColors[entry.type])}>
                         {t(`finance.costType.${entry.type}`)}
@@ -147,14 +147,14 @@ return entries
                       <Badge variant="outline" className="text-[10px]">{entry.costCenter}</Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold">{formatCurrency(entry.amount, entry.currency)}</p>
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <p className="whitespace-nowrap text-sm font-bold">{formatCurrency(entry.amount, entry.currency)}</p>
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-7 w-7 p-0 text-muted-foreground"
                       onClick={() => setNotesEntry(entry)}
-                      title="Notas"
+                      title={t('finance.notes.title')}
                     >
                       <MessageSquare className="h-4 w-4" />
                     </Button>
@@ -200,16 +200,16 @@ return entries
 
       <Sheet open={!!notesEntry} onOpenChange={(open) => { if (!open) 
 setNotesEntry(null) }}>
-        <SheetContent className="w-full sm:max-w-md">
+        <SheetContent className="sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Notas — {notesEntry?.description}</SheetTitle>
+            <SheetTitle>{t('finance.notes.title')} — {notesEntry?.description}</SheetTitle>
             <SheetDescription>{t('finance.tabDescriptions.costs')}</SheetDescription>
           </SheetHeader>
           {notesEntry && (
             <FinancialNotes
               entityType="cost_entry"
               entityId={notesEntry.id}
-              className="mt-4"
+              className="px-4 pb-4"
             />
           )}
         </SheetContent>

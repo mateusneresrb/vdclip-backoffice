@@ -50,7 +50,7 @@ export function DonutChart({
                 show: true,
                 fontSize: '22px',
                 fontWeight: 700,
-                color: theme.isDark ? '#f5f5f5' : '#1a1a1a',
+                color: theme.foreground,
                 offsetY: 4,
                 formatter: (val) => {
                   const num = Number(val)
@@ -76,7 +76,7 @@ export function DonutChart({
       stroke: {
         show: true,
         width: 2,
-        colors: [theme.isDark ? theme.cardBackground : '#ffffff'],
+        colors: [theme.cardBackground],
       },
       legend: {
         position: 'bottom',

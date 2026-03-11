@@ -1,7 +1,7 @@
 import type { UserSearchField } from '../hooks/use-admin-users'
 import type { UserStatus } from '../types'
 import { Link } from '@tanstack/react-router'
-import { Search } from 'lucide-react'
+import { Building2, Search } from 'lucide-react'
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -126,14 +126,22 @@ export function UserSearch() {
                   </div>
                   <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
+                    {user.companyName && (
+                      <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                        <Building2 className="h-3 w-3" />
+                        <Link to="/companies/$companyId" params={{ companyId: user.companyId! }} className="hover:underline">
+                          {user.companyName}
+                        </Link>
+                      </span>
+                    )}
                     <span className="text-[10px] text-muted-foreground">{t('userDetail.createdAt')}: {new Date(user.createdAt).toLocaleDateString()}</span>
                     <span className="text-[10px] text-muted-foreground">{t('userDetail.lastLogin')}: {new Date(user.lastLoginAt).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <Badge variant="secondary" className={planBadgeVariants[user.plan] ?? planBadgeVariants.free}>
+                <Badge variant="secondary" className={`shrink-0 ${planBadgeVariants[user.plan] ?? planBadgeVariants.free}`}>
                   {t(`plan.${user.plan}`)}
                 </Badge>
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" className="hidden shrink-0 sm:inline-flex" asChild>
                   <Link to="/users/$userId" params={{ userId: user.id }}>
                     {t('users.view')}
                   </Link>

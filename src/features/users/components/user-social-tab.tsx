@@ -69,7 +69,7 @@ export function UserSocialTab({ userId }: { userId: string }) {
 
   if (isLoading) {
     return (
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-40" />
         ))}
@@ -83,7 +83,7 @@ export function UserSocialTab({ userId }: { userId: string }) {
 
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
         {connections.map((conn) => (
           <Card key={conn.id} className={conn.hasError ? 'border-destructive/40' : ''}>
             <CardContent className="space-y-3 p-4">

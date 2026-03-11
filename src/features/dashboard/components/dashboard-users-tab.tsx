@@ -12,7 +12,7 @@ export function DashboardUsersTab({ metrics }: { metrics: PlatformMetrics }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <MetricCard
           title={t('metrics.users.total')}
           value={metrics.users.totalUsers.toLocaleString()}

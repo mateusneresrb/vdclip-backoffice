@@ -53,7 +53,7 @@ return companies
   const pagination = usePagination(filteredCompanies, 9)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title={t('business.companies.title')}
         description={t('business.companies.description')}
@@ -71,7 +71,7 @@ return companies
           />
         </div>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-full sm:w-40">
             <SelectValue placeholder={t('business.companies.filterStatus')} />
           </SelectTrigger>
           <SelectContent>
@@ -85,7 +85,7 @@ return companies
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-40" />
           ))}
@@ -94,11 +94,11 @@ return companies
         <EmptyState icon={Building2} title={t('business.companies.noResults')} />
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {pagination.paginatedItems.map((company) => (
               <Link
                 key={company.id}
-                to="/business/companies/$companyId"
+                to="/companies/$companyId"
                 params={{ companyId: company.id }}
                 className="block"
               >

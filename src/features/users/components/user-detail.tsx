@@ -40,7 +40,7 @@ export function UserDetail({ userId }: { userId: string }) {
             <Skeleton className="h-4 w-64" />
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -53,13 +53,13 @@ export function UserDetail({ userId }: { userId: string }) {
 return null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <UserDetailHeader user={user} />
       <Separator />
 
       <Tabs value={tab} onValueChange={setTab}>
-        <div className="overflow-x-auto">
-          <TabsList>
+        <div className="-mb-px overflow-x-auto overflow-y-hidden">
+          <TabsList className="w-max sm:w-auto">
             <TabsTrigger value="overview">{t('users.tabs.overview')}</TabsTrigger>
             <TabsTrigger value="teams">{t('users.tabs.teams')}</TabsTrigger>
             <TabsTrigger value="activity">{t('users.tabs.activity')}</TabsTrigger>

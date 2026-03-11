@@ -121,7 +121,7 @@ export function CashFlowManager() {
                     <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   </CardHeader>
                   <CardContent>
-                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                    <p className="text-lg font-bold sm:text-2xl text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(summary.totalInflow, currencyTab)}
                     </p>
                   </CardContent>
@@ -135,7 +135,7 @@ export function CashFlowManager() {
                     <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
                   </CardHeader>
                   <CardContent>
-                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    <p className="text-lg font-bold sm:text-2xl text-red-600 dark:text-red-400">
                       {formatCurrency(summary.totalOutflow, currencyTab)}
                     </p>
                   </CardContent>
@@ -149,7 +149,7 @@ export function CashFlowManager() {
                     <DollarSign className="h-4 w-4 text-primary" />
                   </CardHeader>
                   <CardContent>
-                    <p className={`text-2xl font-bold ${summary.netFlow >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                    <p className={`text-lg font-bold sm:text-2xl ${summary.netFlow >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                       {formatCurrency(summary.netFlow, currencyTab)}
                     </p>
                   </CardContent>

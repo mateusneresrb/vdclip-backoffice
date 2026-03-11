@@ -100,7 +100,7 @@ return
             <Skeleton className="h-4 w-32" />
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -118,7 +118,7 @@ return null
     : null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <Avatar className="h-16 w-16">
@@ -127,7 +127,7 @@ return null
         </Avatar>
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-bold">{team.name}</h2>
+            <h2 className="truncate text-xl font-bold">{team.name}</h2>
             <Badge variant="secondary" className={planBadgeVariants[team.plan as UserPlan]}>
               {t(`plan.${team.plan}`)}
             </Badge>
@@ -242,8 +242,8 @@ return null
       <Separator />
 
       <Tabs value={tab} onValueChange={setTab}>
-        <div className="overflow-x-auto">
-          <TabsList>
+        <div className="-mb-px overflow-x-auto overflow-y-hidden">
+          <TabsList className="w-max sm:w-auto">
             <TabsTrigger value="overview">{t('teams.detail.overview')}</TabsTrigger>
             <TabsTrigger value="members">{t('teams.detail.membersTab')}</TabsTrigger>
             <TabsTrigger value="invitations">{t('teams.detail.invitations')}</TabsTrigger>

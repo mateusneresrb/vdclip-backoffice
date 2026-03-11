@@ -118,7 +118,7 @@ setErrors((prev) => ({ ...prev, description: false }))
           <p className="text-xs text-destructive">{t('cashFlow.form.requiredField')}</p>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="cf-amount">{t('cashFlow.form.amount')}</Label>
           <Input
@@ -152,7 +152,7 @@ setErrors((prev) => ({ ...prev, amount: false }))
           </Select>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>{t('cashFlow.form.type')}</Label>
           <Select value={type} onValueChange={(v) => setType(v as 'inflow' | 'outflow')}>
@@ -169,7 +169,7 @@ setErrors((prev) => ({ ...prev, amount: false }))
           <div className="flex items-center gap-1.5">
             <Label>{t('cashFlow.form.category')}</Label>
             {category === 'revenue' && (
-              <InfoTooltip content="Use para receitas já recebidas. Para registrar contas a receber futuras, use a aba 'Contas a Receber'." />
+              <InfoTooltip content={t('finance.kpiTooltips.revenueCategory')} />
             )}
           </div>
           <Select value={category} onValueChange={setCategory}>
@@ -327,17 +327,17 @@ return 0
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header with date filter and add button */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{t('finance.cashFlowDescription')}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <DateRangeFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
           <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" className="h-8.5 shrink-0 text-[13px] sm:h-9 sm:text-sm">
                 <Plus className="mr-1 h-4 w-4" />
                 {t('cashFlow.addEntry')}
               </Button>
@@ -358,7 +358,7 @@ return 0
 
       {isLoading ? (
         <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-32" />
             ))}
@@ -367,7 +367,7 @@ return 0
       ) : !usdData && !brlData ? (
         <EmptyState icon={Wallet} title={t('cashFlow.noData')} />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {/* Health Overview */}
           <Card className={cn(
             'border-l-4',
@@ -393,7 +393,7 @@ return 0
           </Card>
 
           {/* KPI Cards - Grouped */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="flex items-center gap-1 text-sm font-medium">
@@ -403,7 +403,7 @@ return 0
                 <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                <p className="text-lg font-bold text-emerald-600 sm:text-xl dark:text-emerald-400">
                   {formatCurrency(usdData?.totalInflow ?? 0, 'USD')}
                 </p>
                 <p className="text-sm font-medium text-emerald-600/70 dark:text-emerald-400/70">
@@ -421,7 +421,7 @@ return 0
                 <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-xl font-bold text-red-600 dark:text-red-400">
+                <p className="text-lg font-bold text-red-600 sm:text-xl dark:text-red-400">
                   {formatCurrency(usdData?.totalOutflow ?? 0, 'USD')}
                 </p>
                 <p className="text-sm font-medium text-red-600/70 dark:text-red-400/70">
@@ -440,7 +440,7 @@ return 0
               </CardHeader>
               <CardContent>
                 <p className={cn(
-                  'text-xl font-bold',
+                  'text-lg sm:text-xl font-bold',
                   (usdData?.netFlow ?? 0) >= 0
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : 'text-red-600 dark:text-red-400',
@@ -468,7 +468,7 @@ return 0
               </CardHeader>
               <CardContent>
                 <p className={cn(
-                  'text-xl font-bold',
+                  'text-lg sm:text-xl font-bold',
                   operatingMarginUsd >= 0
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : 'text-red-600 dark:text-red-400',
@@ -496,7 +496,7 @@ return 0
                 <Flame className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </CardHeader>
               <CardContent>
-                <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
+                <p className="text-lg font-bold text-amber-600 sm:text-xl dark:text-amber-400">
                   {formatCurrency(burnRate.usd, 'USD')}
                 </p>
                 <p className="text-sm font-medium text-amber-600/70 dark:text-amber-400/70">
@@ -521,7 +521,7 @@ return 0
           </div>
 
           {/* Charts Side by Side */}
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {usdData && usdData.monthlyBreakdown.length > 0 && (
               <ChartCard
                 title={`${t('cashFlow.monthlyBreakdown')  } (USD)`}
@@ -552,7 +552,7 @@ return 0
 
           {/* Entries List */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-col gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle className="flex items-center gap-1.5 text-sm font-medium">
                   {t('cashFlow.entries')}
@@ -564,7 +564,7 @@ return 0
                 value={categoryFilter}
                 onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}
               >
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-full sm:w-[160px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -597,10 +597,10 @@ return 0
                       >
                         <button
                           type="button"
-                          className="flex w-full items-center justify-between p-3"
+                          className="flex w-full flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between"
                           onClick={() => setExpandedEntryId(isExpanded ? null : entry.id)}
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
                             <div className={cn(
                               'flex h-8 w-8 shrink-0 items-center justify-center rounded-md',
                               isInflow ? 'bg-emerald-500/10' : 'bg-red-500/10',
@@ -610,9 +610,9 @@ return 0
                                 : <ArrowUpRight className="h-4 w-4 text-red-600 dark:text-red-400" />
                               }
                             </div>
-                            <div className="text-left">
-                              <p className="text-sm font-medium">{entry.description}</p>
-                              <div className="flex items-center gap-1.5">
+                            <div className="min-w-0 text-left">
+                              <p className="truncate text-sm font-medium">{entry.description}</p>
+                              <div className="flex flex-wrap items-center gap-1.5">
                                 <span className={cn(
                                   'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium',
                                   categoryColors[entry.category],
@@ -628,9 +628,9 @@ return 0
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 self-end sm:self-auto">
                             <p className={cn(
-                              'text-sm font-bold',
+                              'text-sm font-bold whitespace-nowrap',
                               isInflow
                                 ? 'text-emerald-600 dark:text-emerald-400'
                                 : 'text-red-600 dark:text-red-400',
@@ -638,7 +638,7 @@ return 0
                               {isInflow ? '+' : '-'}{formatCurrency(entry.amount, entryCurrency)}
                             </p>
                             <ChevronDown className={cn(
-                              'h-4 w-4 text-muted-foreground transition-transform',
+                              'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
                               isExpanded && 'rotate-180',
                             )} />
                           </div>

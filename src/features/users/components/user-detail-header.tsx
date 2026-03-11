@@ -1,5 +1,6 @@
 import type { AdminUser, UserPlan, UserStatus } from '@/features/admin/types'
-import { Check, Copy, CreditCard, MoreVertical, Trash2, UserCog } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { Building2, Check, Copy, CreditCard, MoreVertical, Trash2, UserCog } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -122,24 +123,38 @@ export function UserDetailHeader({ user }: { user: AdminUser }) {
       </Avatar>
       <div className="flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-xl font-bold">{user.name}</h2>
+          <h2 className="truncate text-xl font-bold">{user.name}</h2>
           <Badge variant="secondary" className={statusVariant[user.status]}>
             {t(`status.${user.status}`)}
           </Badge>
           <Badge variant="secondary" className={planBadgeVariants[user.plan]}>{t(`plan.${user.plan}`)}</Badge>
         </div>
-        <p className="text-sm text-muted-foreground">{user.email}</p>
+        <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+
+        {/* Company association */}
+        {user.companyName && (
+          <div className="flex items-center gap-1.5">
+            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+            <Link
+              to="/companies/$companyId"
+              params={{ companyId: user.companyId! }}
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+            >
+              {user.companyName}
+            </Link>
+          </div>
+        )}
 
         {/* External ID with copy button */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-muted-foreground font-mono">{user.external_id}</span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="truncate text-xs text-muted-foreground font-mono">{user.external_id}</span>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-5 w-5"
+                  className="h-7 w-7"
                   onClick={handleCopyExternalId}
                 >
                   {copiedId
@@ -188,7 +203,7 @@ export function UserDetailHeader({ user }: { user: AdminUser }) {
               defaultValue={user.status}
               onValueChange={(value) => handleStatusChange(value as UserStatus)}
             >
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder={t('users.actions.selectStatus')} />
               </SelectTrigger>
               <SelectContent>

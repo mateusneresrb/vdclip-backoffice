@@ -22,7 +22,7 @@ export function UserTeamsTab({ teams }: { teams: UserTeam[] }) {
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
       {teams.map((team) => (
         <Link key={team.id} to="/teams/$teamId" params={{ teamId: team.id }}>
           <Card className="cursor-pointer transition-shadow hover:shadow-md">

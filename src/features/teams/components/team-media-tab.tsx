@@ -314,7 +314,7 @@ export function TeamMediaTab({ teamId }: { teamId: string }) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <Skeleton key={i} className="h-56 rounded-xl" />
         ))}
@@ -370,7 +370,7 @@ export function TeamMediaTab({ teamId }: { teamId: string }) {
         <EmptyState icon={Film} title={t('users.media.noMediaFilter')} />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {pagination.paginatedItems.map((item) => (
               <MediaCard
                 key={item.id}

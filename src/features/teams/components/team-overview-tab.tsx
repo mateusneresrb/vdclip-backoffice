@@ -61,16 +61,16 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
   const socialEntries = Object.entries(team.socialUrls).filter(([, v]) => v)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Quick Stats */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <Card className="border-dashed">
           <CardContent className="flex items-center gap-3 p-4">
             <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/10">
               <Video className="size-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{team.mediaCreated}</p>
+              <p className="text-lg font-bold sm:text-2xl">{team.mediaCreated}</p>
               <p className="text-xs text-muted-foreground">{t('userDetail.quickStats.totalMedia')}</p>
             </div>
           </CardContent>
@@ -82,7 +82,7 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
               <Share2 className="size-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{team.mediaPosted}</p>
+              <p className="text-lg font-bold sm:text-2xl">{team.mediaPosted}</p>
               <p className="text-xs text-muted-foreground">{t('userDetail.quickStats.postsPublished')}</p>
             </div>
           </CardContent>
@@ -94,7 +94,7 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
               <Users className="size-5 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{team.memberCount}<span className="text-sm font-normal text-muted-foreground">/{team.maxMembers}</span></p>
+              <p className="text-lg font-bold sm:text-2xl">{team.memberCount}<span className="text-sm font-normal text-muted-foreground">/{team.maxMembers}</span></p>
               <p className="text-xs text-muted-foreground">{t('teams.detail.memberCount')}</p>
             </div>
           </CardContent>
@@ -106,14 +106,14 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
               <TrendingUp className="size-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{team.credits.toLocaleString()}</p>
+              <p className="text-lg font-bold sm:text-2xl">{team.credits.toLocaleString()}</p>
               <p className="text-xs text-muted-foreground">{t('userDetail.quickStats.creditsAvailable')}</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {/* Plan Info */}
         <Card>
           <CardHeader className="pb-3">
@@ -194,7 +194,7 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-3xl font-bold">{team.credits.toLocaleString()}</p>
+            <p className="text-2xl font-bold sm:text-3xl">{team.credits.toLocaleString()}</p>
             <p className="text-xs text-muted-foreground">{t('teams.detail.creditsAvailable')}</p>
             <Separator />
             <div className="flex items-center justify-between text-xs text-muted-foreground">

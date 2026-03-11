@@ -325,7 +325,7 @@ export function UserMediaTab({ userId }: { userId: string }) {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <Skeleton key={i} className="h-56 rounded-xl" />
         ))}
@@ -381,7 +381,7 @@ export function UserMediaTab({ userId }: { userId: string }) {
         <EmptyState icon={Film} title={t('users.media.noMediaFilter')} />
       ) : (
         <>
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {pagination.paginatedItems.map((item) => (
               <MediaCard
                 key={item.id}

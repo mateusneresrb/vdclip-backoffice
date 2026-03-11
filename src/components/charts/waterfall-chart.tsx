@@ -15,6 +15,8 @@ interface WaterfallChartProps {
   positiveColor?: string
   negativeColor?: string
   totalColor?: string
+  netLabel?: string
+  seriesLabel?: string
 }
 
 export function WaterfallChart({
@@ -24,6 +26,8 @@ export function WaterfallChart({
   positiveColor,
   negativeColor,
   totalColor,
+  netLabel = 'Net',
+  seriesLabel = 'Value',
 }: WaterfallChartProps) {
   const theme = useChartTheme()
 
@@ -45,12 +49,12 @@ export function WaterfallChart({
       cols.push(item.value >= 0 ? posColor : negColor)
     }
 
-    cats.push('Net')
-    sData.push({ x: 'Net', y: [0, running] })
+    cats.push(netLabel)
+    sData.push({ x: netLabel, y: [0, running] })
     cols.push(totColor)
 
     return { categories: cats, seriesData: sData, colors: cols }
-  }, [data, posColor, negColor, totColor])
+  }, [data, posColor, negColor, totColor, netLabel])
 
   const options = useMemo(
     (): ApexCharts.ApexOptions => ({
@@ -105,8 +109,8 @@ export function WaterfallChart({
   )
 
   const series = useMemo(
-    () => [{ name: 'MRR', data: seriesData }],
-    [seriesData],
+    () => [{ name: seriesLabel, data: seriesData }],
+    [seriesData, seriesLabel],
   )
 
   return <ReactApexChart type="rangeBar" options={options} series={series} height={height} />

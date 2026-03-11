@@ -20,10 +20,9 @@ routes/
     teams.tsx                         → /teams
     teams/
       $teamId.tsx                     → /teams/:teamId
-    business/
-      companies.tsx                   → /business/companies
-      companies.$companyId.tsx        → /business/companies/:companyId
-      users.tsx                       → /business/users
+    companies/
+      index.tsx                       → /companies
+      $companyId.tsx                  → /companies/:companyId
     admin.tsx                         → /admin?tab=
     audit.tsx                         → /audit?tab=
     providers.tsx                     → /providers

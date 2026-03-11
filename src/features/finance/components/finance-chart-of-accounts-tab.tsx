@@ -154,7 +154,7 @@ return all
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="h-9 w-52 pl-8 text-sm"
+              className="h-9 w-full sm:w-52 pl-8 text-sm"
               placeholder={t('finance.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -176,7 +176,7 @@ return all
       ) : !filteredCategories.length ? (
         <EmptyState icon={FolderTree} title={t('finance.noResults')} />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
           {(Object.keys(grouped) as FinancialCategory['type'][]).map((type) => (
             <Card key={type}>
               <CardHeader className="pb-2">

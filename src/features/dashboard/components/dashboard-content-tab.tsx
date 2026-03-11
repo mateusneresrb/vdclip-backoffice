@@ -40,7 +40,7 @@ export function DashboardContentTab({ metrics }: { metrics: PlatformMetrics }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         <MetricCard
           title={t('metrics.content.totalProjects')}
           value={metrics.content.totalProjects.toLocaleString()}
@@ -91,7 +91,7 @@ export function DashboardContentTab({ metrics }: { metrics: PlatformMetrics }) {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <ChartCard
           title={t('metrics.content.byAiType')}
           description={t('dashboard.contentHints.byAiTypeDesc')}

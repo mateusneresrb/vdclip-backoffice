@@ -108,9 +108,9 @@ export function UserActivityTab({ userId }: { userId: string }) {
   return (
     <div className="space-y-4">
       {/* Filter bar */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as ActivityType | 'all')}>
-          <SelectTrigger className="w-56">
+          <SelectTrigger className="w-full sm:w-56">
             <SelectValue placeholder={t('activity.filterByType')} />
           </SelectTrigger>
           <SelectContent>
@@ -155,7 +155,7 @@ export function UserActivityTab({ userId }: { userId: string }) {
 
                   {/* Event card */}
                   <div className="rounded-lg border bg-card p-3 shadow-sm">
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
                       <div className="flex items-center gap-2">
                         <div className={cn('flex size-7 items-center justify-center rounded-md', eventColors[event.type])}>
                           <Icon className="size-3.5" />

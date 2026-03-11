@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import ReactApexChart from 'react-apexcharts'
 
-import { getBaseChartOptions, useChartTheme } from './use-chart-theme'
+import { getBaseChartOptions, hexToRgba, useChartTheme } from './use-chart-theme'
 
 interface HeatmapSeries {
   name: string
@@ -39,7 +39,7 @@ export function HeatmapChart({
           shadeIntensity: 0.5,
           colorScale: {
             ranges: [
-              { from: 0, to: 0, color: theme.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', name: '0%' },
+              { from: 0, to: 0, color: hexToRgba(theme.border, theme.isDark ? 0.2 : 0.15), name: '0%' },
             ],
           },
         },

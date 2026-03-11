@@ -58,7 +58,7 @@ export function RevenueTransactionsTab() {
   const pagination = usePagination(filtered, 10)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <Tabs value={currencyTab} onValueChange={(v) => setCurrencyTab(v as Currency)}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <TabsList>
@@ -121,7 +121,7 @@ export function RevenueTransactionsTab() {
                           )} />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">
+                          <p className="truncate text-sm font-medium">
                             {tx.userId ? (
                               <Link
                                 to="/users/$userId"
@@ -142,7 +142,7 @@ export function RevenueTransactionsTab() {
                               tx.userName ?? tx.teamName ?? '-'
                             )}
                           </p>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <span className={cn(
                               'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium',
                               statusColors[tx.status],

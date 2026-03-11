@@ -126,7 +126,7 @@ export function UserDetail({ userId }: { userId: string }) {
             <Skeleton className="h-4 w-64" />
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -176,7 +176,7 @@ return null
 
       <Separator />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {/* Plan Info */}
         <Card>
           <CardHeader className="pb-3">
@@ -350,7 +350,7 @@ return null
           <CardContent className="space-y-4">
             {/* Total + packages count */}
             <div className="flex items-baseline justify-between">
-              <p className="text-3xl font-bold">{user.credits}</p>
+              <p className="text-2xl font-bold sm:text-3xl">{user.credits}</p>
               <span className="text-xs text-muted-foreground">
                 {user.creditPackages.length} {t('userDetail.creditPackages')}
               </span>
@@ -589,7 +589,7 @@ return null
           </CardHeader>
           <CardContent>
             {affiliateLoading ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Skeleton key={i} className="h-16" />
                 ))}
@@ -642,7 +642,7 @@ return null
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                 <div className="rounded-lg border p-3">
                   <p className="text-xs text-muted-foreground">
                     {t('affiliate.referralCode')}
@@ -742,7 +742,7 @@ return null
             ) : (
               <div className="space-y-6">
                 {/* Team Info Cards */}
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   <div className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">
                       {t('teamSettings.name')}
@@ -777,7 +777,7 @@ return null
                 </div>
 
                 {/* Team Plan + Credits + Media */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                   {/* Team Plan */}
                   <Card>
                     <CardHeader className="pb-3">

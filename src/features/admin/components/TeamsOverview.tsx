@@ -70,7 +70,7 @@ export function TeamsOverview() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -78,7 +78,7 @@ export function TeamsOverview() {
       ) : !teams?.length ? (
         <p className="text-muted-foreground">{t('teams.noResults')}</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {teams.map((team) => (
             <Card key={team.id}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">

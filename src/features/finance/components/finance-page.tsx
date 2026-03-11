@@ -35,43 +35,45 @@ export function FinancePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title={t('finance.title')}
         description={t('finance.pageDescription')}
       />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="flex-wrap">
+        <div className="-mb-px overflow-x-auto overflow-y-hidden">
+        <TabsList className="w-max sm:w-auto">
           <TabsTrigger value="cash-flow" className="gap-1.5">
-            <Banknote className="h-4 w-4" />
+            <Banknote className="hidden h-4 w-4 sm:block" />
             {t('finance.tabs.cashFlow')}
           </TabsTrigger>
           <TabsTrigger value="costs" className="gap-1.5">
-            <Receipt className="h-4 w-4" />
+            <Receipt className="hidden h-4 w-4 sm:block" />
             {t('finance.tabs.costs')}
           </TabsTrigger>
           <TabsTrigger value="chart-of-accounts" className="gap-1.5">
-            <List className="h-4 w-4" />
+            <List className="hidden h-4 w-4 sm:block" />
             {t('finance.tabs.chartOfAccounts')}
           </TabsTrigger>
           <TabsTrigger value="bank-accounts" className="gap-1.5">
-            <Building2 className="h-4 w-4" />
+            <Building2 className="hidden h-4 w-4 sm:block" />
             {t('finance.tabs.bankAccounts')}
           </TabsTrigger>
           <TabsTrigger value="taxes" className="gap-1.5">
-            <Calculator className="h-4 w-4" />
+            <Calculator className="hidden h-4 w-4 sm:block" />
             {t('finance.tabs.taxes')}
           </TabsTrigger>
           <TabsTrigger value="cost-centers" className="gap-1.5">
-            <Target className="h-4 w-4" />
+            <Target className="hidden h-4 w-4 sm:block" />
             {t('finance.tabs.costCenters')}
           </TabsTrigger>
           <TabsTrigger value="receivables" className="gap-1.5">
-            <HandCoins className="h-4 w-4" />
+            <HandCoins className="hidden h-4 w-4 sm:block" />
             {t('finance.tabs.receivables')}
           </TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="cash-flow" className="mt-6">
           <FinanceCashFlowTab />

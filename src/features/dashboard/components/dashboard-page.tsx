@@ -25,7 +25,7 @@ export function DashboardPage() {
   const { data: metrics, isLoading } = useDashboardMetrics(dateRange)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title={t('nav.dashboard')}
         description={t('dashboard.consolidatedDescription')}
@@ -62,7 +62,7 @@ export function DashboardPage() {
           <>
             <TabsContent value="summary" className="mt-4">
               <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <Skeleton key={i} className="h-28" />
                   ))}
@@ -76,7 +76,7 @@ export function DashboardPage() {
             </TabsContent>
             <TabsContent value="users" className="mt-4">
               <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <Skeleton key={i} className="h-28" />
                   ))}
@@ -87,7 +87,7 @@ export function DashboardPage() {
             {['content', 'credits'].map((tab) => (
               <TabsContent key={tab} value={tab} className="mt-4">
                 <div className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <Skeleton key={i} className="h-28" />
                     ))}

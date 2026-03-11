@@ -60,6 +60,42 @@ src/
 - **DON'T** usar `<a>` para navegação interna — usar `<Link>` do `@tanstack/react-router`
 - **DON'T** armazenar tokens de auth em localStorage — auth-store não é persistido
 
+## Responsive Design (OBRIGATÓRIO)
+
+**Todo componente DEVE ser responsivo.** Mobile-first é o padrão — Tailwind sem prefixo = mobile.
+
+### Regras de Grid
+- **NUNCA** pular de `sm:` direto para `lg:` em grids com 4+ colunas — sempre incluir `md:` intermediário
+- Padrão para 4 colunas: `grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`
+- Padrão para 3 colunas: `grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3`
+- Padrão para 5 colunas: `grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5`
+- Charts lado a lado: `grid gap-4 md:grid-cols-2`
+
+### Regras de Texto
+- Valores grandes (`text-2xl`, `text-xl`) DEVEM ter variante mobile: `text-lg sm:text-2xl`
+- Nomes de usuário/time DEVEM ter `truncate` para prevenir overflow
+- Emails DEVEM ter `truncate`
+
+### Regras de Layout
+- Flex row com conteúdo que pode empilhar: `flex flex-col gap-2 sm:flex-row sm:items-center`
+- TabsList: `<div className="-mb-px overflow-x-auto overflow-y-hidden"><TabsList className="w-max sm:w-auto">` (scroll horizontal fino no mobile, sem vertical)
+- Headers com controles: `flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between`
+- Spacing responsivo: `space-y-4 md:space-y-6` para containers principais
+
+### Regras de Tabela
+- Tabelas com 5+ colunas DEVEM ter mobile card view: `hidden md:block` (tabela) + `md:hidden` (cards)
+- Colunas menos importantes: `hidden sm:table-cell`, `hidden md:table-cell`, `hidden lg:table-cell`
+- Mostrar dado ocultado inline no mobile (ex: email abaixo do nome com `sm:hidden`)
+- Wrapping sempre: `overflow-x-auto` no container da tabela
+
+### Regras de Componentes
+- Botões de ação (copy, edit): mínimo `h-7 w-7` (touch target)
+- Select widths: `w-full sm:w-44` (full no mobile, fixo no desktop)
+- Input widths: `w-full sm:w-64` (idem)
+- Dialogs: shadcn já é responsivo — confiar no default
+- Valores monetários: `whitespace-nowrap` para evitar quebra de linha em valores formatados
+- Ícones em tabs com 5+ itens: `hidden sm:block` para reduzir largura do scroll no mobile
+
 ## Gotchas
 
 - `routeTree.gen.ts` só existe após `bun dev` — rodar uma vez ao criar novas rotas

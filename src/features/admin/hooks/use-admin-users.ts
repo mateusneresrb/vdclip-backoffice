@@ -31,6 +31,8 @@ const mockUsers: AdminUser[] = [
       { id: 't1', name: 'Alice Studio', role: 'owner', members: 4 },
       { id: 't2', name: 'Marketing Team', role: 'member', members: 12 },
     ],
+    companyId: 'comp1',
+    companyName: 'TechFlow Ltda',
   },
   {
     id: '2',
@@ -57,6 +59,8 @@ const mockUsers: AdminUser[] = [
     teams: [
       { id: 't3', name: 'Bruno Agency', role: 'owner', members: 8 },
     ],
+    companyId: 'comp2',
+    companyName: 'Creative Hub Inc',
   },
   {
     id: '3',
@@ -81,6 +85,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2025-09-20',
     lastLoginAt: '2026-01-10',
     teams: [],
+    companyId: null,
+    companyName: null,
   },
   {
     id: '4',
@@ -107,6 +113,8 @@ const mockUsers: AdminUser[] = [
     teams: [
       { id: 't2', name: 'Marketing Team', role: 'member', members: 12 },
     ],
+    companyId: null,
+    companyName: null,
   },
   {
     id: '5',
@@ -130,6 +138,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2025-01-10',
     lastLoginAt: '2025-11-20',
     teams: [],
+    companyId: null,
+    companyName: null,
   },
   {
     id: '6',
@@ -156,6 +166,8 @@ const mockUsers: AdminUser[] = [
     teams: [
       { id: 't4', name: 'Felipe Clips', role: 'owner', members: 2 },
     ],
+    companyId: 'comp1',
+    companyName: 'TechFlow Ltda',
   },
   {
     id: '7',
@@ -185,6 +197,8 @@ const mockUsers: AdminUser[] = [
       { id: 't5', name: 'Kim Productions', role: 'owner', members: 15 },
       { id: 't6', name: 'Freelancer Hub', role: 'admin', members: 30 },
     ],
+    companyId: 'comp3',
+    companyName: 'Media Solutions SA',
   },
   {
     id: '8',
@@ -208,6 +222,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2026-02-20',
     lastLoginAt: '2026-02-20',
     teams: [],
+    companyId: null,
+    companyName: null,
   },
   {
     id: '9',
@@ -235,6 +251,8 @@ const mockUsers: AdminUser[] = [
     teams: [
       { id: 't7', name: 'Isa Content', role: 'owner', members: 3 },
     ],
+    companyId: 'comp2',
+    companyName: 'Creative Hub Inc',
   },
   {
     id: '10',
@@ -256,6 +274,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2025-07-12',
     lastLoginAt: '2026-01-05',
     teams: [],
+    companyId: null,
+    companyName: null,
   },
   {
     id: '11',
@@ -280,6 +300,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2025-05-10',
     lastLoginAt: '2026-03-01',
     teams: [],
+    companyId: 'comp3',
+    companyName: 'Media Solutions SA',
   },
   {
     id: '12',
@@ -304,6 +326,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2024-10-15',
     lastLoginAt: '2026-03-02',
     teams: [],
+    companyId: null,
+    companyName: null,
   },
   {
     id: '13',
@@ -326,6 +350,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2026-01-20',
     lastLoginAt: '2026-01-22',
     teams: [],
+    companyId: null,
+    companyName: null,
   },
   {
     id: '14',
@@ -350,6 +376,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2025-08-05',
     lastLoginAt: '2026-02-25',
     teams: [],
+    companyId: 'comp1',
+    companyName: 'TechFlow Ltda',
   },
   {
     id: '15',
@@ -375,6 +403,8 @@ const mockUsers: AdminUser[] = [
     createdAt: '2025-02-14',
     lastLoginAt: '2026-03-03',
     teams: [],
+    companyId: null,
+    companyName: null,
   },
 ]
 

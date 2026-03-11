@@ -25,11 +25,8 @@
     "profile": "Meu Perfil",
     "accounts": "Contas",
     "vdclip": "VDClip",
-    "vdclipBusiness": "VDClip Business",
-    "businessUsers": "Usuarios",
-    "businessCompanies": "Empresas",
+    "companies": "Empresas",
     "productVdclip": "VDClip",
-    "productBusiness": "VDClip Business",
     "saasMetrics": "Metricas SaaS",
     "finCashFlow": "Fluxo de Caixa",
     "finCosts": "Custos",
@@ -145,6 +142,14 @@
       "wasteTooltip": "Percentual de créditos que expiraram sem uso. Valores altos indicam que os créditos estão sendo sub-utilizados.",
       "wasteLabel": "Expirados"
     },
+    "financialKpis": "KPIs Financeiros",
+    "viewAll": "Ver tudo",
+    "viewDetail": "Ver detalhe",
+    "vsLastMonth": "vs mês anterior",
+    "customers": "clientes",
+    "nrr": "Net Revenue Retention",
+    "new": "novos",
+    "kpiClickable": "Passe o cursor sobre um card para navegar até o detalhe",
     "noData": "Nenhum dado disponível para exibição.",
     "chartDescriptions": {
       "mrrTrend": "Evolução mensal da receita recorrente.",
@@ -335,7 +340,10 @@
     "subscriptionHistory": {
       "title": "Histórico de Assinatura",
       "noHistory": "Nenhum histórico de plano disponível."
-    }
+    },
+    "company": "Empresa",
+    "companyName": "Empresa",
+    "viewCompany": "Ver detalhes da empresa"
   },
   "creditTypes": {
     "plan_cycle": "Ciclo do Plano",
@@ -911,7 +919,8 @@
       "totalOutflow": "Soma de todas as saídas: custos operacionais, impostos, reembolsos e despesas.",
       "netFlow": "Diferença entre entradas e saídas. Positivo = sobra, Negativo = déficit.",
       "operatingMargin": "Percentual do que sobra após pagar todas as saídas. Fórmula: (Fluxo Líquido / Total de Entradas) x 100",
-      "burnRate": "Média mensal de gastos. Indica quanto o negócio consome por mês em média."
+      "burnRate": "Média mensal de gastos. Indica quanto o negócio consome por mês em média.",
+      "revenueCategory": "Use para receitas já recebidas. Para registrar contas a receber futuras, use a aba 'Contas a Receber'."
     },
     "kpiDescriptions": {
       "operatingMargin": "Acima de 20% = excelente. 5-20% = bom. Abaixo de 5% = atenção."
@@ -955,6 +964,9 @@
       "details": "Detalhes",
       "createdAt": "Registrado em",
       "id": "ID"
+    },
+    "notes": {
+      "title": "Notas"
     },
     "receivables": {
       "title": "Contas a Receber",
@@ -1020,6 +1032,11 @@
     "newCustomers": "Novos Clientes",
     "churnedCustomers": "Clientes Perdidos",
     "churnRate": "Taxa de Churn",
+    "runway": "Runway",
+    "nrr": "NRR",
+    "activeCustomers": "Clientes Ativos",
+    "mrr": "MRR",
+    "ltvCac": "LTV/CAC",
     "payback": "Payback",
     "cashBalance": "Saldo em Caixa",
     "trialToPaid": "Trial para Pago",

@@ -57,7 +57,7 @@ export function MetricsOverview() {
             <Skeleton key={i} className="h-9 w-16" />
           ))}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}
@@ -133,7 +133,7 @@ return null
       {/* Revenue */}
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{t('metrics.revenue.title')}</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             title={t('metrics.revenue.mrr')}
             value={`$${metrics.revenue.mrr.toLocaleString()}`}
@@ -182,7 +182,7 @@ return null
         <h3 className="text-lg font-semibold">
           {t('metrics.subscriptions.title')}
         </h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             title={t('metrics.subscriptions.active')}
             value={metrics.subscriptions.activeSubscriptions.toLocaleString()}
@@ -205,7 +205,7 @@ return null
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {/* By Plan */}
           <Card>
             <CardHeader className="pb-2">
@@ -294,7 +294,7 @@ return null
       {/* Users */}
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{t('metrics.users.title')}</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             title={t('metrics.users.total')}
             value={metrics.users.totalUsers.toLocaleString()}
@@ -322,7 +322,7 @@ return null
       {/* Content */}
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{t('metrics.content.title')}</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           <MetricCard
             title={t('metrics.content.totalProjects')}
             value={metrics.content.totalProjects.toLocaleString()}
@@ -415,7 +415,7 @@ return null
       {/* Credits & Transactions */}
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{t('metrics.credits.title')}</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           <MetricCard
             title={t('metrics.credits.totalIssued')}
             value={metrics.credits.totalCreditsIssued.toLocaleString()}
@@ -451,7 +451,7 @@ return null
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
               {Object.entries(metrics.credits.byType).map(([type, count]) => (
                 <div
                   key={type}
@@ -489,7 +489,7 @@ function MetricCard({
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-lg font-bold sm:text-2xl">{value}</p>
         {subtitle && (
           <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
         )}

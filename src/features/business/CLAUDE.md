@@ -1,22 +1,20 @@
-# Feature: Business (VDClip Business)
+# Feature: Business (Empresas)
 
-**Routes**: `/business/companies`, `/business/companies/:companyId`, `/business/users`
+**Routes**: `/companies`, `/companies/:companyId`
 **Permission**: `USERS_READ`
 
-Gestão do produto VDClip Business (B2B — separado do produto principal).
+Gestão de empresas cadastradas no VDClip. Anteriormente separado como "VDClip Business", agora integrado à seção VDClip na sidebar.
 
 ## Componentes
 
 - `business-companies-page.tsx` — listagem de empresas com busca e filtros
 - `business-company-detail.tsx` — detalhe de empresa (membros, configurações)
-- `business-users-page.tsx` — usuários do VDClip Business
 
 ## Hooks
 
 ```ts
 useBusinessCompanies(search?: string)        → BusinessCompany[]
 useBusinessCompanyDetail(companyId: string)  → BusinessCompany (com membros)
-useBusinessUsers()                           → BusinessUser[]
 ```
 
 ## Types
@@ -31,24 +29,18 @@ BusinessCompany {
   contactEmail?: string
   createdAt: string
 }
-
-BusinessUser {
-  id, name, email, companyId, companyName
-  role: 'admin' | 'member'
-  status: 'active' | 'inactive'
-  createdAt: string
-}
 ```
 
-## Rotas Aninhadas
+## Rotas
 
-Arquivos em `src/routes/_app/business/`:
-- `/business/companies` → `companies.tsx`
-- `/business/companies/:companyId` → `companies.$companyId.tsx`
-- `/business/users` → `users.tsx`
+Arquivos em `src/routes/_app/companies/`:
+- `/companies` → `index.tsx`
+- `/companies/:companyId` → `$companyId.tsx`
 
-## Breadcrumb (AdminHeader)
+## Relação com Usuários
 
-Segmento `business` usa breadcrumb de dois níveis:
-- `parentLabels['business'] = 'nav.productBusiness'`
-- `childLabels.business = { users: 'nav.businessUsers', companies: 'nav.businessCompanies' }`
+Usuários (`AdminUser`) podem ter `companyId` e `companyName` associados.
+O link para a empresa aparece em:
+- `UserSearch` (listagem de usuários)
+- `user-detail-header.tsx` (header do detalhe)
+- `user-overview-tab.tsx` (card de empresa no overview)

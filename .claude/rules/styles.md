@@ -67,3 +67,14 @@ In chart components: `color: 'var(--chart-N)'`
 - Animations: `tw-animate-css` classes or Tailwind transitions
 - Base styles in `@layer base {}`
 - Dark mode via `.dark` class on `<html>` — NOT `prefers-color-scheme`
+
+## Responsive Spacing & Sizing
+
+- Large stat values (`text-2xl`, `text-3xl`): MUST have mobile variant → `text-lg sm:text-2xl`
+- Main container spacing: `space-y-4 md:space-y-6` (NOT `space-y-6` alone)
+- Chart/skeleton heights: `h-64 md:h-80` (NOT `h-80` alone)
+- Select/Input fixed widths: `w-full sm:w-44` (NOT `w-44` alone)
+- Touch targets: minimum `h-7 w-7` (28px) for icon buttons
+- Currency/financial values: `whitespace-nowrap` to prevent line breaks in formatted amounts
+- Tab icons (5+ tabs): `hidden sm:block` on icons to reduce mobile scroll width
+- List entry rows (description + value + actions): `flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between`

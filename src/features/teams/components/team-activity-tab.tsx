@@ -102,9 +102,9 @@ next.delete(id)
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as ActivityType | 'all')}>
-          <SelectTrigger className="w-56">
+          <SelectTrigger className="w-full sm:w-56">
             <SelectValue placeholder={t('activity.filterByType')} />
           </SelectTrigger>
           <SelectContent>

@@ -82,7 +82,7 @@ return accounts
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="h-9 w-52 pl-8 text-sm"
+              className="h-9 w-full sm:w-52 pl-8 text-sm"
               placeholder={t('finance.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -104,12 +104,12 @@ return accounts
       ) : !filtered.length ? (
         <EmptyState icon={Building2} title={t('finance.noResults')} />
       ) : (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {filtered.map((account) => (
             <Card key={account.id} className="transition-shadow hover:shadow-md">
-              <CardHeader className="flex flex-row items-start justify-between pb-2">
-                <div className="space-y-1">
-                  <CardTitle className="text-sm font-medium">{account.name}</CardTitle>
+              <CardHeader className="flex flex-row items-start justify-between gap-2 pb-2">
+                <div className="min-w-0 space-y-1">
+                  <CardTitle className="truncate text-sm font-medium">{account.name}</CardTitle>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Building2 className="h-4 w-4" />
                     {account.bank}
@@ -138,7 +138,7 @@ return accounts
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-2xl font-bold">{formatCurrency(account.balance, account.currency)}</p>
+                <p className="text-lg font-bold sm:text-2xl">{formatCurrency(account.balance, account.currency)}</p>
                 <p className="text-[11px] text-muted-foreground">
                   {t('finance.lastSync')}: {new Date(account.lastSyncAt).toLocaleString()}
                 </p>
