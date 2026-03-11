@@ -1,0 +1,497 @@
+import type { BackofficeAdmin } from '../types'
+import {
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Search,
+  Shield,
+  ShieldCheck,
+  ShieldX,
+  Users,
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+
+import { useTranslation } from 'react-i18next'
+
+import { PaginationControls } from '@/components/pagination-controls'
+import { EmptyState } from '@/components/shared/empty-state'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { usePagination } from '@/hooks/use-pagination'
+import { showSuccessToast } from '@/lib/toast'
+
+import { cn } from '@/lib/utils'
+import { useAdminAccounts } from '../hooks/use-admin-accounts'
+
+const roleColors: Record<string, string> = {
+  super_admin: 'bg-red-500/15 text-red-700 dark:text-red-400',
+  finance_admin: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+  finance_viewer: 'bg-teal-500/15 text-teal-700 dark:text-teal-400',
+  support: 'bg-blue-500/15 text-blue-700 dark:text-blue-400',
+  viewer: 'bg-muted text-muted-foreground',
+}
+
+const roles = ['super_admin', 'finance_admin', 'finance_viewer', 'support', 'viewer'] as const
+
+export function AdminUsersListTab() {
+  const { t } = useTranslation('admin')
+  const { data: admins, isLoading } = useAdminAccounts()
+
+  const [search, setSearch] = useState('')
+  const [roleFilter, setRoleFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [editingAdmin, setEditingAdmin] = useState<BackofficeAdmin | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [toggleAdmin, setToggleAdmin] = useState<BackofficeAdmin | null>(null)
+
+  const filtered = useMemo(() => {
+    if (!admins) 
+return []
+    return admins.filter((admin) => {
+      const matchesSearch =
+        !search ||
+        admin.name.toLowerCase().includes(search.toLowerCase()) ||
+        admin.email.toLowerCase().includes(search.toLowerCase())
+      const matchesRole = roleFilter === 'all' || admin.role === roleFilter
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'active' && admin.isActive) ||
+        (statusFilter === 'inactive' && !admin.isActive)
+      return matchesSearch && matchesRole && matchesStatus
+    })
+  }, [admins, search, roleFilter, statusFilter])
+
+  const pagination = usePagination(filtered, 10)
+
+  const handleToggleConfirm = () => {
+    // TODO: API call to activate/deactivate
+    const key = toggleAdmin?.isActive ? 'toast.adminDeactivated' : 'toast.adminActivated'
+    setToggleAdmin(null)
+    showSuccessToast({ title: t(key) })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-14" />
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Filters + Create */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder={t('adminUsers.searchPlaceholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger className="w-full sm:w-44">
+            <SelectValue placeholder={t('adminUsers.filterRole')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('adminUsers.allRoles')}</SelectItem>
+            {roles.map((role) => (
+              <SelectItem key={role} value={role}>
+                {t(`adminUsers.roles.${role}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-40">
+            <SelectValue placeholder={t('adminUsers.filterStatus')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('adminUsers.allStatuses')}</SelectItem>
+            <SelectItem value="active">{t('adminUsers.active')}</SelectItem>
+            <SelectItem value="inactive">{t('adminUsers.inactive')}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button className="gap-1.5" onClick={() => setShowCreateDialog(true)}>
+          <Plus className="size-4" />
+          {t('adminUsers.createAdmin')}
+        </Button>
+      </div>
+
+      {/* Table */}
+      {!filtered.length ? (
+        <EmptyState icon={Users} title={t('adminUsers.noResults')} description={t('adminUsers.noResultsHint')} />
+      ) : (
+        <div className="overflow-x-auto rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('adminUsers.name')}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t('adminUsers.email')}</TableHead>
+                <TableHead>{t('adminUsers.role')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('adminUsers.mfa')}</TableHead>
+                <TableHead>{t('adminUsers.status')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('adminUsers.lastLogin')}</TableHead>
+                <TableHead className="w-10" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pagination.paginatedItems.map((admin) => (
+                <TableRow key={admin.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2.5">
+                      <Avatar className="size-8">
+                        {admin.avatar && <AvatarImage src={admin.avatar} alt={admin.name} />}
+                        <AvatarFallback className="text-xs">
+                          {admin.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{admin.name}</p>
+                        <p className="truncate text-xs text-muted-foreground sm:hidden">{admin.email}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <span className="text-sm text-muted-foreground">{admin.email}</span>
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium',
+                        roleColors[admin.role] ?? roleColors.viewer,
+                      )}
+                    >
+                      {t(`adminUsers.roles.${admin.role}`)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        'gap-1 text-xs',
+                        admin.mfaEnabled
+                          ? 'text-emerald-700 dark:text-emerald-400'
+                          : 'text-amber-700 dark:text-amber-400',
+                      )}
+                    >
+                      {admin.mfaEnabled ? (
+                        <>
+                          <ShieldCheck className="size-3" />
+                          {t('adminUsers.mfaOn')}
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="size-3" />
+                          {t('adminUsers.mfaOff')}
+                        </>
+                      )}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        'text-xs',
+                        admin.isActive
+                          ? 'text-emerald-700 dark:text-emerald-400'
+                          : 'text-red-700 dark:text-red-400',
+                      )}
+                    >
+                      {admin.isActive ? t('adminUsers.active') : t('adminUsers.inactive')}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(admin.lastLoginAt).toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="size-8">
+                          <MoreHorizontal className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditingAdmin(admin)}>
+                          <Pencil className="mr-2 size-4" />
+                          {t('adminUsers.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setToggleAdmin(admin)}>
+                          {admin.isActive ? (
+                            <>
+                              <ShieldX className="mr-2 size-4" />
+                              {t('adminUsers.deactivate')}
+                            </>
+                          ) : (
+                            <>
+                              <ShieldCheck className="mr-2 size-4" />
+                              {t('adminUsers.activate')}
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      <PaginationControls {...pagination} />
+
+      {/* Edit Dialog */}
+      <EditAdminDialog
+        admin={editingAdmin}
+        onClose={() => setEditingAdmin(null)}
+      />
+
+      {/* Create Dialog */}
+      <CreateAdminDialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+      />
+
+      {/* Toggle Active Confirmation */}
+      <AlertDialog open={!!toggleAdmin} onOpenChange={(v) => { if (!v) 
+setToggleAdmin(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {toggleAdmin?.isActive
+                ? t('adminUsers.confirmDeactivateTitle')
+                : t('adminUsers.confirmActivateTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {toggleAdmin?.isActive
+                ? t('adminUsers.confirmDeactivateDescription', { name: toggleAdmin?.name })
+                : t('adminUsers.confirmActivateDescription', { name: toggleAdmin?.name })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('adminUsers.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className={cn(
+                toggleAdmin?.isActive && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+              )}
+              onClick={handleToggleConfirm}
+            >
+              {toggleAdmin?.isActive ? t('adminUsers.deactivate') : t('adminUsers.activate')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
+
+function CreateAdminDialog({
+  open,
+  onClose,
+}: {
+  open: boolean
+  onClose: () => void
+}) {
+  const { t } = useTranslation('admin')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [role, setRole] = useState('')
+  const [tempPassword, setTempPassword] = useState('')
+
+  const handleOpenChange = (v: boolean) => {
+    if (!v) 
+onClose()
+  }
+
+  const handleCreate = () => {
+    // TODO: API call
+    showSuccessToast({ title: t('toast.adminInvited') })
+    onClose()
+    setName('')
+    setEmail('')
+    setRole('')
+    setTempPassword('')
+  }
+
+  const isValid = name.trim() && email.trim() && role && tempPassword.trim()
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('adminUsers.createAdminTitle')}</DialogTitle>
+          <DialogDescription>{t('adminUsers.createAdminDescription')}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>{t('adminUsers.name')}</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('adminUsers.namePlaceholder')} />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('adminUsers.email')}</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('adminUsers.emailPlaceholder')} />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('adminUsers.role')}</Label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger>
+                <SelectValue placeholder={t('adminUsers.selectRole')} />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {t(`adminUsers.roles.${r}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>{t('adminUsers.tempPassword')}</Label>
+            <Input
+              type="password"
+              value={tempPassword}
+              onChange={(e) => setTempPassword(e.target.value)}
+              placeholder={t('adminUsers.tempPasswordPlaceholder')}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            {t('adminUsers.cancel')}
+          </Button>
+          <Button onClick={handleCreate} disabled={!isValid}>
+            {t('adminUsers.create')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function EditAdminDialog({
+  admin,
+  onClose,
+}: {
+  admin: BackofficeAdmin | null
+  onClose: () => void
+}) {
+  const { t } = useTranslation('admin')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [role, setRole] = useState('')
+
+  const open = !!admin
+  const handleOpenChange = (v: boolean) => {
+    if (!v) 
+onClose()
+  }
+
+  useEffect(() => {
+    if (admin) {
+      setName(admin.name)
+      setEmail(admin.email)
+      setRole(admin.role)
+    }
+  }, [admin])
+
+  const handleSave = () => {
+    // TODO: API call
+    showSuccessToast({ title: t('toast.adminUpdated') })
+    onClose()
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('adminUsers.editTitle')}</DialogTitle>
+          <DialogDescription>{t('adminUsers.editDescription')}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>{t('adminUsers.name')}</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('adminUsers.email')}</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('adminUsers.role')}</Label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {t(`adminUsers.roles.${r}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            {t('adminUsers.cancel')}
+          </Button>
+          <Button onClick={handleSave}>
+            {t('adminUsers.save')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}

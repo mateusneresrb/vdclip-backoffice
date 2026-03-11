@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import type { CreditType, UserPlan, UserStatus } from '../types'
 import {
   Calendar,
   CreditCard,
@@ -13,11 +13,12 @@ import {
   Plus,
   Save,
   Shield,
-  UserX,
   Users,
+  UserX,
 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 
+import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -39,18 +40,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import {
-  useAdminUserTemplates,
   useAdminTeamTemplates,
+  useAdminUserTemplates,
 } from '../hooks/use-admin-templates'
 import {
+  useAdminTeamSettings,
   useAdminUser,
   useAdminUserAffiliate,
-  useAdminTeamSettings,
 } from '../hooks/use-admin-users'
-import type { CreditType, UserPlan, UserStatus } from '../types'
 import { MediaManager } from './MediaManager'
 import { TemplateManager } from './TemplateManager'
 
@@ -126,7 +126,7 @@ export function UserDetail({ userId }: { userId: string }) {
             <Skeleton className="h-4 w-64" />
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -135,7 +135,8 @@ export function UserDetail({ userId }: { userId: string }) {
     )
   }
 
-  if (!user) return null
+  if (!user) 
+return null
 
   const initials = user.name
     .split(' ')
@@ -175,7 +176,7 @@ export function UserDetail({ userId }: { userId: string }) {
 
       <Separator />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {/* Plan Info */}
         <Card>
           <CardHeader className="pb-3">
@@ -349,7 +350,7 @@ export function UserDetail({ userId }: { userId: string }) {
           <CardContent className="space-y-4">
             {/* Total + packages count */}
             <div className="flex items-baseline justify-between">
-              <p className="text-3xl font-bold">{user.credits}</p>
+              <p className="text-2xl font-bold sm:text-3xl">{user.credits}</p>
               <span className="text-xs text-muted-foreground">
                 {user.creditPackages.length} {t('userDetail.creditPackages')}
               </span>
@@ -588,7 +589,7 @@ export function UserDetail({ userId }: { userId: string }) {
           </CardHeader>
           <CardContent>
             {affiliateLoading ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Skeleton key={i} className="h-16" />
                 ))}
@@ -641,7 +642,7 @@ export function UserDetail({ userId }: { userId: string }) {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                 <div className="rounded-lg border p-3">
                   <p className="text-xs text-muted-foreground">
                     {t('affiliate.referralCode')}
@@ -741,7 +742,7 @@ export function UserDetail({ userId }: { userId: string }) {
             ) : (
               <div className="space-y-6">
                 {/* Team Info Cards */}
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   <div className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">
                       {t('teamSettings.name')}
@@ -776,7 +777,7 @@ export function UserDetail({ userId }: { userId: string }) {
                 </div>
 
                 {/* Team Plan + Credits + Media */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                   {/* Team Plan */}
                   <Card>
                     <CardHeader className="pb-3">

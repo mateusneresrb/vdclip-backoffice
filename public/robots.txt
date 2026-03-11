@@ -1,0 +1,3 @@
+# VDClip BackOffice — dashboard privado, não indexar
+User-agent: *
+Disallow: /

@@ -70,12 +70,10 @@ src/features/{feature-name}/
    - Add nav item to `src/components/layout/app-sidebar.tsx` (icon + translation key)
    - Add route label to `src/components/layout/header.tsx` `routeLabels` map
 
-8. **Add translations** to all 3 locale files:
-   - `public/locales/en/common.json` — nav label
+8. **Add translations to pt-BR locale:
    - `public/locales/pt-BR/common.json` — nav label
-   - `public/locales/es/common.json` — nav label
    - Create feature namespace files if the feature has substantial text:
-     - `public/locales/{en,pt-BR,es}/{feature-name}.json`
+     - `public/locales/pt-BR/{feature-name}.json`
      - Register namespace in `src/i18n.ts` `ns` array
 
 9. **Verify**:

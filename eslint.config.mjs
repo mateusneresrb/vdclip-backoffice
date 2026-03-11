@@ -9,7 +9,17 @@ export default antfu(
       'src/components/ui/**',
       'src/routeTree.gen.ts',
       'dist/**',
+      '.claude/**',
+      'eslint.config.mjs',
+      'public/**',
+      '**/*.md',
+      '**/*.md/**',
     ],
+  },
+  {
+    rules: {
+      'react/no-implicit-key': 'off',
+    },
   },
   prettier,
 )

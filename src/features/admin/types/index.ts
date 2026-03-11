@@ -4,7 +4,7 @@ export type PlanProvider = 'paddle' | 'pix' | 'internal'
 export type SocialProvider = 'google' | 'github' | 'discord'
 export type CreditType = 'plan_cycle' | 'purchased' | 'promotional' | 'bonus' | 'adjustment'
 
-export type MetricsDateRange = '1d' | '7d' | '30d' | '90d' | 'ytd' | 'all' | 'custom'
+export type MetricsDateRange = '1d' | '3d' | '7d' | '30d' | '90d' | 'ytd' | 'all' | 'custom'
 
 export interface DateRange {
   from: string
@@ -22,6 +22,7 @@ export interface CreditPackage {
 
 export interface AdminUser {
   id: string
+  external_id: string
   name: string
   email: string
   avatar?: string
@@ -40,6 +41,8 @@ export interface AdminUser {
   createdAt: string
   lastLoginAt: string
   teams: UserTeam[]
+  companyId: string | null
+  companyName: string | null
 }
 
 export interface UserTeam {
@@ -131,6 +134,9 @@ export interface PlatformMetrics {
   users: UserMetrics
   content: ContentMetrics
   credits: CreditMetrics
+  mrrHistory: { date: string; mrr: number }[]
+  userGrowth: { date: string; total: number; new: number }[]
+  revenueComposition: { date: string; newMrr: number; expansion: number; churn: number }[]
 }
 
 // Template types (mirrors vdclip-dashboard schema)
@@ -202,11 +208,17 @@ export interface AdminTemplate {
   updatedAt: string
 }
 
+export type ProviderCategory = 'video_source' | 'payment' | 'ai_processing' | 'publishing'
+
 export interface SupportedProvider {
   id: string
   name: string
+  slug: string
   enabled: boolean
-  type: 'social' | 'publishing' | 'ai' | 'processing'
+  type: 'social' | 'publishing' | 'ai' | 'processing' | 'payment'
+  category: ProviderCategory
+  description?: string
+  connectionCount?: number
 }
 
 // Media types (mirrors projects + project_results tables)
@@ -217,6 +229,7 @@ export type RenderingStatus = 'pending' | 'rendering' | 'completed' | 'failed'
 
 export interface AdminMedia {
   id: string
+  externalId?: string | null
   title: string
   url: string | null
   thumbnailUrl: string | null
@@ -242,4 +255,217 @@ export interface MediaResult {
   viralityScore: number | null
   projectVersion: number
   renderingStatus: RenderingStatus
+}
+
+// Financial types
+
+export type Currency = 'USD' | 'BRL'
+export type SubscriptionStatus = 'active' | 'past_due' | 'cancelled' | 'expired'
+export type TransactionType = 'subscription_payment' | 'credit_purchase' | 'refund'
+export type TransactionStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded'
+export type BillingPeriod = 'monthly' | 'yearly'
+export type AuthEventType = 'login_success' | 'login_failed' | 'password_changed' | 'oauth_connected' | 'oauth_disconnected' | 'token_refreshed' | 'account_locked'
+
+export interface AdminSubscription {
+  id: string
+  userId: string | null
+  userName: string | null
+  userEmail: string | null
+  teamId: string | null
+  teamName: string | null
+  planTier: UserPlan
+  billingPeriod: BillingPeriod
+  status: SubscriptionStatus
+  provider: PlanProvider
+  currency: Currency
+  amount: number
+  mrr: number
+  currentPeriodStart: string
+  currentPeriodEnd: string
+  cancelledAt: string | null
+  createdAt: string
+}
+
+export interface AdminTransaction {
+  id: string
+  userId: string | null
+  userName: string | null
+  teamId: string | null
+  teamName: string | null
+  provider: PlanProvider
+  transactionType: TransactionType
+  status: TransactionStatus
+  currency: Currency
+  amount: number
+  completedAt: string | null
+  createdAt: string
+}
+
+export interface AuthLogEntry {
+  id: string
+  userId: number | null
+  userName: string | null
+  userEmail: string | null
+  userSource: 'vdclip' | 'business'
+  eventType: AuthEventType
+  ipAddress: string | null
+  userAgent: string | null
+  metadata: Record<string, unknown> | null
+  createdAt: string
+}
+
+export interface AdminTeamOverview {
+  id: string
+  name: string
+  memberCount: number
+  plan: UserPlan
+  category: string | null
+  createdAt: string
+}
+
+export interface RevenueDailySnapshot {
+  snapshotDate: string
+  currency: Currency
+  mrr: number
+  newMrr: number
+  expansionMrr: number
+  contractionMrr: number
+  churnedMrr: number
+  reactivationMrr: number
+  activeSubscriptionsCount: number
+  newSubscriptionsCount: number
+  churnedSubscriptionsCount: number
+  creditRevenue: number
+}
+
+export interface CashFlowEntry {
+  id: string
+  date: string
+  description: string
+  category: 'revenue' | 'expense' | 'refund' | 'tax' | 'investment' | 'other'
+  type: 'inflow' | 'outflow'
+  currency: Currency
+  amount: number
+  createdAt: string
+}
+
+export interface CashFlowSummary {
+  currency: Currency
+  totalInflow: number
+  totalOutflow: number
+  netFlow: number
+  entries: CashFlowEntry[]
+  monthlyBreakdown: { month: string; inflow: number; outflow: number }[]
+}
+
+export interface UserActivityEvent {
+  id: string
+  type: 'subscription_created' | 'plan_changed' | 'credits_added' | 'login' | 'password_changed' | 'media_created'
+  description: string
+  metadata?: Record<string, unknown>
+  createdAt: string
+}
+
+export interface UserSocialConnection {
+  id: string
+  platform: string
+  displayName: string
+  username: string
+  connectedAt: string
+  lastUsedAt: string | null
+  hasError: boolean
+  errorMessage: string | null
+  postsCount?: number
+}
+
+export interface AdminTeamDetail {
+  id: string
+  name: string
+  picture: string | null
+  email: string | null
+  category: string | null
+  socialUrls: { youtube?: string; instagram?: string; tiktok?: string }
+  plan: UserPlan
+  memberCount: number
+  maxMembers: number
+  storageUsed: number
+  storageLimit: number
+  credits: number
+  mediaCreated: number
+  mediaPosted: number
+  createdAt: string
+}
+
+// SaaS Metrics (mirrors business_metrics_snapshots table V016)
+
+export interface SaasMetricsSnapshot {
+  id: string
+  month: string
+  costCenterId: string | null
+  currency: Currency
+  // P&L
+  grossRevenue: number
+  netRevenue: number
+  cogs: number
+  grossProfit: number
+  grossMarginPct: number
+  totalOpex: number
+  rAndDCost: number
+  salesMarketingCost: number
+  generalAdminCost: number
+  netIncome: number
+  // Cash & Runway
+  burnRate: number
+  runwayMonths: number
+  cashBalance: number
+  // Customers
+  totalCustomers: number
+  newCustomers: number
+  churnedCustomers: number
+  churnRatePct: number
+  revenueChurnRatePct: number
+  // Unit Economics
+  arpu: number
+  ltv: number
+  cac: number
+  ltvCacRatio: number
+  paybackMonths: number
+  // Growth & Health
+  nrrPct: number
+  quickRatio: number
+  trialToPaidRatePct: number
+  createdAt: string
+}
+
+export interface TeamInvitation {
+  id: string
+  email: string
+  role: 'admin' | 'member'
+  status: 'pending' | 'accepted' | 'expired'
+  invitedBy: string
+  createdAt: string
+  expiresAt: string
+}
+
+// Scheduled Posts (mirrors scheduled_posts table V025)
+
+export type ScheduledPostStatus = 'pending' | 'scheduled' | 'published' | 'failed' | 'cancelled'
+
+export interface ScheduledPost {
+  id: string
+  platform: string
+  title: string
+  description: string | null
+  thumbnailUrl: string | null
+  status: ScheduledPostStatus
+  scheduledAt: string | null
+  publishedAt: string | null
+  lastAttemptedAt: string | null
+  socialPublishId: string | null
+  retryCount: number
+  errorMessage: string | null
+  projectResultId: string | null
+  socialConnectionId: string
+  createdAt: string
+  updatedAt: string
 }

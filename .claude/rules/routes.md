@@ -9,14 +9,14 @@ paths:
 
 - Use `createFileRoute` with the exact path matching the file location
 - Component function is private (not exported), only `Route` is exported
-- Layout routes (`_authenticated.tsx`) use `<Outlet />` for children
+- Layout route `_app.tsx` uses `<Outlet />` for children
 
 ## When Creating a Route
 
-1. Create file in `src/routes/_authenticated/{name}.tsx`
-2. Add nav item in `src/components/layout/app-sidebar.tsx` (`navItems` or `footerItems`)
-3. Add label in `src/components/layout/header.tsx` `routeLabels` map
-4. Add translations in ALL 3 locale files (`en`, `pt-BR`, `es`)
+1. Create file in `src/routes/_app/{name}.tsx`
+2. Add nav item in `src/components/layout/admin-sidebar.tsx`
+3. Add label in `src/components/layout/admin-header.tsx` `routeLabels` map
+4. Add `nav.{name}` ao arquivo `public/locales/pt-BR/admin.json`
 5. Run `bun dev` to regenerate `routeTree.gen.ts`
 
 ## Page Template
@@ -25,12 +25,12 @@ paths:
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
-export const Route = createFileRoute('/_authenticated/{name}')({
+export const Route = createFileRoute('/_app/{name}')({
   component: PageComponent,
 })
 
 function PageComponent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('admin')
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
@@ -45,5 +45,5 @@ function PageComponent() {
 
 - NEVER edit `routeTree.gen.ts` — auto-generated
 - Route paths must match file paths exactly
-- Protected routes go inside `_authenticated/` directory
+- Routes com layout (sidebar) vao dentro de `_app/`
 - Public routes (login, etc.) go in `src/routes/` root

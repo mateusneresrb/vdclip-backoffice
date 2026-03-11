@@ -1,18 +1,36 @@
-import { useTranslation } from 'react-i18next'
-
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Switch } from '@/components/ui/switch'
-
-import { useAdminProviders } from '../hooks/use-admin-providers'
 import type { SupportedProvider } from '../types'
+import { ToggleRight } from 'lucide-react'
 
-const typeVariant: Record<SupportedProvider['type'], string> = {
-  social: 'bg-blue-500/15 text-blue-700 dark:text-blue-400',
-  publishing: 'bg-violet-500/15 text-violet-700 dark:text-violet-400',
-  ai: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
-  processing: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+import { useTranslation } from 'react-i18next'
+import { EmptyState } from '@/components/shared/empty-state'
+import { PageHeader } from '@/components/shared/page-header'
+import { Skeleton } from '@/components/ui/skeleton'
+
+import { ProviderCard } from '@/features/providers/components/provider-card'
+import { useAdminProviders } from '../hooks/use-admin-providers'
+
+function ProviderSection({
+  title,
+  providers,
+  onToggle,
+}: {
+  title: string
+  providers: SupportedProvider[]
+  onToggle?: (provider: SupportedProvider) => void
+}) {
+  if (providers.length === 0) 
+return null
+
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+        {providers.map((provider) => (
+          <ProviderCard key={provider.id} provider={provider} onToggle={onToggle} />
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export function ProvidersManager() {
@@ -21,50 +39,64 @@ export function ProvidersManager() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-48" />
-        </CardHeader>
-        <CardContent className="space-y-3">
+      <div className="space-y-6">
+        <PageHeader title={t('providers.title')} description={t('providers.pageDescription')} />
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-12" />
+            <Skeleton key={i} className="h-28" />
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     )
   }
 
-  if (!providers) return null
+  if (!providers?.length) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title={t('providers.title')} description={t('providers.pageDescription')} />
+        <EmptyState icon={ToggleRight} title={t('providers.noProviders')} description={t('providers.noProvidersHint')} />
+      </div>
+    )
+  }
+
+  const videoSourceProviders = providers.filter((p) => p.category === 'video_source')
+  const paymentProviders = providers.filter((p) => p.category === 'payment')
+  const aiProcessingProviders = providers.filter((p) => p.category === 'ai_processing')
+  const publishingProviders = providers.filter((p) => p.category === 'publishing')
+
+  const handleToggle = (_provider: SupportedProvider) => {
+    // TODO: API call to toggle provider
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('providers.title')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-lg border">
-          <div className="grid grid-cols-[1fr_auto_auto] gap-2 sm:gap-4 border-b px-3 sm:px-4 py-3 text-sm font-medium text-muted-foreground">
-            <span>{t('providers.name')}</span>
-            <span>{t('providers.type')}</span>
-            <span>{t('providers.enabled')}</span>
-          </div>
-          {providers.map((provider) => (
-            <div
-              key={provider.id}
-              className="grid grid-cols-[1fr_auto_auto] items-center gap-2 sm:gap-4 border-b px-3 sm:px-4 py-3 last:border-b-0"
-            >
-              <span className="text-sm font-medium truncate">{provider.name}</span>
-              <Badge variant="secondary" className={typeVariant[provider.type]}>
-                {t(`providers.types.${provider.type}`)}
-              </Badge>
-              <Switch
-                checked={provider.enabled}
-                aria-label={`${t('providers.toggle')} ${provider.name}`}
-              />
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <PageHeader title={t('providers.title')} description={t('providers.pageDescription')} />
+
+      <div className="space-y-8">
+        <ProviderSection
+          title={t('providers.sections.videoSource')}
+          providers={videoSourceProviders}
+          onToggle={handleToggle}
+        />
+
+        <ProviderSection
+          title={t('providers.sections.payment')}
+          providers={paymentProviders}
+          onToggle={handleToggle}
+        />
+
+        <ProviderSection
+          title={t('providers.sections.aiProcessing')}
+          providers={aiProcessingProviders}
+          onToggle={handleToggle}
+        />
+
+        <ProviderSection
+          title={t('providers.sections.publishing')}
+          providers={publishingProviders}
+          onToggle={handleToggle}
+        />
+      </div>
+    </div>
   )
 }

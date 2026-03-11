@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import type { MetricsDateRange, PlanProvider, UserPlan } from '../types'
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -15,24 +15,24 @@ import {
   Users,
   XCircle,
 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+
 import { Skeleton } from '@/components/ui/skeleton'
-
 import { useAdminMetrics } from '../hooks/use-admin-metrics'
-import type { MetricsDateRange, PlanProvider, UserPlan } from '../types'
 
-const dateRangePresets: MetricsDateRange[] = ['1d', '7d', '30d', '90d', 'ytd', 'all']
+const dateRangePresets: MetricsDateRange[] = ['1d', '3d', '7d', '30d', '90d', 'ytd']
 
 const planColors: Record<UserPlan, string> = {
   free: 'bg-muted',
   lite: 'bg-blue-500/15',
-  premium: 'bg-violet-500/15',
-  ultimate: 'bg-amber-500/15',
+  premium: 'bg-orange-500/15',
+  ultimate: 'bg-violet-600/15',
 }
 
 const providerColors: Record<PlanProvider, string> = {
@@ -57,7 +57,7 @@ export function MetricsOverview() {
             <Skeleton key={i} className="h-9 w-16" />
           ))}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}
@@ -66,7 +66,8 @@ export function MetricsOverview() {
     )
   }
 
-  if (!metrics) return null
+  if (!metrics) 
+return null
 
   return (
     <div className="space-y-8">
@@ -132,7 +133,7 @@ export function MetricsOverview() {
       {/* Revenue */}
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{t('metrics.revenue.title')}</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             title={t('metrics.revenue.mrr')}
             value={`$${metrics.revenue.mrr.toLocaleString()}`}
@@ -181,7 +182,7 @@ export function MetricsOverview() {
         <h3 className="text-lg font-semibold">
           {t('metrics.subscriptions.title')}
         </h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             title={t('metrics.subscriptions.active')}
             value={metrics.subscriptions.activeSubscriptions.toLocaleString()}
@@ -204,7 +205,7 @@ export function MetricsOverview() {
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {/* By Plan */}
           <Card>
             <CardHeader className="pb-2">
@@ -293,7 +294,7 @@ export function MetricsOverview() {
       {/* Users */}
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{t('metrics.users.title')}</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <MetricCard
             title={t('metrics.users.total')}
             value={metrics.users.totalUsers.toLocaleString()}
@@ -321,7 +322,7 @@ export function MetricsOverview() {
       {/* Content */}
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{t('metrics.content.title')}</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           <MetricCard
             title={t('metrics.content.totalProjects')}
             value={metrics.content.totalProjects.toLocaleString()}
@@ -414,7 +415,7 @@ export function MetricsOverview() {
       {/* Credits & Transactions */}
       <section className="space-y-4">
         <h3 className="text-lg font-semibold">{t('metrics.credits.title')}</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           <MetricCard
             title={t('metrics.credits.totalIssued')}
             value={metrics.credits.totalCreditsIssued.toLocaleString()}
@@ -450,7 +451,7 @@ export function MetricsOverview() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
               {Object.entries(metrics.credits.byType).map(([type, count]) => (
                 <div
                   key={type}
@@ -488,7 +489,7 @@ function MetricCard({
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-lg font-bold sm:text-2xl">{value}</p>
         {subtitle && (
           <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
         )}

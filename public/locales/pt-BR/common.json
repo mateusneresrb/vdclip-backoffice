@@ -4,10 +4,10 @@
     "dashboard": "Painel",
     "projects": "Projetos",
     "templates": "Modelos",
-    "calendar": "Calendário",
+    "calendar": "Calendario",
     "affiliate": "Afiliado",
     "profile": "Perfil",
-    "settings": "Configurações"
+    "settings": "Configuracoes"
   },
   "theme": {
     "light": "Claro",
@@ -17,8 +17,8 @@
   },
   "language": {
     "label": "Idioma",
-    "en": "Inglês",
-    "pt-BR": "Português",
+    "en": "Ingles",
+    "pt-BR": "Portugues",
     "es": "Espanhol"
   },
   "common": {
@@ -26,6 +26,103 @@
     "loading": "Carregando...",
     "error": "Algo deu errado",
     "login": "Entrar",
-    "logout": "Sair"
+    "logout": "Sair",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "add": "Adicionar",
+    "actions": "Acoes",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "noData": "Nenhum dado disponivel."
+  },
+  "sidebar": {
+    "account": "Conta",
+    "settings": "Configuracoes"
+  },
+  "pagination": {
+    "items": "itens",
+    "page": "Pagina",
+    "previous": "Anterior",
+    "next": "Proxima"
+  },
+  "profile": {
+    "title": "Meu Perfil",
+    "description": "Gerencie suas informacoes pessoais, seguranca e preferencias.",
+    "personalInfo": "Informacoes Pessoais",
+    "name": "Nome",
+    "email": "Email",
+    "role": "Funcao",
+    "mfaStatus": "Status MFA",
+    "lastLogin": "Ultimo login",
+    "memberSince": "Membro desde",
+    "security": "Seguranca",
+    "changePassword": "Alterar Senha",
+    "changePasswordDescription": "Atualize sua senha de acesso ao backoffice.",
+    "currentPassword": "Senha Atual",
+    "newPassword": "Nova Senha",
+    "confirmPassword": "Confirmar Senha",
+    "updatePassword": "Atualizar Senha",
+    "twoFactor": "Autenticacao de Dois Fatores",
+    "twoFactorDescription": "Adicione uma camada extra de seguranca a sua conta.",
+    "twoFactorEnabled": "2FA Ativo",
+    "twoFactorDisabled": "2FA Inativo",
+    "enable2fa": "Ativar 2FA",
+    "disable2fa": "Desativar 2FA",
+    "mfaRequired": "Configuração Obrigatória",
+    "mfaRequiredDescription": "Sua conta requer autenticação de dois fatores. Configure agora para acessar o backoffice.",
+    "mfaDevBypass": "Ignorar verificação (modo dev)",
+    "setup2faTitle": "Configurar Autenticação de Dois Fatores",
+    "setup2faDescription": "Escaneie o QR code abaixo com o seu aplicativo autenticador (Google Authenticator, Authy, etc.).",
+    "setup2faSecretLabel": "Ou insira o código manualmente:",
+    "setup2faVerifyTitle": "Verificar código",
+    "setup2faVerifyDescription": "Digite o código de 6 dígitos gerado pelo seu aplicativo para confirmar a configuração.",
+    "setup2faVerifyPlaceholder": "000000",
+    "setup2faVerify": "Verificar e ativar",
+    "setup2faBack": "Voltar",
+    "setup2faSuccess": "2FA ativado com sucesso",
+    "disable2faTitle": "Desativar Autenticação de Dois Fatores",
+    "disable2faDescription": "Digite o código de 6 dígitos do seu aplicativo autenticador para confirmar a desativação.",
+    "disable2faConfirm": "Desativar 2FA",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "tabs": {
+      "general": "Geral",
+      "security": "Seguranca",
+      "activity": "Atividade",
+      "preferences": "Preferencias"
+    },
+    "permissions": "Permissoes",
+    "sessions": {
+      "title": "Sessoes Ativas",
+      "device": "Dispositivo",
+      "ip": "Endereco IP",
+      "lastActive": "Ultimo Acesso",
+      "current": "Sessao Atual",
+      "revoke": "Revogar",
+      "noSessions": "Nenhuma sessao ativa."
+    },
+    "activityLog": {
+      "title": "Historico de Atividade",
+      "noEvents": "Nenhum evento registrado.",
+      "eventTypes": {
+        "login": "Login realizado",
+        "password_changed": "Senha alterada",
+        "mfa_enabled": "2FA ativado",
+        "mfa_disabled": "2FA desativado",
+        "oauth_connected": "OAuth conectado",
+        "oauth_disconnected": "OAuth desconectado"
+      }
+    },
+    "preferences": {
+      "title": "Preferencias",
+      "theme": "Tema",
+      "themeDescription": "Escolha o tema visual do backoffice.",
+      "notifications": "Notificacoes",
+      "notificationsDescription": "Configuracoes de notificacoes (em breve).",
+      "emailNotifications": "Notificacoes por Email",
+      "browserNotifications": "Notificacoes do Navegador"
+    }
   }
 }

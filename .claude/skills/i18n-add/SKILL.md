@@ -1,6 +1,6 @@
 ---
 name: i18n-add
-description: Add translation keys to all 3 locale files (en, pt-BR, es). Use when new text needs to be internationalized, or when auditing missing translations.
+description: Add translation keys to pt-BR locale file. Use when new text needs to be internationalized, or when auditing missing translations.
 argument-hint: "[namespace] [key] [en-text] [pt-br-text] [es-text]"
 ---
 
@@ -16,9 +16,7 @@ $ARGUMENTS
 
 | Code  | Language   | Locale Path                    |
 |-------|------------|--------------------------------|
-| en    | English    | `public/locales/en/`           |
 | pt-BR | Portuguese | `public/locales/pt-BR/`        |
-| es    | Spanish    | `public/locales/es/`           |
 
 ## Namespaces
 
@@ -31,7 +29,7 @@ New namespaces can be created — just add the JSON files and register in `src/i
 
 ## Rules
 
-1. **Always update ALL 3 languages** — never add a key to just one locale
+1. **Apenas atualizar o locale pt-BR
 2. **Use nested keys** with dot notation: `section.subsection.key`
 3. **Keep translations contextual** — "Save" for a save button vs "save" for a concept are different
 4. **Handle plurals** if needed using i18next plural syntax: `key_one`, `key_other`

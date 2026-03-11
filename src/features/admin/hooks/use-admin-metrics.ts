@@ -1,6 +1,46 @@
+import type { MetricsDateRange, PlatformMetrics } from '../types'
+
 import { useQuery } from '@tanstack/react-query'
 
-import type { MetricsDateRange, PlatformMetrics } from '../types'
+function generateMrrHistory(days: number) {
+  const data: { date: string; mrr: number }[] = []
+  let mrr = 14000
+  for (let i = days; i >= 0; i--) {
+    const date = new Date()
+    date.setDate(date.getDate() - i)
+    mrr += Math.round((Math.random() - 0.3) * 200)
+    data.push({ date: date.toISOString().split('T')[0], mrr })
+  }
+  return data
+}
+
+function generateUserGrowth(days: number) {
+  const data: { date: string; total: number; new: number }[] = []
+  let total = 1100
+  for (let i = days; i >= 0; i--) {
+    const date = new Date()
+    date.setDate(date.getDate() - i)
+    const newUsers = Math.round(Math.random() * 8 + 1)
+    total += newUsers
+    data.push({ date: date.toISOString().split('T')[0], total, new: newUsers })
+  }
+  return data
+}
+
+function generateRevenueComposition(days: number) {
+  const data: { date: string; newMrr: number; expansion: number; churn: number }[] = []
+  for (let i = days; i >= 0; i--) {
+    const date = new Date()
+    date.setDate(date.getDate() - i)
+    data.push({
+      date: date.toISOString().split('T')[0],
+      newMrr: Math.round(Math.random() * 3000 + 500),
+      expansion: Math.round(Math.random() * 1200 + 200),
+      churn: -Math.round(Math.random() * 1500 + 300),
+    })
+  }
+  return data
+}
 
 const mockMetrics: PlatformMetrics = {
   revenue: {
@@ -74,6 +114,9 @@ const mockMetrics: PlatformMetrics = {
     transactionVolume: 324500,
     refunds: 4200,
   },
+  mrrHistory: generateMrrHistory(30),
+  userGrowth: generateUserGrowth(30),
+  revenueComposition: generateRevenueComposition(30),
 }
 
 const adminMetricsKeys = {
