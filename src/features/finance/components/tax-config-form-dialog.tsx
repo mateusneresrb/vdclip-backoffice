@@ -24,25 +24,16 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
-import { Switch } from '@/components/ui/switch'
 import { useTaxConfigMutations } from '../hooks/use-tax-config-mutations'
 
 const taxConfigSchema = z.object({
-  name: z.string().min(1, 'Nome obrigatorio'),
-  code: z.string().min(1, 'Codigo obrigatorio'),
+  taxType: z.string().min(1, 'Tipo de imposto obrigatorio'),
   rate: z.number().min(0, 'Aliquota deve ser positiva').max(100, 'Aliquota maxima 100%'),
-  type: z.enum(['federal', 'state', 'municipal']),
-  appliesTo: z.enum(['revenue', 'payroll', 'services', 'all']),
-  isActive: z.boolean(),
+  municipalityCode: z.string().nullable(),
+  taxRegime: z.string().nullable(),
+  effectiveFrom: z.string().min(1, 'Data de inicio obrigatoria'),
+  effectiveTo: z.string().nullable(),
 })
 
 type TaxConfigFormValues = z.infer<typeof taxConfigSchema>
@@ -65,12 +56,12 @@ export function TaxConfigFormDialog({
   const form = useForm<TaxConfigFormValues>({
     resolver: zodResolver(taxConfigSchema),
     defaultValues: {
-      name: '',
-      code: '',
+      taxType: '',
       rate: 0,
-      type: 'federal',
-      appliesTo: 'all',
-      isActive: true,
+      municipalityCode: null,
+      taxRegime: null,
+      effectiveFrom: '',
+      effectiveTo: null,
     },
   })
 
@@ -79,20 +70,20 @@ export function TaxConfigFormDialog({
       form.reset(
         tax
           ? {
-              name: tax.name,
-              code: tax.code,
+              taxType: tax.taxType,
               rate: tax.rate,
-              type: tax.type,
-              appliesTo: tax.appliesTo,
-              isActive: tax.isActive,
+              municipalityCode: tax.municipalityCode,
+              taxRegime: tax.taxRegime,
+              effectiveFrom: tax.effectiveFrom,
+              effectiveTo: tax.effectiveTo,
             }
           : {
-              name: '',
-              code: '',
+              taxType: '',
               rate: 0,
-              type: 'federal',
-              appliesTo: 'all',
-              isActive: true,
+              municipalityCode: null,
+              taxRegime: null,
+              effectiveFrom: '',
+              effectiveTo: null,
             },
       )
     }
@@ -129,24 +120,10 @@ export function TaxConfigFormDialog({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="taxType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('finance.form.name')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('finance.form.code')}</FormLabel>
+                  <FormLabel>{t('finance.form.taxType')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -174,91 +151,75 @@ export function TaxConfigFormDialog({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('finance.form.taxType')}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="municipalityCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('finance.form.municipalityCode')}</FormLabel>
                     <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <Input
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="federal">
-                        {t('finance.taxTypes.federal')}
-                      </SelectItem>
-                      <SelectItem value="state">
-                        {t('finance.taxTypes.state')}
-                      </SelectItem>
-                      <SelectItem value="municipal">
-                        {t('finance.taxTypes.municipal')}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="appliesTo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('finance.form.appliesTo')}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+              <FormField
+                control={form.control}
+                name="taxRegime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('finance.form.taxRegime')}</FormLabel>
                     <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <Input
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="revenue">
-                        {t('finance.appliesToOptions.revenue')}
-                      </SelectItem>
-                      <SelectItem value="payroll">
-                        {t('finance.appliesToOptions.payroll')}
-                      </SelectItem>
-                      <SelectItem value="services">
-                        {t('finance.appliesToOptions.services')}
-                      </SelectItem>
-                      <SelectItem value="all">
-                        {t('finance.appliesToOptions.all')}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            <FormField
-              control={form.control}
-              name="isActive"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                  <Label htmlFor="taxIsActive">
-                    {t('finance.form.active')}
-                  </Label>
-                  <FormControl>
-                    <Switch
-                      id="taxIsActive"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="effectiveFrom"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('finance.form.effectiveFrom')}</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="effectiveTo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('finance.form.effectiveTo')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <DialogFooter>
               <Button

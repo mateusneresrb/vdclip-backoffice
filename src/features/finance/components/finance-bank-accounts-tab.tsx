@@ -33,6 +33,7 @@ import { BankAccountFormDialog } from './bank-account-form-dialog'
 const accountTypeMap: Record<BankAccount['accountType'], string> = {
   checking: 'finance.accountTypes.checking',
   savings: 'finance.accountTypes.savings',
+  payment_gateway: 'finance.accountTypes.paymentGateway',
   investment: 'finance.accountTypes.investment',
 }
 
@@ -140,7 +141,7 @@ return accounts
               <CardContent className="space-y-3">
                 <p className="text-lg font-bold sm:text-2xl">{formatCurrency(account.balance, account.currency)}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  {t('finance.lastSync')}: {new Date(account.lastSyncAt).toLocaleString()}
+                  {t('finance.initialBalance')}: {formatCurrency(account.initialBalance, account.currency)}
                 </p>
               </CardContent>
             </Card>

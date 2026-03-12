@@ -1,4 +1,4 @@
-import type { CostEntry } from '../types'
+import type { CostEntry, CreateCostEntryInput } from '../types'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import i18n from '@/i18n'
@@ -9,11 +9,43 @@ export function useCostEntryMutations() {
   const queryClient = useQueryClient()
 
   const create = useMutation({
-    mutationFn: async (data: Omit<CostEntry, 'id'>) => {
+    mutationFn: async (data: CreateCostEntryInput) => {
       await new Promise((r) => setTimeout(r, 500))
       return {
-        ...data,
         id: crypto.randomUUID(),
+        categoryId: data.categoryId,
+        categoryName: '',
+        categoryExternalId: data.categoryId,
+        costCenterId: data.costCenterId ?? null,
+        costCenterName: null,
+        costCenterExternalId: null,
+        recurringParentId: null,
+        vendor: data.vendor,
+        description: data.description,
+        amount: data.amount,
+        currency: data.currency,
+        isRecurring: data.isRecurring,
+        recurrenceInterval: data.recurrenceInterval ?? null,
+        recurringSince: data.recurringSince ?? null,
+        recurringUntil: data.recurringUntil ?? null,
+        status: 'draft',
+        billingDate: data.billingDate,
+        dueDate: data.dueDate ?? null,
+        competenceMonth: data.competenceMonth,
+        costAllocation: data.costAllocation,
+        isVariable: data.isVariable ?? false,
+        unitMetric: data.unitMetric ?? null,
+        unitQuantity: data.unitQuantity ?? null,
+        unitCost: data.unitCost ?? null,
+        paidAt: null,
+        paymentMethod: null,
+        financialTransactionId: null,
+        receiptUrl: data.receiptUrl ?? null,
+        notes: data.notes ?? null,
+        createdBy: null,
+        createdByEmail: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       } as CostEntry
     },
     onSuccess: (newEntry) => {

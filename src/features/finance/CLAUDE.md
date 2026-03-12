@@ -48,14 +48,24 @@ FinancialNotes  // src/features/finance/components/financial-notes.tsx
 ## Types
 ```ts
 // em features/finance/types
-FinancialCategory     // árvore: { id, parentId, code, name, type, children? }
-BankAccount           // { name, bank, accountType, currency, balance, isActive }
-CostEntry             // { type: 'recurring'|'one_time', frequency, currency, amount }
-TaxConfig             // { rate, type: 'federal'|'state'|'municipal', appliesTo }
-Receivable            // { status: pending|received|overdue|written_off|cancelled }
+FinancialCategoryType // 'revenue' | 'cogs' | 'opex' | 'tax' | 'asset' | 'liability' | 'equity'
+FinancialCategory     // árvore: { id, parentId, code, name, type, costGroup, level, displayOrder, description, isActive, children? }
+BankAccount           // { name, bank, accountType, agency, accountNumber, currency, initialBalance, balance, isActive }
+CostEntryStatus       // 'draft' | 'approved' | 'paid' | 'cancelled'
+RecurrenceInterval    // 'monthly' | 'quarterly' | 'annual'
+CostAllocation        // 'cogs' | 'r_and_d' | 'sales_marketing' | 'general_admin'
+CostEntry             // { vendor, description, amount, currency, isRecurring, recurrenceInterval, status, billingDate, dueDate, competenceMonth, costAllocation, ... 30+ campos }
+TaxConfig             // { taxType, rate, municipalityCode, taxRegime, effectiveFrom, effectiveTo }
+ReceivableSourceType  // 'gateway_payout' | 'invoice' | 'manual'
+Receivable            // { id, sourceType, sourceReference, description, customerName, customerExternalId, amount, currency, expectedDate, receivedAt, status, notes, costCenterId/Name, categoryId/Name, financialTransactionId, createdBy, createdByEmail, createdAt, updatedAt }
+CostCenter            // { slug, name, description, budget, spent, isActive }
 FinancialNoteEntityType  // 'financial_transaction' | 'cost_entry' | 'receivable'
 FinancialNoteCreator     // { id: string, name: string, email: string }
 FinancialNote            // { id, content, createdBy: FinancialNoteCreator, createdAt, entityType, entityId }
+// Input types (para mutations/form dialogs)
+CreateBankAccountInput     // Omit<BankAccount, 'id' | 'balance'>
+CreateFinancialCategoryInput // { code, name, type, parentId, level, displayOrder, costGroup?, description? }
+CreateCostEntryInput       // { categoryId, costCenterId?, vendor, description, amount, currency, isRecurring, recurrenceInterval?, recurringUntil?, recurringSince?, billingDate, dueDate?, competenceMonth, costAllocation, isVariable?, unitMetric?, unitQuantity?, unitCost?, receiptUrl?, notes? }
 // re-exportado de admin/types
 CashFlowEntry, CashFlowSummary, Currency
 ```

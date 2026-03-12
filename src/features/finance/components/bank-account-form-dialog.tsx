@@ -38,10 +38,12 @@ import { useBankAccountMutations } from '../hooks/use-bank-account-mutations'
 
 const bankAccountSchema = z.object({
   name: z.string().min(1, 'Nome obrigatorio'),
-  bank: z.string().min(1, 'Banco obrigatorio'),
-  accountType: z.enum(['checking', 'savings', 'investment']),
+  bank: z.string().nullable(),
+  accountType: z.enum(['checking', 'savings', 'payment_gateway', 'investment']),
+  agency: z.string().nullable(),
+  accountNumber: z.string().nullable(),
   currency: z.enum(['USD', 'BRL']),
-  balance: z.number().min(0, 'Saldo deve ser positivo'),
+  initialBalance: z.number().min(0, 'Saldo inicial deve ser positivo'),
   isActive: z.boolean(),
 })
 
@@ -66,10 +68,12 @@ export function BankAccountFormDialog({
     resolver: zodResolver(bankAccountSchema),
     defaultValues: {
       name: '',
-      bank: '',
+      bank: null,
       accountType: 'checking',
+      agency: null,
+      accountNumber: null,
       currency: 'BRL',
-      balance: 0,
+      initialBalance: 0,
       isActive: true,
     },
   })
@@ -82,16 +86,20 @@ export function BankAccountFormDialog({
               name: account.name,
               bank: account.bank,
               accountType: account.accountType,
+              agency: account.agency,
+              accountNumber: account.accountNumber,
               currency: account.currency,
-              balance: account.balance,
+              initialBalance: account.initialBalance,
               isActive: account.isActive,
             }
           : {
               name: '',
-              bank: '',
+              bank: null,
               accountType: 'checking',
+              agency: null,
+              accountNumber: null,
               currency: 'BRL',
-              balance: 0,
+              initialBalance: 0,
               isActive: true,
             },
       )
@@ -148,7 +156,10 @@ export function BankAccountFormDialog({
                 <FormItem>
                   <FormLabel>{t('finance.form.bank')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -177,6 +188,9 @@ export function BankAccountFormDialog({
                       <SelectItem value="savings">
                         {t('finance.accountTypes.savings')}
                       </SelectItem>
+                      <SelectItem value="payment_gateway">
+                        {t('finance.accountTypes.paymentGateway')}
+                      </SelectItem>
                       <SelectItem value="investment">
                         {t('finance.accountTypes.investment')}
                       </SelectItem>
@@ -186,6 +200,42 @@ export function BankAccountFormDialog({
                 </FormItem>
               )}
             />
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="agency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('finance.form.agency')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="accountNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('finance.form.accountNumber')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -214,10 +264,10 @@ export function BankAccountFormDialog({
 
             <FormField
               control={form.control}
-              name="balance"
+              name="initialBalance"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('finance.form.balance')}</FormLabel>
+                  <FormLabel>{t('finance.form.initialBalance')}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"

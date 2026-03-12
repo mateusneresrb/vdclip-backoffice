@@ -2,6 +2,7 @@ import type { Currency, MetricsDateRange } from '@/features/admin/types'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import {
   BarChart3,
+  Clock,
   CreditCard,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -13,10 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DateRangeFilter } from '@/features/dashboard/components/date-range-filter'
 import { FinanceSaasMetricsTab } from '@/features/finance/components/finance-saas-metrics-tab'
 
+import { RevenuePendingPurchasesTab } from './revenue-pending-purchases-tab'
 import { RevenueSummaryTab } from './revenue-summary-tab'
 import { RevenueTransactionsTab } from './revenue-transactions-tab'
 
-const VALID_TABS = ['saas-metrics', 'revenue', 'transactions'] as const
+const VALID_TABS = ['saas-metrics', 'revenue', 'transactions', 'pending-purchases'] as const
 type RevenueTab = typeof VALID_TABS[number]
 
 export function RevenuePage() {
@@ -54,6 +56,10 @@ export function RevenuePage() {
               <TabsTrigger value="transactions" className="gap-1.5">
                 <CreditCard className="h-4 w-4" />
                 {t('revenue.tabTransactions')}
+              </TabsTrigger>
+              <TabsTrigger value="pending-purchases" className="gap-1.5">
+                <Clock className="hidden h-4 w-4 sm:block" />
+                {t('pendingPurchases.tabLabel')}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -94,6 +100,10 @@ export function RevenuePage() {
 
         <TabsContent value="transactions" className="mt-6">
           <RevenueTransactionsTab />
+        </TabsContent>
+
+        <TabsContent value="pending-purchases" className="mt-6">
+          <RevenuePendingPurchasesTab />
         </TabsContent>
       </Tabs>
     </div>

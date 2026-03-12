@@ -1,4 +1,4 @@
-import type { BankAccount } from '../types'
+import type { BankAccount, CreateBankAccountInput } from '../types'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import i18n from '@/i18n'
@@ -9,12 +9,12 @@ export function useBankAccountMutations() {
   const queryClient = useQueryClient()
 
   const create = useMutation({
-    mutationFn: async (data: Omit<BankAccount, 'id' | 'lastSyncAt'>) => {
+    mutationFn: async (data: CreateBankAccountInput) => {
       await new Promise((r) => setTimeout(r, 500))
       return {
         ...data,
         id: crypto.randomUUID(),
-        lastSyncAt: new Date().toISOString(),
+        balance: data.initialBalance,
       } as BankAccount
     },
     onSuccess: (newAccount) => {

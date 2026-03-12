@@ -449,6 +449,29 @@ export interface TeamInvitation {
 
 // Scheduled Posts (mirrors scheduled_posts table V025)
 
+export interface PendingPurchase {
+  id: string
+  email: string
+  planTier: string
+  billingPeriod: string
+  provider: string
+  providerSubscriptionId: string | null
+  providerTransactionId: string | null
+  providerCustomerId: string | null
+  currency: string
+  amount: string
+  creditsAmount: number
+  periodStart: string | null
+  periodEnd: string | null
+  isTrial: boolean
+  status: 'pending' | 'claimed' | 'expired'
+  claimedByUserId: string | null
+  claimedByUserEmail: string | null
+  claimedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export type ScheduledPostStatus = 'pending' | 'scheduled' | 'published' | 'failed' | 'cancelled'
 
 export interface ScheduledPost {

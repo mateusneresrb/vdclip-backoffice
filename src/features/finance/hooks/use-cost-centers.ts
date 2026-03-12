@@ -6,75 +6,69 @@ import { useMemo } from 'react'
 const mockCostCenters: CostCenter[] = [
   {
     id: 'cc-1',
-    code: 'ENG-001',
+    slug: 'engenharia',
     name: 'Engenharia',
     description: 'Time de desenvolvimento e engenharia de software',
-    responsible: 'Carlos Silva',
     budget: 50000,
     spent: 42500,
-    currency: 'USD',
     isActive: true,
     createdAt: '2025-01-15T00:00:00Z',
+    updatedAt: '2025-01-15T00:00:00Z',
   },
   {
     id: 'cc-2',
-    code: 'MKT-001',
+    slug: 'marketing',
     name: 'Marketing',
     description: 'Campanhas de marketing e aquisicao de clientes',
-    responsible: 'Ana Rodrigues',
     budget: 25000,
     spent: 23800,
-    currency: 'BRL',
     isActive: true,
     createdAt: '2025-02-01T00:00:00Z',
+    updatedAt: '2025-02-01T00:00:00Z',
   },
   {
     id: 'cc-3',
-    code: 'INF-001',
+    slug: 'infraestrutura',
     name: 'Infraestrutura',
     description: 'Custos de servidores, cloud e ferramentas SaaS',
-    responsible: 'Rafael Santos',
     budget: 35000,
     spent: 28700,
-    currency: 'USD',
     isActive: true,
     createdAt: '2025-01-10T00:00:00Z',
+    updatedAt: '2025-01-10T00:00:00Z',
   },
   {
     id: 'cc-4',
-    code: 'SAL-001',
+    slug: 'vendas',
     name: 'Vendas',
     description: 'Equipe comercial e operacoes de vendas',
-    responsible: 'Julia Martins',
     budget: 18000,
     spent: 9200,
-    currency: 'BRL',
     isActive: true,
     createdAt: '2025-03-01T00:00:00Z',
+    updatedAt: '2025-03-01T00:00:00Z',
   },
   {
     id: 'cc-5',
-    code: 'OPS-001',
+    slug: 'operacoes',
     name: 'Operacoes',
     description: 'Processos operacionais e administrativos',
-    responsible: 'Fernando Lima',
     budget: 15000,
     spent: 14200,
-    currency: 'BRL',
     isActive: false,
     createdAt: '2025-04-01T00:00:00Z',
+    updatedAt: '2025-04-01T00:00:00Z',
   },
   {
     id: 'cc-6',
-    code: 'SUP-001',
+    slug: 'suporte',
     name: 'Suporte ao Cliente',
     description: 'Atendimento e suporte tecnico ao cliente',
-    responsible: 'Mariana Costa',
     budget: 12000,
     spent: 8400,
-    currency: 'USD',
     isActive: true,
     createdAt: '2025-05-01T00:00:00Z',
+    updatedAt: '2025-05-01T00:00:00Z',
   },
 ]
 
@@ -94,7 +88,7 @@ export function useCostCenters(search: string, activeOnly: boolean) {
   })
 
   const filtered = useMemo(() => {
-    if (!query.data) 
+    if (!query.data)
 return []
     let result = query.data
     if (activeOnly) {
@@ -105,8 +99,7 @@ return []
       result = result.filter(
         (cc) =>
           cc.name.toLowerCase().includes(q) ||
-          cc.code.toLowerCase().includes(q) ||
-          cc.responsible.toLowerCase().includes(q),
+          cc.slug.toLowerCase().includes(q),
       )
     }
     return result

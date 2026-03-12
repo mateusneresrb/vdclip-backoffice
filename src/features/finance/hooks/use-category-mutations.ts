@@ -1,4 +1,4 @@
-import type { FinancialCategory } from '../types'
+import type { CreateFinancialCategoryInput, FinancialCategory } from '../types'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import i18n from '@/i18n'
@@ -9,11 +9,16 @@ export function useCategoryMutations() {
   const queryClient = useQueryClient()
 
   const create = useMutation({
-    mutationFn: async (data: Omit<FinancialCategory, 'id'>) => {
+    mutationFn: async (data: CreateFinancialCategoryInput) => {
       await new Promise((r) => setTimeout(r, 500))
       return {
         ...data,
         id: crypto.randomUUID(),
+        costGroup: data.costGroup ?? null,
+        level: data.level,
+        displayOrder: data.displayOrder,
+        description: data.description ?? null,
+        isActive: true,
       } as FinancialCategory
     },
     onSuccess: (newCategory) => {

@@ -1707,5 +1707,54 @@
     "providerToggled": "Integração atualizada com sucesso",
     "copied": "Copiado para a área de transferência",
     "copyError": "Erro ao copiar"
+  },
+  "pendingPurchases": {
+    "tabLabel": "Compras Pendentes",
+    "title": "Compras Pendentes",
+    "description": "Compras de assinaturas e créditos aguardando vinculação a um usuário.",
+    "searchPlaceholder": "Buscar por email...",
+    "filterStatus": "Status",
+    "filterProvider": "Provedor",
+    "allStatuses": "Todos os status",
+    "allProviders": "Todos os provedores",
+    "columns": {
+      "email": "Email",
+      "plan": "Plano",
+      "provider": "Provedor",
+      "amount": "Valor",
+      "status": "Status",
+      "created": "Criado em",
+      "actions": "Ações"
+    },
+    "status": {
+      "pending": "Pendente",
+      "claimed": "Vinculada",
+      "expired": "Expirada"
+    },
+    "trial": "Trial",
+    "credits": "{{count}} créditos",
+    "noResults": "Nenhuma compra pendente encontrada",
+    "noResultsHint": "Compras pendentes aparecerão aqui quando transações de pagamento forem recebidas sem vínculo com um usuário.",
+    "dismiss": "Expirar",
+    "cancelOnProvider": "Cancelar no Provedor",
+    "dismissDialog": {
+      "title": "Expirar compra pendente?",
+      "description": "A compra será marcada como expirada e não poderá mais ser vinculada a um usuário. Esta ação não pode ser desfeita.",
+      "cancel": "Manter",
+      "confirm": "Expirar"
+    },
+    "cancelDialog": {
+      "title": "Cancelar compra no provedor?",
+      "description": "A assinatura será cancelada no provedor de pagamento (Paddle) e a compra será marcada como expirada. Esta ação não pode ser desfeita.",
+      "cancel": "Manter",
+      "confirm": "Cancelar no Provedor"
+    },
+    "toast": {
+      "dismissed": "Compra marcada como expirada",
+      "dismissError": "Erro ao expirar compra",
+      "cancelled": "Compra cancelada no provedor",
+      "cancelError": "Erro ao cancelar compra no provedor"
+    },
+    "totalCount": "{{count}} compra(s) encontrada(s)"
   }
 }

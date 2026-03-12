@@ -43,24 +43,27 @@ const costEntrySchema = z
     description: z.string().min(1, 'Descricao obrigatoria'),
     categoryId: z.string().min(1, 'Categoria obrigatoria'),
     categoryName: z.string(),
-    costCenter: z.string().min(1, 'Centro de custo obrigatorio'),
-    type: z.enum(['recurring', 'one_time']),
-    frequency: z.enum(['monthly', 'quarterly', 'yearly']).nullable(),
+    costCenterName: z.string().nullable(),
+    vendor: z.string().min(1, 'Fornecedor obrigatorio'),
+    isRecurring: z.boolean(),
+    recurrenceInterval: z.enum(['monthly', 'quarterly', 'annual']).nullable(),
     currency: z.enum(['USD', 'BRL']),
     amount: z.number().positive('Valor deve ser positivo'),
-    startDate: z.string().min(1, 'Data de inicio obrigatoria'),
-    endDate: z.string().nullable(),
-    isActive: z.boolean(),
+    billingDate: z.string().min(1, 'Data de cobranca obrigatoria'),
+    recurringUntil: z.string().nullable(),
+    competenceMonth: z.string().min(1, 'Mes de competencia obrigatorio'),
+    costAllocation: z.enum(['cogs', 'r_and_d', 'sales_marketing', 'general_admin']),
+    status: z.enum(['draft', 'approved', 'paid', 'cancelled']),
   })
   .refine(
     (data) => {
-      if (data.type === 'recurring') 
-return data.frequency !== null
+      if (data.isRecurring)
+return data.recurrenceInterval !== null
       return true
     },
     {
       message: 'Frequencia obrigatoria para custos recorrentes',
-      path: ['frequency'],
+      path: ['recurrenceInterval'],
     },
   )
 
@@ -90,18 +93,21 @@ export function CostEntryFormDialog({
       description: '',
       categoryId: '',
       categoryName: '',
-      costCenter: '',
-      type: 'one_time',
-      frequency: null,
+      costCenterName: null,
+      vendor: '',
+      isRecurring: false,
+      recurrenceInterval: null,
       currency: 'BRL',
       amount: 0,
-      startDate: '',
-      endDate: null,
-      isActive: true,
+      billingDate: '',
+      recurringUntil: null,
+      competenceMonth: '',
+      costAllocation: 'general_admin',
+      status: 'draft',
     },
   })
 
-  const costType = form.watch('type')
+  const isRecurring = form.watch('isRecurring')
 
   useEffect(() => {
     if (open) {
@@ -111,37 +117,43 @@ export function CostEntryFormDialog({
               description: entry.description,
               categoryId: entry.categoryId,
               categoryName: entry.categoryName,
-              costCenter: entry.costCenter,
-              type: entry.type,
-              frequency: entry.frequency,
+              costCenterName: entry.costCenterName,
+              vendor: entry.vendor,
+              isRecurring: entry.isRecurring,
+              recurrenceInterval: entry.recurrenceInterval,
               currency: entry.currency,
               amount: entry.amount,
-              startDate: entry.startDate,
-              endDate: entry.endDate,
-              isActive: entry.isActive,
+              billingDate: entry.billingDate,
+              recurringUntil: entry.recurringUntil,
+              competenceMonth: entry.competenceMonth,
+              costAllocation: entry.costAllocation,
+              status: entry.status,
             }
           : {
               description: '',
               categoryId: '',
               categoryName: '',
-              costCenter: '',
-              type: 'one_time',
-              frequency: null,
+              costCenterName: null,
+              vendor: '',
+              isRecurring: false,
+              recurrenceInterval: null,
               currency: 'BRL',
               amount: 0,
-              startDate: '',
-              endDate: null,
-              isActive: true,
+              billingDate: '',
+              recurringUntil: null,
+              competenceMonth: '',
+              costAllocation: 'general_admin',
+              status: 'draft',
             },
       )
     }
   }, [open, entry, form])
 
   useEffect(() => {
-    if (costType === 'one_time') {
-      form.setValue('frequency', null)
+    if (!isRecurring) {
+      form.setValue('recurrenceInterval', null)
     }
-  }, [costType, form])
+  }, [isRecurring, form])
 
   const isPending = create.isPending || update.isPending
 
@@ -224,12 +236,29 @@ export function CostEntryFormDialog({
 
             <FormField
               control={form.control}
-              name="costCenter"
+              name="vendor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('finance.form.vendor')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="costCenterName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('finance.form.costCenter')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,37 +268,27 @@ export function CostEntryFormDialog({
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
-                name="type"
+                name="isRecurring"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('finance.form.type')}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="recurring">
-                          {t('finance.costTypes.recurring')}
-                        </SelectItem>
-                        <SelectItem value="one_time">
-                          {t('finance.costTypes.oneTime')}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                    <Label htmlFor="costIsRecurring">
+                      {t('finance.form.recurring')}
+                    </Label>
+                    <FormControl>
+                      <Switch
+                        id="costIsRecurring"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />
 
-              {costType === 'recurring' && (
+              {isRecurring && (
                 <FormField
                   control={form.control}
-                  name="frequency"
+                  name="recurrenceInterval"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t('finance.form.frequency')}</FormLabel>
@@ -291,8 +310,8 @@ export function CostEntryFormDialog({
                           <SelectItem value="quarterly">
                             {t('finance.frequencies.quarterly')}
                           </SelectItem>
-                          <SelectItem value="yearly">
-                            {t('finance.frequencies.yearly')}
+                          <SelectItem value="annual">
+                            {t('finance.frequencies.annual')}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -301,6 +320,57 @@ export function CostEntryFormDialog({
                   )}
                 />
               )}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="costAllocation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('finance.form.costAllocation')}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="cogs">
+                          {t('finance.costAllocations.cogs')}
+                        </SelectItem>
+                        <SelectItem value="r_and_d">
+                          {t('finance.costAllocations.rAndD')}
+                        </SelectItem>
+                        <SelectItem value="sales_marketing">
+                          {t('finance.costAllocations.salesMarketing')}
+                        </SelectItem>
+                        <SelectItem value="general_admin">
+                          {t('finance.costAllocations.generalAdmin')}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="competenceMonth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('finance.form.competenceMonth')}</FormLabel>
+                    <FormControl>
+                      <Input type="month" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -352,10 +422,10 @@ export function CostEntryFormDialog({
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
-                name="startDate"
+                name="billingDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('finance.form.startDate')}</FormLabel>
+                    <FormLabel>{t('finance.form.billingDate')}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -366,10 +436,10 @@ export function CostEntryFormDialog({
 
               <FormField
                 control={form.control}
-                name="endDate"
+                name="recurringUntil"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('finance.form.endDate')}</FormLabel>
+                    <FormLabel>{t('finance.form.recurringUntil')}</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
@@ -387,19 +457,35 @@ export function CostEntryFormDialog({
 
             <FormField
               control={form.control}
-              name="isActive"
+              name="status"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                  <Label htmlFor="costIsActive">
-                    {t('finance.form.active')}
-                  </Label>
-                  <FormControl>
-                    <Switch
-                      id="costIsActive"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
+                <FormItem>
+                  <FormLabel>{t('finance.form.status')}</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="draft">
+                        {t('finance.costStatus.draft')}
+                      </SelectItem>
+                      <SelectItem value="approved">
+                        {t('finance.costStatus.approved')}
+                      </SelectItem>
+                      <SelectItem value="paid">
+                        {t('finance.costStatus.paid')}
+                      </SelectItem>
+                      <SelectItem value="cancelled">
+                        {t('finance.costStatus.cancelled')}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
                 </FormItem>
               )}
             />

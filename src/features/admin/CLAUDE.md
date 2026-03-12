@@ -22,6 +22,9 @@ useAdminAuthLogs(filters)    → AuthLog[]                // Logs de auth
 useAdminMedia(userId)        → Media[]                  // Mídias de um usuário
 useAdminProviders()          → Provider[]               // Integrações
 useAdminTemplates()          → Template[]               // Templates admin
+useAdminPendingPurchases(filters) → PendingPurchasePage // Compras pendentes (api-client)
+useDismissPendingPurchase()  → mutation                  // POST dismiss
+useCancelPendingPurchase()   → mutation                  // POST cancel on provider
 ```
 
 ## Tipos Centrais (todos os features importam daqui via `@/features/admin/types`)
@@ -43,10 +46,13 @@ SaasMetricsSnapshot, Currency ('USD' | 'BRL')
 
 // Financeiro
 CashFlowEntry, CashFlowSummary, UserActivityEvent, UserSocialConnection
+
+// Compras Pendentes
+PendingPurchase  // status: 'pending' | 'claimed' | 'expired'
 ```
 
 ## Importante
-- Hooks aqui são **todos mock** atualmente
+- Hooks aqui são **maioria mock** atualmente (exceto `useAdminPendingPurchases` e mutations que usam `api-client`)
 - Ao integrar API real: substituir `queryFn` inline por chamadas HTTP autenticadas
 - Types devem espelhar o schema do backend — quando o schema mudar, atualizar aqui primeiro
 - `SaasMetricsSnapshot` espelha a tabela `business_metrics_snapshots` (migration V016)
