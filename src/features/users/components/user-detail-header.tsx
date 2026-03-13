@@ -1,6 +1,6 @@
 import type { AdminUser, UserPlan, UserStatus } from '@/features/admin/types'
 import { Link } from '@tanstack/react-router'
-import { Building2, Check, Copy, CreditCard, MoreVertical, Trash2, UserCog } from 'lucide-react'
+import { Building2, Check, Copy, CreditCard, MoreVertical, UserCog } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -59,9 +59,8 @@ const statusOptions: UserStatus[] = ['active', 'inactive', 'suspended']
 
 export function UserDetailHeader({ user }: { user: AdminUser }) {
   const { t } = useTranslation('admin')
-  const { updateStatus, deleteUser } = useUserMutations()
+  const { updateStatus } = useUserMutations()
 
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showStatusDialog, setShowStatusDialog] = useState(false)
   const [pendingStatus, setPendingStatus] = useState<UserStatus | null>(null)
   const [showStatusSelect, setShowStatusSelect] = useState(false)
@@ -237,13 +236,6 @@ export function UserDetailHeader({ user }: { user: AdminUser }) {
             <UserCog className="mr-2 h-4 w-4" />
             {t('users.actions.changeStatus')}
           </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            {t('users.actions.deleteUser')}
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -275,26 +267,6 @@ export function UserDetailHeader({ user }: { user: AdminUser }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('users.actions.deleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('users.actions.deleteDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('userDetail.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteUser.mutate(user.id)}
-            >
-              {t('users.actions.confirmDelete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

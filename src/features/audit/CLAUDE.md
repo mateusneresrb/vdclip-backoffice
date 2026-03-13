@@ -12,8 +12,9 @@ Logs de auditoria e autenticação do backoffice.
 
 ## Hooks
 ```ts
-useAuditLogs(filters)   → AuditLog[]
-useAuthLogs(filters)    → AuthLog[]
+useAuditLogs(filters: AuditLogFilters)  → AuditLogEntry[]   // GET /audit-logs
+useAuditLogsRaw()                       → raw API response   // sem filtros
+useAdminAuthLogs(search)                → AuthLog[]          // re-export de @/features/admin
 ```
 
 ## Types

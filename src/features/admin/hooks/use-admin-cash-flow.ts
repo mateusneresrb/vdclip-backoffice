@@ -4,65 +4,126 @@ import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
 
-interface ApiCashFlowSummary {
+interface ApiCashFlowResponse {
   currency: string
   total_inflow: string
   total_outflow: string
-  net_flow: string
+  total_net: string
   entries: Array<{
-    id: string
-    transaction_date: string
-    description: string
-    category_name: string
-    direction: string
-    currency: string
-    amount: string
-    type: string
-    created_at: string
-  }>
-  monthly_breakdown: Array<{
-    month: string
+    period: string
     inflow: string
     outflow: string
+    net: string
+    currency: string
   }>
 }
 
-function toFrontend(data: ApiCashFlowSummary, currency: Currency): CashFlowSummary {
+interface ApiTransactionItem {
+  id: string
+  type: string
+  direction: string
+  category_name: string
+  amount: string
+  currency: string
+  description: string
+  transaction_date: string
+  created_at?: string
+}
+
+function dateRangeToDates(dateRange: string): { date_from: string; date_to: string } {
+  const to = new Date()
+  const from = new Date()
+  switch (dateRange) {
+    case '1d':
+      from.setDate(from.getDate() - 1)
+      break
+    case '3d':
+      from.setDate(from.getDate() - 3)
+      break
+    case '7d':
+      from.setDate(from.getDate() - 7)
+      break
+    case '30d':
+      from.setDate(from.getDate() - 30)
+      break
+    case '90d':
+      from.setDate(from.getDate() - 90)
+      break
+    case 'ytd':
+      from.setMonth(0, 1)
+      break
+    case 'all':
+      from.setFullYear(from.getFullYear() - 5)
+      break
+    default:
+      from.setDate(from.getDate() - 30)
+  }
+  return {
+    date_from: from.toISOString().split('T')[0],
+    date_to: to.toISOString().split('T')[0],
+  }
+}
+
+function mapCategory(direction: string, type: string): CashFlowSummary['entries'][number]['category'] {
+  if (type === 'tax') return 'tax'
+  if (type === 'refund') return 'refund'
+  if (type === 'investment') return 'investment'
+  if (direction === 'inflow') return 'revenue'
+  if (direction === 'outflow') return 'expense'
+  return 'other'
+}
+
+function toFrontend(
+  summary: ApiCashFlowResponse,
+  transactions: ApiTransactionItem[],
+  currency: Currency,
+): CashFlowSummary {
   return {
     currency,
-    totalInflow: Number.parseFloat(data.total_inflow),
-    totalOutflow: Number.parseFloat(data.total_outflow),
-    netFlow: Number.parseFloat(data.net_flow),
-    entries: data.entries.map((e) => ({
-      id: e.id,
-      date: e.transaction_date,
-      description: e.description,
-      category: e.type as CashFlowSummary['entries'][number]['category'],
-      type: e.direction as 'inflow' | 'outflow',
-      currency: e.currency as Currency,
-      amount: Number.parseFloat(e.amount),
-      createdAt: e.created_at,
+    totalInflow: Number.parseFloat(summary.total_inflow),
+    totalOutflow: Number.parseFloat(summary.total_outflow),
+    netFlow: Number.parseFloat(summary.total_net),
+    entries: transactions.map((t) => ({
+      id: t.id,
+      date: t.transaction_date,
+      description: t.description,
+      category: mapCategory(t.direction, t.type),
+      type: t.direction as 'inflow' | 'outflow',
+      currency: t.currency as Currency,
+      amount: Number.parseFloat(t.amount),
+      createdAt: t.created_at ?? t.transaction_date,
     })),
-    monthlyBreakdown: data.monthly_breakdown.map((m) => ({
-      month: m.month,
-      inflow: Number.parseFloat(m.inflow),
-      outflow: Number.parseFloat(m.outflow),
+    monthlyBreakdown: summary.entries.map((e) => ({
+      month: e.period,
+      inflow: Number.parseFloat(e.inflow),
+      outflow: Number.parseFloat(e.outflow),
     })),
   }
 }
 
 const adminCashFlowKeys = {
   all: ['admin-cash-flow'] as const,
-  byCurrency: (currency: Currency) =>
-    [...adminCashFlowKeys.all, currency] as const,
+  byCurrency: (currency: Currency, dateRange: string) =>
+    [...adminCashFlowKeys.all, currency, dateRange] as const,
 }
 
-export function useAdminCashFlow(currency: Currency = 'USD') {
+export function useAdminCashFlow(currency: Currency = 'USD', dateRange: string = '30d') {
   return useQuery({
-    queryKey: adminCashFlowKeys.byCurrency(currency),
+    queryKey: adminCashFlowKeys.byCurrency(currency, dateRange),
     queryFn: async () => {
-      const data = await apiClient.get<ApiCashFlowSummary>('/dashboard/cash-flow', { currency })
-      return toFrontend(data, currency)
+      const dates = dateRangeToDates(dateRange)
+      const [summary, txPage] = await Promise.all([
+        apiClient.get<ApiCashFlowResponse>('/dashboard/cash-flow', {
+          currency,
+          ...dates,
+        }),
+        apiClient.get<{ items: ApiTransactionItem[] }>('/financial-transactions', {
+          currency,
+          per_page: 100,
+          ...dates,
+        }),
+      ])
+      return toFrontend(summary, txPage.items, currency)
     },
   })
 }

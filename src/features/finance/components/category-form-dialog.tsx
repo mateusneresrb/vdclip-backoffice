@@ -37,7 +37,7 @@ import { useCategoryMutations } from '../hooks/use-category-mutations'
 const categorySchema = z.object({
   code: z.string().min(1, 'Codigo obrigatorio'),
   name: z.string().min(1, 'Nome obrigatorio'),
-  type: z.enum(['revenue', 'expense', 'asset', 'liability']),
+  type: z.enum(['revenue', 'cogs', 'opex', 'tax', 'asset', 'liability', 'equity']),
   parentId: z.string().nullable(),
 })
 
@@ -65,7 +65,7 @@ export function CategoryFormDialog({
     defaultValues: {
       code: '',
       name: '',
-      type: 'expense',
+      type: 'opex',
       parentId: null,
     },
   })
@@ -83,7 +83,7 @@ export function CategoryFormDialog({
           : {
               code: '',
               name: '',
-              type: 'expense',
+              type: 'opex',
               parentId: null,
             },
       )
@@ -99,7 +99,16 @@ export function CategoryFormDialog({
         { onSuccess: () => onOpenChange(false) },
       )
     } else {
-      create.mutate(values, { onSuccess: () => onOpenChange(false) })
+      const parent = values.parentId
+        ? categories.find((c) => c.id === values.parentId)
+        : null
+      const level = parent ? parent.level + 1 : 1
+      const siblings = categories.filter((c) => c.parentId === values.parentId)
+      const displayOrder = siblings.length
+      create.mutate(
+        { ...values, level, displayOrder },
+        { onSuccess: () => onOpenChange(false) },
+      )
     }
   }
 
@@ -170,14 +179,23 @@ export function CategoryFormDialog({
                       <SelectItem value="revenue">
                         {t('finance.categoryTypes.revenue')}
                       </SelectItem>
-                      <SelectItem value="expense">
-                        {t('finance.categoryTypes.expense')}
+                      <SelectItem value="cogs">
+                        {t('finance.categoryTypes.cogs')}
+                      </SelectItem>
+                      <SelectItem value="opex">
+                        {t('finance.categoryTypes.opex')}
+                      </SelectItem>
+                      <SelectItem value="tax">
+                        {t('finance.categoryTypes.tax')}
                       </SelectItem>
                       <SelectItem value="asset">
                         {t('finance.categoryTypes.asset')}
                       </SelectItem>
                       <SelectItem value="liability">
                         {t('finance.categoryTypes.liability')}
+                      </SelectItem>
+                      <SelectItem value="equity">
+                        {t('finance.categoryTypes.equity')}
                       </SelectItem>
                     </SelectContent>
                   </Select>

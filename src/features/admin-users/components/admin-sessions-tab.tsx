@@ -1,5 +1,6 @@
 import type { AdminSession } from '../types'
-import { LogOut, MapPin, MonitorSmartphone, Search } from 'lucide-react'
+
+import { LogOut, MapPin, MonitorSmartphone, Search, Shield } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
@@ -20,76 +21,59 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePagination } from '@/hooks/use-pagination'
-import { showSuccessToast } from '@/lib/toast'
 
 import { cn } from '@/lib/utils'
-import { useAdminSessions } from '../hooks/use-admin-sessions'
+import { useAdminSessions, useRevokeOtherSessions, useRevokeSession } from '../hooks/use-admin-sessions'
 
 function truncateUserAgent(ua: string, maxLength = 40) {
   return ua.length > maxLength ? `${ua.slice(0, maxLength)}...` : ua
 }
 
 function formatLocation(session: AdminSession): string | null {
-  if (session.city && session.country) 
-return `${session.city}, ${session.country}`
-  if (session.country) 
-return session.country
-  if (session.city) 
-return session.city
-  return null
+  const parts = [session.city, session.region, session.country].filter(Boolean)
+  return parts.length > 0 ? parts.join(', ') : null
 }
 
 export function AdminSessionsTab() {
   const { t } = useTranslation('admin')
   const { data: sessions, isLoading } = useAdminSessions()
+  const revokeSession = useRevokeSession()
+  const revokeOtherSessions = useRevokeOtherSessions()
 
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
   const [revokingSession, setRevokingSession] = useState<AdminSession | null>(null)
   const [showRevokeAllDialog, setShowRevokeAllDialog] = useState(false)
 
   const filtered = useMemo(() => {
-    if (!sessions) 
-return []
-    return sessions.filter((session) => {
-      const matchesSearch =
-        !search ||
-        session.adminName.toLowerCase().includes(search.toLowerCase()) ||
-        session.ipAddress.includes(search)
-      const matchesStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'active' && session.isActive) ||
-        (statusFilter === 'expired' && !session.isActive)
-      return matchesSearch && matchesStatus
-    })
-  }, [sessions, search, statusFilter])
+    if (!sessions) return []
+    if (!search) return sessions
+    const q = search.toLowerCase()
+    return sessions.filter(
+      (s) => s.ipAddress.includes(q) || s.userAgent.toLowerCase().includes(q),
+    )
+  }, [sessions, search])
 
-  const hasActiveSessions = useMemo(
-    () => sessions?.some((s) => s.isActive) ?? false,
+  const otherSessionIds = useMemo(
+    () => sessions?.filter((s) => !s.isCurrent).map((s) => s.id) ?? [],
     [sessions],
   )
 
   const pagination = usePagination(filtered, 10)
 
   const handleRevokeConfirm = () => {
-    // TODO: API call to revoke session
+    if (revokingSession) {
+      revokeSession.mutate(revokingSession.id)
+    }
     setRevokingSession(null)
-    showSuccessToast({ title: t('toast.sessionRevoked') })
   }
 
   const handleRevokeAllConfirm = () => {
-    // TODO: API call to revoke all sessions
+    if (otherSessionIds.length > 0) {
+      revokeOtherSessions.mutate(otherSessionIds)
+    }
     setShowRevokeAllDialog(false)
-    showSuccessToast({ title: t('toast.allSessionsRevoked') })
   }
 
   if (isLoading) {
@@ -115,20 +99,11 @@ return []
             className="pl-9"
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-44">
-            <SelectValue placeholder={t('adminUsers.filterSessionStatus')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t('adminUsers.allSessions')}</SelectItem>
-            <SelectItem value="active">{t('adminUsers.sessionActive')}</SelectItem>
-            <SelectItem value="expired">{t('adminUsers.sessionExpired')}</SelectItem>
-          </SelectContent>
-        </Select>
-        {hasActiveSessions && (
+        {otherSessionIds.length > 0 && (
           <Button
             variant="destructive"
             className="gap-1.5"
+            disabled={revokeOtherSessions.isPending}
             onClick={() => setShowRevokeAllDialog(true)}
           >
             <LogOut className="size-4" />
@@ -149,17 +124,17 @@ return []
                 <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{session.adminName}</p>
                       <Badge
                         variant="outline"
                         className={cn(
                           'text-xs',
-                          session.isActive
-                            ? 'text-emerald-700 dark:text-emerald-400'
+                          session.isCurrent
+                            ? 'border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
                             : 'text-muted-foreground',
                         )}
                       >
-                        {session.isActive ? t('adminUsers.sessionActive') : t('adminUsers.sessionExpired')}
+                        {session.isCurrent && <Shield className="mr-1 size-3" />}
+                        {session.isCurrent ? t('adminUsers.currentSession') : t('adminUsers.sessionActive')}
                       </Badge>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -181,16 +156,17 @@ return []
                         {t('adminUsers.createdAt')}: {new Date(session.createdAt).toLocaleString()}
                       </span>
                       <span>
-                        {t('adminUsers.expiresAt')}: {new Date(session.expiresAt).toLocaleString()}
+                        {t('adminUsers.lastActivity')}: {new Date(session.lastActivityAt).toLocaleString()}
                       </span>
                     </div>
                   </div>
 
-                  {session.isActive && (
+                  {!session.isCurrent && (
                     <Button
                       variant="destructive"
                       size="sm"
                       className="gap-1.5"
+                      disabled={revokeSession.isPending}
                       onClick={() => setRevokingSession(session)}
                     >
                       <LogOut className="h-4 w-4" />
@@ -207,8 +183,7 @@ return []
       <PaginationControls {...pagination} />
 
       {/* Revoke Single Session Confirmation */}
-      <AlertDialog open={!!revokingSession} onOpenChange={(v) => { if (!v) 
-setRevokingSession(null) }}>
+      <AlertDialog open={!!revokingSession} onOpenChange={(v) => { if (!v) setRevokingSession(null) }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('adminUsers.confirmRevokeTitle')}</AlertDialogTitle>
@@ -228,7 +203,7 @@ setRevokingSession(null) }}>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Revoke All Sessions Confirmation */}
+      {/* Revoke All Other Sessions Confirmation */}
       <AlertDialog open={showRevokeAllDialog} onOpenChange={setShowRevokeAllDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

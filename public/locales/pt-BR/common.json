@@ -85,6 +85,8 @@
     "disable2faTitle": "Desativar Autenticação de Dois Fatores",
     "disable2faDescription": "Digite o código de 6 dígitos do seu aplicativo autenticador para confirmar a desativação.",
     "disable2faConfirm": "Desativar 2FA",
+    "mfaSetupError": "Erro ao configurar autenticação de dois fatores. Tente novamente.",
+    "mfaVerifyError": "Código inválido. Tente novamente.",
     "save": "Salvar",
     "cancel": "Cancelar",
     "tabs": {

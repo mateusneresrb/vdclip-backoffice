@@ -25,23 +25,14 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 import { Switch } from '@/components/ui/switch'
 
 const costCenterSchema = z.object({
-  code: z.string().min(1, 'Codigo obrigatorio'),
+  slug: z.string().min(1, 'Slug obrigatorio'),
   name: z.string().min(1, 'Nome obrigatorio'),
-  description: z.string().min(1, 'Descricao obrigatoria'),
-  responsible: z.string().min(1, 'Responsavel obrigatorio'),
-  budget: z.number().positive('Orcamento deve ser positivo'),
-  currency: z.enum(['USD', 'BRL']),
+  description: z.string().nullable(),
+  budget: z.number().positive('Orcamento deve ser positivo').nullable(),
   isActive: z.boolean(),
 })
 
@@ -64,12 +55,10 @@ export function CostCenterFormDialog({
   const form = useForm<CostCenterFormValues>({
     resolver: zodResolver(costCenterSchema),
     defaultValues: {
-      code: '',
+      slug: '',
       name: '',
-      description: '',
-      responsible: '',
-      budget: 0,
-      currency: 'BRL',
+      description: null,
+      budget: null,
       isActive: true,
     },
   })
@@ -79,21 +68,17 @@ export function CostCenterFormDialog({
       form.reset(
         costCenter
           ? {
-              code: costCenter.code,
+              slug: costCenter.slug,
               name: costCenter.name,
               description: costCenter.description,
-              responsible: costCenter.responsible,
               budget: costCenter.budget,
-              currency: costCenter.currency,
               isActive: costCenter.isActive,
             }
           : {
-              code: '',
+              slug: '',
               name: '',
-              description: '',
-              responsible: '',
-              budget: 0,
-              currency: 'BRL',
+              description: null,
+              budget: null,
               isActive: true,
             },
       )
@@ -125,12 +110,12 @@ export function CostCenterFormDialog({
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
-                name="code"
+                name="slug"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('finance.costCenters.code')}</FormLabel>
+                    <FormLabel>{t('finance.costCenters.slug')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="ENG-001" {...field} />
+                      <Input placeholder="eng-001" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -159,7 +144,10 @@ export function CostCenterFormDialog({
                 <FormItem>
                   <FormLabel>{t('finance.costCenters.description')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,63 +156,22 @@ export function CostCenterFormDialog({
 
             <FormField
               control={form.control}
-              name="responsible"
+              name="budget"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('finance.costCenters.responsible')}</FormLabel>
+                  <FormLabel>{t('finance.costCenters.budget')}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('finance.form.currency')}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="BRL">BRL</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="budget"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('finance.costCenters.budget')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <FormField
               control={form.control}

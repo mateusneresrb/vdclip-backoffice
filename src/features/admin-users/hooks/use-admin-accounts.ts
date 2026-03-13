@@ -2,63 +2,45 @@ import type { BackofficeAdmin } from '../types'
 
 import { useQuery } from '@tanstack/react-query'
 
-const mockAdmins: BackofficeAdmin[] = [
-  {
-    id: '1',
-    name: 'Admin Principal',
-    email: 'admin@vdclip.com',
-    role: 'super_admin',
-    avatar: undefined,
-    mfaEnabled: true,
-    isActive: true,
-    lastLoginAt: '2026-03-06T10:00:00Z',
-    createdAt: '2025-01-15T08:00:00Z',
-  },
-  {
-    id: '2',
-    name: 'Financeiro',
-    email: 'financeiro@vdclip.com',
-    role: 'finance_admin',
-    avatar: undefined,
-    mfaEnabled: true,
-    isActive: true,
-    lastLoginAt: '2026-03-05T16:30:00Z',
-    createdAt: '2025-03-10T09:00:00Z',
-  },
-  {
-    id: '3',
-    name: 'Suporte',
-    email: 'suporte@vdclip.com',
-    role: 'support',
-    avatar: undefined,
-    mfaEnabled: false,
-    isActive: true,
-    lastLoginAt: '2026-03-06T08:45:00Z',
-    createdAt: '2025-06-20T14:00:00Z',
-  },
-  {
-    id: '4',
-    name: 'Visualizador',
-    email: 'viewer@vdclip.com',
-    role: 'viewer',
-    avatar: undefined,
-    mfaEnabled: false,
-    isActive: false,
-    lastLoginAt: '2026-02-20T11:00:00Z',
-    createdAt: '2025-09-01T10:00:00Z',
-  },
-]
+import { apiClient } from '@/lib/api-client'
 
 const adminAccountsKeys = {
   all: ['admin-accounts'] as const,
+}
+
+function mapAdmin(data: Record<string, unknown>): BackofficeAdmin {
+  const firstName = String(data.first_name ?? '')
+  const lastName = String(data.last_name ?? '')
+  const name = data.name
+    ? String(data.name)
+    : [firstName, lastName].filter(Boolean).join(' ')
+
+  return {
+    id: String(data.id),
+    name,
+    email: String(data.email ?? ''),
+    role: (data.role as BackofficeAdmin['role']) ?? 'viewer',
+    avatar: (data.picture_url ?? data.avatar) as string | undefined,
+    mfaEnabled: Boolean(data.has_mfa_enabled ?? data.mfaEnabled ?? false),
+    isActive: Boolean(data.is_active ?? data.isActive ?? true),
+    lastLoginAt: String(data.last_login_at ?? data.lastLoginAt ?? ''),
+    createdAt: String(data.created_at ?? data.createdAt ?? ''),
+  }
 }
 
 export function useAdminAccounts() {
   return useQuery({
     queryKey: adminAccountsKeys.all,
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      return mockAdmins
+      const data = await apiClient.get<
+        Record<string, unknown>[]
+        | { items: Record<string, unknown>[] }
+        | { admin_users: Record<string, unknown>[] }
+      >('/admin-users', { page: 1, per_page: 100 })
+      const items = Array.isArray(data)
+        ? data
+        : ((data as Record<string, unknown>).items ?? (data as Record<string, unknown>).admin_users ?? []) as Record<string, unknown>[]
+      return items.map(mapAdmin)
     },
   })
 }

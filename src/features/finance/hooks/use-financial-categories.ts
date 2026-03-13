@@ -1,34 +1,39 @@
-import type { FinancialCategory } from '../types'
+import type { FinancialCategory, FinancialCategoryType } from '../types'
 
 import { useQuery } from '@tanstack/react-query'
 
-const mockCategories: FinancialCategory[] = [
-  // 1. Ativo (Asset)
-  { id: '1', parentId: null, code: '1', name: 'Ativo', type: 'asset' },
-  { id: '1.1', parentId: '1', code: '1.1', name: 'Circulante', type: 'asset' },
-  { id: '1.1.1', parentId: '1.1', code: '1.1.1', name: 'Caixa', type: 'asset' },
-  { id: '1.1.2', parentId: '1.1', code: '1.1.2', name: 'Bancos', type: 'asset' },
-  { id: '1.1.3', parentId: '1.1', code: '1.1.3', name: 'Contas a Receber', type: 'asset' },
-  { id: '1.2', parentId: '1', code: '1.2', name: 'Nao Circulante', type: 'asset' },
+import { apiClient } from '@/lib/api-client'
 
-  // 2. Passivo (Liability)
-  { id: '2', parentId: null, code: '2', name: 'Passivo', type: 'liability' },
-  { id: '2.1', parentId: '2', code: '2.1', name: 'Circulante', type: 'liability' },
-  { id: '2.1.1', parentId: '2.1', code: '2.1.1', name: 'Fornecedores', type: 'liability' },
-  { id: '2.1.2', parentId: '2.1', code: '2.1.2', name: 'Impostos', type: 'liability' },
+interface ApiCategory {
+  id: string
+  external_id: string
+  name: string
+  slug: string
+  parent_id: string | null
+  description: string | null
+  type: string
+  is_active: boolean
+  level?: number
+  display_order?: number
+  cost_group?: string | null
+  created_at: string
+  updated_at: string
+}
 
-  // 3. Receitas (Revenue)
-  { id: '3', parentId: null, code: '3', name: 'Receitas', type: 'revenue' },
-  { id: '3.1', parentId: '3', code: '3.1', name: 'Assinaturas', type: 'revenue' },
-  { id: '3.2', parentId: '3', code: '3.2', name: 'Creditos', type: 'revenue' },
-  { id: '3.3', parentId: '3', code: '3.3', name: 'Servicos', type: 'revenue' },
-
-  // 4. Despesas (Expense)
-  { id: '4', parentId: null, code: '4', name: 'Despesas', type: 'expense' },
-  { id: '4.1', parentId: '4', code: '4.1', name: 'Infraestrutura', type: 'expense' },
-  { id: '4.2', parentId: '4', code: '4.2', name: 'Pessoal', type: 'expense' },
-  { id: '4.3', parentId: '4', code: '4.3', name: 'Marketing', type: 'expense' },
-]
+function toFrontend(row: ApiCategory): FinancialCategory {
+  return {
+    id: row.external_id ?? row.id,
+    parentId: row.parent_id ?? null,
+    code: row.slug,
+    name: row.name,
+    type: row.type as FinancialCategoryType,
+    costGroup: row.cost_group ?? null,
+    level: row.level ?? 0,
+    displayOrder: row.display_order ?? 0,
+    description: row.description ?? null,
+    isActive: row.is_active,
+  }
+}
 
 const financialCategoryKeys = {
   all: ['financial-categories'] as const,
@@ -39,8 +44,8 @@ export function useFinancialCategories() {
   return useQuery({
     queryKey: financialCategoryKeys.list(),
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      return mockCategories
+      const res = await apiClient.get<{ items: ApiCategory[] }>('/financial-categories')
+      return res.items.map(toFrontend)
     },
   })
 }

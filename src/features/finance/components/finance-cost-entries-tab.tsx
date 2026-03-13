@@ -1,4 +1,4 @@
-import type { CostEntry, Currency } from '../types'
+import type { CostEntry, CostEntryStatus, Currency } from '../types'
 import { MessageSquare, MoreVertical, Package, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -48,15 +48,17 @@ function formatCurrency(amount: number, currency: Currency) {
   }).format(amount)
 }
 
-const typeColors: Record<CostEntry['type'], string> = {
-  recurring: 'bg-blue-500/15 text-blue-700 dark:text-blue-400',
-  one_time: 'bg-violet-500/15 text-violet-700 dark:text-violet-400',
+const statusColors: Record<CostEntryStatus, string> = {
+  draft: 'bg-slate-500/15 text-slate-700 dark:text-slate-400',
+  approved: 'bg-blue-500/15 text-blue-700 dark:text-blue-400',
+  paid: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+  cancelled: 'bg-red-500/15 text-red-700 dark:text-red-400',
 }
 
 const frequencyLabels: Record<string, string> = {
   monthly: 'finance.frequency.monthly',
   quarterly: 'finance.frequency.quarterly',
-  yearly: 'finance.frequency.yearly',
+  annual: 'finance.frequency.annual',
 }
 
 export function FinanceCostEntriesTab() {
@@ -79,7 +81,7 @@ return entries
       (e) =>
         e.description?.toLowerCase().includes(q) ||
         e.categoryName?.toLowerCase().includes(q) ||
-        e.costCenter?.toLowerCase().includes(q),
+        e.costCenterName?.toLowerCase().includes(q),
     )
   }, [entries, search])
 
@@ -138,13 +140,15 @@ return entries
                     <p className="truncate text-sm font-medium">{entry.description}</p>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-[11px] text-muted-foreground">{entry.categoryName}</span>
-                      <span className={cn('inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium', typeColors[entry.type])}>
-                        {t(`finance.costType.${entry.type}`)}
+                      <span className={cn('inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium', statusColors[entry.status])}>
+                        {t(`finance.costStatus.${entry.status}`)}
                       </span>
-                      {entry.frequency && (
-                        <span className="text-[10px] text-muted-foreground">{t(frequencyLabels[entry.frequency])}</span>
+                      {entry.isRecurring && entry.recurrenceInterval && (
+                        <span className="text-[10px] text-muted-foreground">{t(frequencyLabels[entry.recurrenceInterval])}</span>
                       )}
-                      <Badge variant="outline" className="text-[10px]">{entry.costCenter}</Badge>
+                      {entry.costCenterName && (
+                        <Badge variant="outline" className="text-[10px]">{entry.costCenterName}</Badge>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 self-end sm:self-auto">

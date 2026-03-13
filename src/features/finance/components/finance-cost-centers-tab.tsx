@@ -1,5 +1,5 @@
-import type { CostCenter, Currency } from '../types'
-import { Plus, Search, Target, User } from 'lucide-react'
+import type { CostCenter } from '../types'
+import { Plus, Search, Target } from 'lucide-react'
 import { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
@@ -20,10 +20,10 @@ import { cn } from '@/lib/utils'
 import { useCostCenters } from '../hooks/use-cost-centers'
 import { CostCenterFormDialog } from './cost-center-form-dialog'
 
-function formatCurrency(amount: number, currency: Currency) {
-  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency,
+    currency: 'BRL',
   }).format(amount)
 }
 
@@ -112,7 +112,8 @@ export function FinanceCostCentersTab() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {costCenters.map((cc) => {
-            const percentage = cc.budget > 0 ? (cc.spent / cc.budget) * 100 : 0
+            const hasBudget = cc.budget != null && cc.budget > 0
+            const percentage = hasBudget ? (cc.spent / cc.budget!) * 100 : 0
             const clampedPercentage = Math.min(percentage, 100)
 
             return (
@@ -128,7 +129,7 @@ export function FinanceCostCentersTab() {
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-base">{cc.name}</CardTitle>
-                      <p className="text-xs text-muted-foreground">{cc.code}</p>
+                      <p className="text-xs text-muted-foreground">{cc.slug}</p>
                     </div>
                     {!cc.isActive && (
                       <span className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -138,37 +139,44 @@ export function FinanceCostCentersTab() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <User className="h-3.5 w-3.5" />
-                    {cc.responsible}
-                  </div>
+                  {cc.description && (
+                    <p className="text-sm text-muted-foreground">{cc.description}</p>
+                  )}
 
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        {t('finance.costCenters.budgetUsage')}
-                      </span>
-                      <span className={cn('font-medium', getBudgetUsageTextColor(percentage))}>
-                        {percentage.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={cn(
-                          'h-full rounded-full transition-all',
-                          getBudgetUsageColor(percentage),
-                        )}
-                        style={{ width: `${clampedPercentage}%` }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>
-                        {t('finance.costCenters.spent')}: {formatCurrency(cc.spent, cc.currency)}
-                      </span>
-                      <span>
-                        {t('finance.costCenters.budget')}: {formatCurrency(cc.budget, cc.currency)}
-                      </span>
-                    </div>
+                    {hasBudget ? (
+                      <>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            {t('finance.costCenters.budgetUsage')}
+                          </span>
+                          <span className={cn('font-medium', getBudgetUsageTextColor(percentage))}>
+                            {percentage.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className={cn(
+                              'h-full rounded-full transition-all',
+                              getBudgetUsageColor(percentage),
+                            )}
+                            style={{ width: `${clampedPercentage}%` }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>
+                            {t('finance.costCenters.spent')}: {formatCurrency(cc.spent)}
+                          </span>
+                          <span>
+                            {t('finance.costCenters.budget')}: {formatCurrency(cc.budget!)}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-xs text-muted-foreground">
+                        {t('finance.costCenters.spent')}: {formatCurrency(cc.spent)}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

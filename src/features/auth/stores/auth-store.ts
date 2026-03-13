@@ -7,7 +7,11 @@ interface AuthState {
   admin: AdminAccount | null
   permissions: Set<string>
   status: AuthStatus
-  setAdmin: (admin: AdminAccount) => void
+  _token: string | null
+  _mfaToken: string | null
+  setAdmin: (admin: AdminAccount, permissions?: string[]) => void
+  setToken: (token: string) => void
+  setMfaToken: (token: string | null) => void
   clearAuth: () => void
   setStatus: (status: AuthStatus) => void
   completeMfaSetup: () => void
@@ -17,17 +21,23 @@ export const useAuthStore = create<AuthState>()((set) => ({
   admin: null,
   permissions: new Set<string>(),
   status: 'unauthenticated' as AuthStatus,
-  setAdmin: (admin) =>
+  _token: null,
+  _mfaToken: null,
+  setAdmin: (admin, permissions) =>
     set({
       admin,
-      permissions: new Set(ROLE_PERMISSIONS[admin.role]),
+      permissions: new Set(permissions ?? ROLE_PERMISSIONS[admin.role]),
       status: 'authenticated',
     }),
+  setToken: (token) => set({ _token: token }),
+  setMfaToken: (mfaToken) => set({ _mfaToken: mfaToken }),
   clearAuth: () =>
     set({
       admin: null,
       permissions: new Set<string>(),
       status: 'unauthenticated',
+      _token: null,
+      _mfaToken: null,
     }),
   setStatus: (status) => set({ status }),
   completeMfaSetup: () =>

@@ -1,7 +1,8 @@
 import type { AdminRole } from '@/features/auth/lib/permissions'
+import { useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown, ChevronUp, Pencil, Plus, Shield, Users } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
 
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { EmptyState } from '@/components/shared/empty-state'
@@ -19,7 +20,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-
 import {
   Table,
   TableBody,
@@ -29,7 +29,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { PERMISSIONS, ROLE_PERMISSIONS } from '@/features/auth/lib/permissions'
-import { showSuccessToast } from '@/lib/toast'
+import { apiClient } from '@/lib/api-client'
+import { showErrorToast, showSuccessToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { useAdminRoles } from '../hooks/use-admin-roles'
 
@@ -274,9 +275,11 @@ function CreateRoleDialog({
   onClose: () => void
 }) {
   const { t } = useTranslation('admin')
+  const queryClient = useQueryClient()
   const [displayName, setDisplayName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set())
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleToggle = (perm: string) => {
     setSelectedPermissions((prev) => {
@@ -290,17 +293,38 @@ function CreateRoleDialog({
     })
   }
 
-  const handleCreate = () => {
-    // TODO: API call
-    showSuccessToast({ title: t('toast.roleCreated') })
-    onClose()
-    setDisplayName('')
-    setDescription('')
-    setSelectedPermissions(new Set())
+  const handleCreate = async () => {
+    setIsSubmitting(true)
+    try {
+      const slug = displayName.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
+      const role = await apiClient.post<{ id: string }>('/admin-roles', {
+        name: displayName,
+        slug,
+        description: description || undefined,
+      })
+      if (role?.id && selectedPermissions.size > 0) {
+        await apiClient.put(`/admin-roles/${role.id}/permissions`, {
+          permission_ids: Array.from(selectedPermissions),
+        })
+      }
+      await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
+      showSuccessToast({ title: t('toast.roleCreated') })
+      onClose()
+      setDisplayName('')
+      setDescription('')
+      setSelectedPermissions(new Set())
+    } catch (error) {
+      showErrorToast({
+        title: t('toast.error'),
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleOpenChange = (v: boolean) => {
-    if (!v) 
+    if (!v)
 onClose()
   }
 
@@ -335,7 +359,7 @@ onClose()
           <Button variant="outline" onClick={onClose}>
             {t('adminUsers.cancel')}
           </Button>
-          <Button onClick={handleCreate} disabled={!isValid}>
+          <Button onClick={handleCreate} disabled={!isValid || isSubmitting}>
             {t('adminUsers.create')}
           </Button>
         </DialogFooter>
@@ -352,9 +376,10 @@ function EditRoleDialog({
   onClose: () => void
 }) {
   const { t } = useTranslation('admin')
+  const queryClient = useQueryClient()
 
   const initialPermissions = useMemo(() => {
-    if (!role) 
+    if (!role)
 return new Set<string>()
     return new Set(ROLE_PERMISSIONS[role.name] ?? [])
   }, [role])
@@ -362,6 +387,7 @@ return new Set<string>()
   const [displayName, setDisplayName] = useState('')
   const [description, setDescription] = useState('')
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set())
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const open = !!role
 
@@ -386,14 +412,33 @@ return new Set<string>()
     })
   }
 
-  const handleSave = () => {
-    // TODO: API call
-    showSuccessToast({ title: t('toast.roleUpdated') })
-    onClose()
+  const handleSave = async () => {
+    if (!role)
+      return
+    setIsSubmitting(true)
+    try {
+      await apiClient.patch(`/admin-roles/${role.id}`, {
+        name: displayName,
+        description: description || undefined,
+      })
+      await apiClient.put(`/admin-roles/${role.id}/permissions`, {
+        permission_ids: Array.from(selectedPermissions),
+      })
+      await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
+      showSuccessToast({ title: t('toast.roleUpdated') })
+      onClose()
+    } catch (error) {
+      showErrorToast({
+        title: t('toast.error'),
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleOpenChange = (v: boolean) => {
-    if (!v) 
+    if (!v)
 onClose()
   }
 
@@ -426,7 +471,7 @@ onClose()
           <Button variant="outline" onClick={onClose}>
             {t('adminUsers.cancel')}
           </Button>
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} disabled={isSubmitting}>
             {t('adminUsers.save')}
           </Button>
         </DialogFooter>

@@ -1,4 +1,5 @@
 import type { Currency, Receivable, ReceivableStatus } from '../types'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   CalendarCheck,
   CheckCircle2,
@@ -6,8 +7,8 @@ import {
   Package,
   Search,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
 
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PaginationControls } from '@/components/pagination-controls'
@@ -38,11 +39,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePagination } from '@/hooks/use-pagination'
-import { showSuccessToast } from '@/lib/toast'
+import { apiClient } from '@/lib/api-client'
+import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 import { cn } from '@/lib/utils'
+import { useBankAccounts } from '../hooks/use-bank-accounts'
 import { useReceivables } from '../hooks/use-receivables'
 import { FinancialNotes } from './financial-notes'
 
@@ -72,12 +82,16 @@ const statusFilters: Array<ReceivableStatus | 'all'> = [
 
 export function FinanceReceivablesTab() {
   const { t } = useTranslation('admin')
+  const queryClient = useQueryClient()
   const { data: receivables, isLoading } = useReceivables()
+  const { data: bankAccounts } = useBankAccounts()
   const [statusFilter, setStatusFilter] = useState<ReceivableStatus | 'all'>('all')
   const [confirmEntry, setConfirmEntry] = useState<Receivable | null>(null)
   const [receivedDate, setReceivedDate] = useState('')
+  const [bankAccountId, setBankAccountId] = useState('')
   const [search, setSearch] = useState('')
   const [notesEntry, setNotesEntry] = useState<Receivable | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const filtered = useMemo(() => {
     if (!receivables) 
@@ -127,13 +141,31 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
   function handleOpenConfirm(entry: Receivable) {
     setConfirmEntry(entry)
     setReceivedDate(new Date().toISOString().split('T')[0])
+    setBankAccountId('')
   }
 
-  function handleConfirmReceived() {
-    // TODO: API call to mark as received with receivedDate
-    showSuccessToast({ title: t('toast.receivableMarked') })
-    setConfirmEntry(null)
-    setReceivedDate('')
+  async function handleConfirmReceived() {
+    if (!confirmEntry || !bankAccountId)
+      return
+    setIsSubmitting(true)
+    try {
+      await apiClient.post(`/receivables/${confirmEntry.id}/receive`, {
+        bank_account_id: bankAccountId,
+        transaction_date: receivedDate,
+      })
+      await queryClient.invalidateQueries({ queryKey: ['receivables'] })
+      showSuccessToast({ title: t('toast.receivableMarked') })
+      setConfirmEntry(null)
+      setReceivedDate('')
+      setBankAccountId('')
+    } catch (error) {
+      showErrorToast({
+        title: t('toast.error'),
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -328,19 +360,36 @@ setNotesEntry(null) }}>
               })}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
-            <Label>{t('finance.receivables.receivedAt')}</Label>
-            <Input
-              type="date"
-              value={receivedDate}
-              onChange={(e) => setReceivedDate(e.target.value)}
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('finance.receivables.bankAccount')}</Label>
+              <Select value={bankAccountId} onValueChange={setBankAccountId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('finance.receivables.selectBankAccount')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {bankAccounts?.filter((a) => a.isActive).map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.name}{account.bank ? ` — ${account.bank}` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('finance.receivables.receivedAt')}</Label>
+              <Input
+                type="date"
+                value={receivedDate}
+                onChange={(e) => setReceivedDate(e.target.value)}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmEntry(null)}>
               {t('finance.form.cancel')}
             </Button>
-            <Button onClick={handleConfirmReceived} disabled={!receivedDate}>
+            <Button onClick={handleConfirmReceived} disabled={!receivedDate || !bankAccountId || isSubmitting}>
               <CalendarCheck className="mr-1 h-4 w-4" />
               {t('finance.receivables.confirmButton')}
             </Button>

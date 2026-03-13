@@ -1,0 +1,39 @@
+name: Release on Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate CalVer tag
+        id: calver
+        run: |
+          TODAY=$(date -u +"%Y%m%d")
+          LATEST=$(git tag --list "${TODAY}.*" --sort=-version:refname | head -n 1)
+          if [ -z "$LATEST" ]; then
+            echo "tag=${TODAY}.0" >> "$GITHUB_OUTPUT"
+          else
+            PATCH=$(echo "$LATEST" | cut -d'.' -f2)
+            echo "tag=${TODAY}.$((PATCH + 1))" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create tag and release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.calver.outputs.tag }}
+          name: ${{ steps.calver.outputs.tag }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

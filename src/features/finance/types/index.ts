@@ -2,65 +2,147 @@ import type { Currency } from '@/features/admin/types'
 
 export type { CashFlowEntry, CashFlowSummary, Currency } from '@/features/admin/types'
 
+export type FinancialCategoryType = 'revenue' | 'cogs' | 'opex' | 'tax' | 'asset' | 'liability' | 'equity'
+
 export interface FinancialCategory {
   id: string
   parentId: string | null
   code: string
   name: string
-  type: 'revenue' | 'expense' | 'asset' | 'liability'
+  type: FinancialCategoryType
+  costGroup: string | null
+  level: number
+  displayOrder: number
+  description: string | null
+  isActive: boolean
   children?: FinancialCategory[]
+}
+
+export interface CreateFinancialCategoryInput {
+  code: string
+  name: string
+  type: FinancialCategoryType
+  parentId: string | null
+  level: number
+  displayOrder: number
+  costGroup?: string | null
+  description?: string | null
 }
 
 export interface BankAccount {
   id: string
   name: string
-  bank: string
-  accountType: 'checking' | 'savings' | 'investment'
+  bank: string | null
+  accountType: 'checking' | 'savings' | 'payment_gateway' | 'investment'
+  agency: string | null
+  accountNumber: string | null
   currency: Currency
+  initialBalance: number
   balance: number
-  lastSyncAt: string
   isActive: boolean
 }
 
+export type CreateBankAccountInput = Omit<BankAccount, 'id' | 'balance'>
+
+export type CostEntryStatus = 'draft' | 'approved' | 'paid' | 'cancelled'
+export type RecurrenceInterval = 'monthly' | 'quarterly' | 'annual'
+export type CostAllocation = 'cogs' | 'r_and_d' | 'sales_marketing' | 'general_admin'
+
 export interface CostEntry {
   id: string
-  description: string
   categoryId: string
   categoryName: string
-  costCenter: string
-  type: 'recurring' | 'one_time'
-  frequency: 'monthly' | 'quarterly' | 'yearly' | null
-  currency: Currency
+  categoryExternalId: string
+  costCenterId: string | null
+  costCenterName: string | null
+  costCenterExternalId: string | null
+  recurringParentId: string | null
+  vendor: string
+  description: string
   amount: number
-  startDate: string
-  endDate: string | null
-  isActive: boolean
+  currency: Currency
+  isRecurring: boolean
+  recurrenceInterval: RecurrenceInterval | null
+  recurringSince: string | null
+  recurringUntil: string | null
+  status: CostEntryStatus
+  billingDate: string
+  dueDate: string | null
+  competenceMonth: string
+  costAllocation: CostAllocation
+  isVariable: boolean
+  unitMetric: string | null
+  unitQuantity: number | null
+  unitCost: number | null
+  paidAt: string | null
+  paymentMethod: string | null
+  financialTransactionId: string | null
+  receiptUrl: string | null
+  notes: string | null
+  createdBy: string | null
+  createdByEmail: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateCostEntryInput {
+  categoryId: string
+  costCenterId?: string | null
+  vendor: string
+  description: string
+  amount: number
+  currency: Currency
+  isRecurring: boolean
+  recurrenceInterval?: RecurrenceInterval | null
+  recurringUntil?: string | null
+  recurringSince?: string | null
+  billingDate: string
+  dueDate?: string | null
+  competenceMonth: string
+  costAllocation: CostAllocation
+  isVariable?: boolean
+  unitMetric?: string | null
+  unitQuantity?: number | null
+  unitCost?: number | null
+  receiptUrl?: string | null
+  notes?: string | null
 }
 
 export interface TaxConfig {
   id: string
-  name: string
-  code: string
+  taxType: string
   rate: number
-  type: 'federal' | 'state' | 'municipal'
-  isActive: boolean
-  appliesTo: 'revenue' | 'payroll' | 'services' | 'all'
+  municipalityCode: string | null
+  taxRegime: string | null
+  effectiveFrom: string
+  effectiveTo: string | null
 }
 
 export type ReceivableStatus = 'pending' | 'received' | 'overdue' | 'written_off' | 'cancelled'
-export type ReceivableSourceType = 'subscription' | 'one_time' | 'refund_reversal' | 'manual'
+export type ReceivableSourceType = 'gateway_payout' | 'invoice' | 'manual'
 
 export interface Receivable {
   id: string
   sourceType: ReceivableSourceType
+  sourceReference: string | null
   description: string
   customerName: string
+  customerExternalId: string | null
   amount: number
   currency: Currency
   expectedDate: string
   receivedAt: string | null
   status: ReceivableStatus
   notes: string | null
+  costCenterId: string | null
+  costCenterName: string | null
+  categoryId: string | null
+  categoryName: string | null
+  financialTransactionId: string | null
+  createdBy: string | null
+  createdByEmail: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export type FinancialNoteEntityType = 'financial_transaction' | 'cost_entry' | 'receivable'
@@ -83,13 +165,12 @@ export interface FinancialNote {
 
 export interface CostCenter {
   id: string
-  code: string
+  slug: string
   name: string
-  description: string
-  responsible: string
-  budget: number
+  description: string | null
+  budget: number | null
   spent: number
-  currency: Currency
   isActive: boolean
   createdAt: string
+  updatedAt: string
 }

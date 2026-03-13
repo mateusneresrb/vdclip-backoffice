@@ -2,122 +2,7 @@ import type { MetricsDateRange, PlatformMetrics } from '../types'
 
 import { useQuery } from '@tanstack/react-query'
 
-function generateMrrHistory(days: number) {
-  const data: { date: string; mrr: number }[] = []
-  let mrr = 14000
-  for (let i = days; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    mrr += Math.round((Math.random() - 0.3) * 200)
-    data.push({ date: date.toISOString().split('T')[0], mrr })
-  }
-  return data
-}
-
-function generateUserGrowth(days: number) {
-  const data: { date: string; total: number; new: number }[] = []
-  let total = 1100
-  for (let i = days; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    const newUsers = Math.round(Math.random() * 8 + 1)
-    total += newUsers
-    data.push({ date: date.toISOString().split('T')[0], total, new: newUsers })
-  }
-  return data
-}
-
-function generateRevenueComposition(days: number) {
-  const data: { date: string; newMrr: number; expansion: number; churn: number }[] = []
-  for (let i = days; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    data.push({
-      date: date.toISOString().split('T')[0],
-      newMrr: Math.round(Math.random() * 3000 + 500),
-      expansion: Math.round(Math.random() * 1200 + 200),
-      churn: -Math.round(Math.random() * 1500 + 300),
-    })
-  }
-  return data
-}
-
-const mockMetrics: PlatformMetrics = {
-  revenue: {
-    mrr: 18750,
-    newMrr: 2340,
-    expansionMrr: 890,
-    contractionMrr: 320,
-    churnedMrr: 1150,
-    reactivationMrr: 480,
-    creditRevenue: 3200,
-    totalRevenue: 224800,
-  },
-  subscriptions: {
-    activeSubscriptions: 727,
-    newSubscriptions: 63,
-    churnedSubscriptions: 18,
-    churnRate: 2.5,
-    byPlan: {
-      free: 520,
-      lite: 380,
-      premium: 280,
-      ultimate: 67,
-    },
-    byProvider: {
-      paddle: 480,
-      pix: 180,
-      internal: 67,
-    },
-    byBillingPeriod: {
-      monthly: 520,
-      yearly: 207,
-    },
-  },
-  users: {
-    totalUsers: 1247,
-    newUsersInPeriod: 63,
-    verifiedEmails: 1089,
-    socialAccounts: 412,
-  },
-  content: {
-    totalProjects: 15840,
-    completedProjects: 14200,
-    failedProjects: 340,
-    totalScheduledPosts: 12350,
-    publishedPosts: 11800,
-    failedPosts: 150,
-    byAiType: {
-      clips: 8400,
-      highlights: 4200,
-      shorts: 3240,
-    },
-    byProvider: {
-      youtube: 6200,
-      tiktok: 3800,
-      instagram: 2400,
-      facebook: 1500,
-      vdclip: 1940,
-    },
-  },
-  credits: {
-    totalCreditsIssued: 245000,
-    totalCreditsUsed: 198000,
-    expiredCredits: 12400,
-    byType: {
-      plan_cycle: 180000,
-      purchased: 42000,
-      promotional: 15000,
-      bonus: 6000,
-      adjustment: 2000,
-    },
-    transactionVolume: 324500,
-    refunds: 4200,
-  },
-  mrrHistory: generateMrrHistory(30),
-  userGrowth: generateUserGrowth(30),
-  revenueComposition: generateRevenueComposition(30),
-}
+import { apiClient } from '@/lib/api-client'
 
 const adminMetricsKeys = {
   all: ['admin-metrics'] as const,
@@ -125,12 +10,167 @@ const adminMetricsKeys = {
     [...adminMetricsKeys.all, range] as const,
 }
 
+function getDateParams(range: MetricsDateRange): Record<string, string> {
+  const now = new Date()
+  const to = now.toISOString().split('T')[0]
+  let from: string
+
+  switch (range) {
+    case '1d': {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 1)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+    case '3d': {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 3)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+    case '7d': {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 7)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+    case '90d': {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 90)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+    case 'ytd': {
+      from = `${now.getFullYear()}-01-01`
+      break
+    }
+    case 'all': {
+      from = '2024-01-01'
+      break
+    }
+    case '30d':
+    default: {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 30)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+  }
+
+  return { date_from: from, date_to: to }
+}
+
+function mapMetrics(d: Record<string, unknown>): PlatformMetrics {
+  const revenue = (d.revenue ?? {}) as Record<string, unknown>
+  const subs = (d.subscriptions ?? {}) as Record<string, unknown>
+  const users = (d.users ?? {}) as Record<string, unknown>
+  const content = (d.content ?? {}) as Record<string, unknown>
+  const credits = (d.credits ?? {}) as Record<string, unknown>
+
+  const byPlan = (subs.by_plan ?? subs.byPlan ?? {}) as Record<string, number>
+  const byProvider = (subs.by_provider ?? subs.byProvider ?? {}) as Record<string, number>
+  const byBilling = (subs.by_billing_period ?? subs.byBillingPeriod ?? {}) as Record<string, number>
+  const byAiType = (content.by_ai_type ?? content.byAiType ?? {}) as Record<string, number>
+  const byContentProvider = (content.by_provider ?? content.byProvider ?? {}) as Record<string, number>
+  const byCredType = (credits.by_type ?? credits.byType ?? {}) as Record<string, number>
+
+  return {
+    revenue: {
+      mrr: Number(revenue.mrr ?? 0),
+      newMrr: Number(revenue.new_mrr ?? revenue.newMrr ?? 0),
+      expansionMrr: Number(revenue.expansion_mrr ?? revenue.expansionMrr ?? 0),
+      contractionMrr: Number(revenue.contraction_mrr ?? revenue.contractionMrr ?? 0),
+      churnedMrr: Number(revenue.churned_mrr ?? revenue.churnedMrr ?? 0),
+      reactivationMrr: Number(revenue.reactivation_mrr ?? revenue.reactivationMrr ?? 0),
+      creditRevenue: Number(revenue.credit_revenue ?? revenue.creditRevenue ?? 0),
+      totalRevenue: Number(revenue.total_revenue ?? revenue.totalRevenue ?? 0),
+    },
+    subscriptions: {
+      activeSubscriptions: Number(subs.active_subscriptions ?? subs.activeSubscriptions ?? 0),
+      newSubscriptions: Number(subs.new_subscriptions ?? subs.newSubscriptions ?? 0),
+      churnedSubscriptions: Number(subs.churned_subscriptions ?? subs.churnedSubscriptions ?? 0),
+      churnRate: Number(subs.churn_rate ?? subs.churnRate ?? 0),
+      byPlan: {
+        free: Number(byPlan.free ?? 0),
+        lite: Number(byPlan.lite ?? 0),
+        premium: Number(byPlan.premium ?? 0),
+        ultimate: Number(byPlan.ultimate ?? 0),
+      },
+      byProvider: {
+        paddle: Number(byProvider.paddle ?? 0),
+        pix: Number(byProvider.pix ?? 0),
+        internal: Number(byProvider.internal ?? 0),
+      },
+      byBillingPeriod: {
+        monthly: Number(byBilling.monthly ?? 0),
+        yearly: Number(byBilling.yearly ?? 0),
+      },
+    },
+    users: {
+      totalUsers: Number(users.total_users ?? users.totalUsers ?? 0),
+      newUsersInPeriod: Number(users.new_users_in_period ?? users.newUsersInPeriod ?? 0),
+      verifiedEmails: Number(users.verified_emails ?? users.verifiedEmails ?? 0),
+      socialAccounts: Number(users.social_accounts ?? users.socialAccounts ?? 0),
+    },
+    content: {
+      totalProjects: Number(content.total_projects ?? content.totalProjects ?? 0),
+      completedProjects: Number(content.completed_projects ?? content.completedProjects ?? 0),
+      failedProjects: Number(content.failed_projects ?? content.failedProjects ?? 0),
+      totalScheduledPosts: Number(content.total_scheduled_posts ?? content.totalScheduledPosts ?? 0),
+      publishedPosts: Number(content.published_posts ?? content.publishedPosts ?? 0),
+      failedPosts: Number(content.failed_posts ?? content.failedPosts ?? 0),
+      byAiType: {
+        clips: Number(byAiType.clips ?? 0),
+        highlights: Number(byAiType.highlights ?? 0),
+        shorts: Number(byAiType.shorts ?? 0),
+      },
+      byProvider: byContentProvider,
+    },
+    credits: {
+      totalCreditsIssued: Number(credits.total_credits_issued ?? credits.totalCreditsIssued ?? 0),
+      totalCreditsUsed: Number(credits.total_credits_used ?? credits.totalCreditsUsed ?? 0),
+      expiredCredits: Number(credits.expired_credits ?? credits.expiredCredits ?? 0),
+      byType: {
+        plan_cycle: Number(byCredType.plan_cycle ?? 0),
+        purchased: Number(byCredType.purchased ?? 0),
+        promotional: Number(byCredType.promotional ?? 0),
+        bonus: Number(byCredType.bonus ?? 0),
+        adjustment: Number(byCredType.adjustment ?? 0),
+      },
+      transactionVolume: Number(credits.transaction_volume ?? credits.transactionVolume ?? 0),
+      refunds: Number(credits.refunds ?? 0),
+    },
+    mrrHistory: Array.isArray(d.mrr_history ?? d.mrrHistory)
+      ? ((d.mrr_history ?? d.mrrHistory) as Record<string, unknown>[]).map(h => ({
+          date: String(h.date ?? ''),
+          mrr: Number(h.mrr ?? 0),
+        }))
+      : [],
+    userGrowth: Array.isArray(d.user_growth ?? d.userGrowth)
+      ? ((d.user_growth ?? d.userGrowth) as Record<string, unknown>[]).map(g => ({
+          date: String(g.date ?? ''),
+          total: Number(g.total ?? 0),
+          new: Number(g.new ?? 0),
+        }))
+      : [],
+    revenueComposition: Array.isArray(d.revenue_composition ?? d.revenueComposition)
+      ? ((d.revenue_composition ?? d.revenueComposition) as Record<string, unknown>[]).map(r => ({
+          date: String(r.date ?? ''),
+          newMrr: Number(r.new_mrr ?? r.newMrr ?? 0),
+          expansion: Number(r.expansion ?? 0),
+          churn: Number(r.churn ?? 0),
+        }))
+      : [],
+  }
+}
+
 export function useAdminMetrics(dateRange: MetricsDateRange = '30d') {
   return useQuery({
     queryKey: adminMetricsKeys.byRange(dateRange),
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      return mockMetrics
+      const params = getDateParams(dateRange)
+      const data = await apiClient.get<Record<string, unknown>>('/platform/metrics', params)
+      return mapMetrics(data)
     },
   })
 }

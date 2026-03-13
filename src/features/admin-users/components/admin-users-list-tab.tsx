@@ -1,4 +1,5 @@
 import type { BackofficeAdmin } from '../types'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   MoreHorizontal,
   Pencil,
@@ -9,8 +10,8 @@ import {
   ShieldX,
   Users,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
 
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PaginationControls } from '@/components/pagination-controls'
@@ -61,7 +62,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { usePagination } from '@/hooks/use-pagination'
-import { showSuccessToast } from '@/lib/toast'
+import { apiClient } from '@/lib/api-client'
+import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 import { cn } from '@/lib/utils'
 import { useAdminAccounts } from '../hooks/use-admin-accounts'
@@ -78,6 +80,7 @@ const roles = ['super_admin', 'finance_admin', 'finance_viewer', 'support', 'vie
 
 export function AdminUsersListTab() {
   const { t } = useTranslation('admin')
+  const queryClient = useQueryClient()
   const { data: admins, isLoading } = useAdminAccounts()
 
   const [search, setSearch] = useState('')
@@ -106,11 +109,25 @@ return []
 
   const pagination = usePagination(filtered, 10)
 
-  const handleToggleConfirm = () => {
-    // TODO: API call to activate/deactivate
-    const key = toggleAdmin?.isActive ? 'toast.adminDeactivated' : 'toast.adminActivated'
-    setToggleAdmin(null)
-    showSuccessToast({ title: t(key) })
+  const handleToggleConfirm = async () => {
+    if (!toggleAdmin)
+      return
+    const endpoint = toggleAdmin.isActive
+      ? `/admin-users/${toggleAdmin.id}/lock`
+      : `/admin-users/${toggleAdmin.id}/unlock`
+    const key = toggleAdmin.isActive ? 'toast.adminDeactivated' : 'toast.adminActivated'
+    try {
+      await apiClient.post(endpoint, {})
+      await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      showSuccessToast({ title: t(key) })
+    } catch (error) {
+      showErrorToast({
+        title: t('toast.error'),
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setToggleAdmin(null)
+    }
   }
 
   if (isLoading) {
@@ -343,24 +360,42 @@ function CreateAdminDialog({
   onClose: () => void
 }) {
   const { t } = useTranslation('admin')
+  const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('')
   const [tempPassword, setTempPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleOpenChange = (v: boolean) => {
-    if (!v) 
+    if (!v)
 onClose()
   }
 
-  const handleCreate = () => {
-    // TODO: API call
-    showSuccessToast({ title: t('toast.adminInvited') })
-    onClose()
-    setName('')
-    setEmail('')
-    setRole('')
-    setTempPassword('')
+  const handleCreate = async () => {
+    setIsSubmitting(true)
+    try {
+      await apiClient.post('/admin-users', {
+        name,
+        email,
+        role,
+        temp_password: tempPassword,
+      })
+      await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      showSuccessToast({ title: t('toast.adminInvited') })
+      onClose()
+      setName('')
+      setEmail('')
+      setRole('')
+      setTempPassword('')
+    } catch (error) {
+      showErrorToast({
+        title: t('toast.error'),
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isValid = name.trim() && email.trim() && role && tempPassword.trim()
@@ -410,7 +445,7 @@ onClose()
           <Button variant="outline" onClick={onClose}>
             {t('adminUsers.cancel')}
           </Button>
-          <Button onClick={handleCreate} disabled={!isValid}>
+          <Button onClick={handleCreate} disabled={!isValid || isSubmitting}>
             {t('adminUsers.create')}
           </Button>
         </DialogFooter>
@@ -427,13 +462,15 @@ function EditAdminDialog({
   onClose: () => void
 }) {
   const { t } = useTranslation('admin')
+  const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const open = !!admin
   const handleOpenChange = (v: boolean) => {
-    if (!v) 
+    if (!v)
 onClose()
   }
 
@@ -445,10 +482,23 @@ onClose()
     }
   }, [admin])
 
-  const handleSave = () => {
-    // TODO: API call
-    showSuccessToast({ title: t('toast.adminUpdated') })
-    onClose()
+  const handleSave = async () => {
+    if (!admin)
+      return
+    setIsSubmitting(true)
+    try {
+      await apiClient.patch(`/admin-users/${admin.id}`, { name, email, role })
+      await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      showSuccessToast({ title: t('toast.adminUpdated') })
+      onClose()
+    } catch (error) {
+      showErrorToast({
+        title: t('toast.error'),
+        description: error instanceof Error ? error.message : undefined,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -487,7 +537,7 @@ onClose()
           <Button variant="outline" onClick={onClose}>
             {t('adminUsers.cancel')}
           </Button>
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} disabled={isSubmitting}>
             {t('adminUsers.save')}
           </Button>
         </DialogFooter>

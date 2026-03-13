@@ -9,19 +9,42 @@ Não tem rota própria — fornece tipos e hooks para todos os outros features.
 
 ## Hooks disponíveis
 ```ts
-useAdminMetrics(dateRange)   → PlatformMetrics          // Dashboard geral
-useSaasMetrics()             → SaasMetricsSnapshot[]    // Métricas SaaS históricas
-useAdminRevenue(dateRange)   → RevenueSnapshot[]        // Receita por moeda
-useAdminUsers(filters)       → { users, total, page }   // Listagem de usuários
-useAdminUser(userId)         → AdminUser                // Detalhe usuário
-useAdminTeams(filters)       → AdminTeamDetail[]        // Times
-useAdminTransactions(filters)→ TransactionPage          // Transações
-useAdminSubscriptions(filters)→ Subscription[]         // Assinaturas
-useAdminCashFlow(filters)    → CashFlowSummary          // Fluxo de caixa
-useAdminAuthLogs(filters)    → AuthLog[]                // Logs de auth
-useAdminMedia(userId)        → Media[]                  // Mídias de um usuário
-useAdminProviders()          → Provider[]               // Integrações
-useAdminTemplates()          → Template[]               // Templates admin
+// Dashboard & Métricas
+useAdminMetrics(dateRange: MetricsDateRange)    → PlatformMetrics
+useSaasMetrics()                                → SaasMetricsSnapshot[]
+useAdminRevenue(dateRange: MetricsDateRange)    → RevenueDailySnapshot[]
+useAdminCashFlow(currency, dateRange)           → CashFlowSummary
+
+// Usuários
+useAdminUsers(query: UserSearchQuery)           → { users, total, page }
+useAdminUser(userId)                            → AdminUser
+useAdminUserAffiliate(userId, enabled)          → AffiliateInfo  // MOCK — sem endpoint
+useAdminUserMedia(userId, enabled)              → Media[]
+useAdminUserTemplates(userId, enabled)          → Template[]
+useAdminUserScheduledPosts(userId, enabled)     → ScheduledPost[]
+
+// Times
+useAdminTeams(query: TeamSearchQuery)           → AdminTeamDetail[]
+useAdminTeamSettings(teamId, enabled)           → TeamSettings
+useAdminTeamMedia(teamId, enabled)              → Media[]
+useAdminTeamTemplates(teamId, enabled)          → Template[]
+useAdminTeamScheduledPosts(teamId, enabled)     → ScheduledPost[]
+
+// Financeiro & Transações
+useAdminTransactions(search, typeFilter)        → TransactionPage
+useAdminSubscriptions(search, statusFilter)     → Subscription[]
+useAdminAuthLogs(search)                        → AuthLog[]
+useAdminProviders()                             → Provider[]
+useAdminMediaResults(mediaId, enabled)          → MediaResult[]
+
+// Compras Pendentes
+useAdminPendingPurchases(filters)               → PendingPurchasePage
+useDismissPendingPurchase()                     → mutation
+useCancelPendingPurchase()                      → mutation
+
+// Scheduled Posts Mutations
+useUpdateScheduledPost(scope, scopeId)          → mutation
+useCancelScheduledPost(scope, scopeId)          → mutation
 ```
 
 ## Tipos Centrais (todos os features importam daqui via `@/features/admin/types`)
@@ -43,10 +66,13 @@ SaasMetricsSnapshot, Currency ('USD' | 'BRL')
 
 // Financeiro
 CashFlowEntry, CashFlowSummary, UserActivityEvent, UserSocialConnection
+
+// Compras Pendentes
+PendingPurchase  // status: 'pending' | 'claimed' | 'expired'
 ```
 
 ## Importante
-- Hooks aqui são **todos mock** atualmente
-- Ao integrar API real: substituir `queryFn` inline por chamadas HTTP autenticadas
+- Todos os hooks usam `api-client` para chamadas reais (exceto `useAdminUserAffiliate` que mantém mock — sem endpoint backend)
+- Cada hook tem mappers inline para converter snake_case do backend para camelCase do frontend
 - Types devem espelhar o schema do backend — quando o schema mudar, atualizar aqui primeiro
 - `SaasMetricsSnapshot` espelha a tabela `business_metrics_snapshots` (migration V016)

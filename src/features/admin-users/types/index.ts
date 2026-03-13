@@ -28,8 +28,9 @@ export interface AdminSession {
   ipAddress: string
   userAgent: string
   city?: string
+  region?: string
   country?: string
+  lastActivityAt: string
   createdAt: string
-  expiresAt: string
-  isActive: boolean
+  isCurrent: boolean
 }

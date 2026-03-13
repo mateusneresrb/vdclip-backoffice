@@ -24,17 +24,23 @@ import { useFinancialCategories } from '../hooks/use-financial-categories'
 import { CategoryFormDialog } from './category-form-dialog'
 
 const typeLabels: Record<FinancialCategory['type'], string> = {
+  revenue: 'finance.categoryTypes.revenue',
+  cogs: 'finance.categoryTypes.cogs',
+  opex: 'finance.categoryTypes.opex',
+  tax: 'finance.categoryTypes.tax',
   asset: 'finance.categoryTypes.asset',
   liability: 'finance.categoryTypes.liability',
-  revenue: 'finance.categoryTypes.revenue',
-  expense: 'finance.categoryTypes.expense',
+  equity: 'finance.categoryTypes.equity',
 }
 
 const typeColors: Record<FinancialCategory['type'], string> = {
+  revenue: 'text-emerald-600 dark:text-emerald-400',
+  cogs: 'text-orange-600 dark:text-orange-400',
+  opex: 'text-amber-600 dark:text-amber-400',
+  tax: 'text-violet-600 dark:text-violet-400',
   asset: 'text-blue-600 dark:text-blue-400',
   liability: 'text-red-600 dark:text-red-400',
-  revenue: 'text-emerald-600 dark:text-emerald-400',
-  expense: 'text-amber-600 dark:text-amber-400',
+  equity: 'text-teal-600 dark:text-teal-400',
 }
 
 function buildTree(categories: FinancialCategory[]): FinancialCategory[] {
@@ -138,10 +144,13 @@ return all
   const allCategories = categories ?? []
   const tree = buildTree(filteredCategories)
   const grouped = {
+    revenue: tree.filter((c) => c.type === 'revenue'),
+    cogs: tree.filter((c) => c.type === 'cogs'),
+    opex: tree.filter((c) => c.type === 'opex'),
+    tax: tree.filter((c) => c.type === 'tax'),
     asset: tree.filter((c) => c.type === 'asset'),
     liability: tree.filter((c) => c.type === 'liability'),
-    revenue: tree.filter((c) => c.type === 'revenue'),
-    expense: tree.filter((c) => c.type === 'expense'),
+    equity: tree.filter((c) => c.type === 'equity'),
   }
 
   const hasChildren = (cat: FinancialCategory) => (cat.children?.length ?? 0) > 0
