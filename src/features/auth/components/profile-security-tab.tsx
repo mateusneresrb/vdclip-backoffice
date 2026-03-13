@@ -1,4 +1,4 @@
-import { Key, MapPin, Monitor, Shield, ShieldCheck, ShieldX } from 'lucide-react'
+import { Key, Loader2, MapPin, Monitor, Shield, ShieldCheck, ShieldX } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -23,14 +23,12 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import i18n from '@/i18n'
-import { showSuccessToast } from '@/lib/toast'
+import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 import { useAuth } from '../hooks/use-auth'
-import { useProfileSessions } from '../hooks/use-profile-sessions'
+import { useProfileSessions, useRevokeSession } from '../hooks/use-profile-sessions'
+import { authApi } from '../lib/auth-api'
 import { useAuthStore } from '../stores/auth-store'
-
-// Mock QR code data — replace with actual API response when integrating
-const MOCK_TOTP_SECRET = 'JBSWY3DPEHPK3PXP'
 
 interface PasswordFormValues {
   currentPassword: string
@@ -43,12 +41,16 @@ export function ProfileSecurityTab() {
   const { admin } = useAuth()
   const completeMfaSetup = useAuthStore((s) => s.completeMfaSetup)
   const { data: sessions, isLoading: sessionsLoading } = useProfileSessions()
+  const revokeSession = useRevokeSession()
 
   const [setupDialogOpen, setSetupDialogOpen] = useState(false)
   const [setupStep, setSetupStep] = useState<'scan' | 'verify'>('scan')
   const [otpValue, setOtpValue] = useState('')
   const [disableDialogOpen, setDisableDialogOpen] = useState(false)
   const [disableOtp, setDisableOtp] = useState('')
+  const [mfaSetupData, setMfaSetupData] = useState<{ secret: string; provisioningUri: string } | null>(null)
+  const [mfaLoading, setMfaLoading] = useState(false)
+  const [passwordChanging, setPasswordChanging] = useState(false)
 
   const { register, handleSubmit, reset, watch } = useForm<PasswordFormValues>({
     defaultValues: {
@@ -62,38 +64,77 @@ export function ProfileSecurityTab() {
   const newPassword = watch('newPassword')
   const confirmPassword = watch('confirmPassword')
 
-  if (!admin) 
+  if (!admin)
 return null
 
-  const onSubmitPassword = (_data: PasswordFormValues) => {
-    // TODO: API call
-    reset()
-    showSuccessToast({ title: i18n.t('admin:toast.passwordChanged') })
+  const onSubmitPassword = async (data: PasswordFormValues) => {
+    setPasswordChanging(true)
+    try {
+      await authApi.changePassword(data.currentPassword, data.newPassword)
+      reset()
+      showSuccessToast({ title: i18n.t('admin:toast.passwordChanged') })
+    } catch (err) {
+      showErrorToast({ title: err instanceof Error ? err.message : i18n.t('admin:toast.error') })
+    } finally {
+      setPasswordChanging(false)
+    }
   }
 
-  const handleRevokeSession = (_sessionId: string) => {
-    // TODO: API call
-    showSuccessToast({ title: i18n.t('admin:toast.profileSessionRevoked') })
+  const handleRevokeSession = (sessionId: string) => {
+    revokeSession.mutate(sessionId, {
+      onSuccess: () => showSuccessToast({ title: i18n.t('admin:toast.profileSessionRevoked') }),
+      onError: (err) => showErrorToast({ title: err instanceof Error ? err.message : i18n.t('admin:toast.error') }),
+    })
   }
 
-  const handleOpenSetup = () => {
+  const handleOpenSetup = async () => {
     setSetupStep('scan')
     setOtpValue('')
+    setMfaSetupData(null)
     setSetupDialogOpen(true)
+    setMfaLoading(true)
+    try {
+      const data = await authApi.setupMfa()
+      setMfaSetupData({ secret: data.secret, provisioningUri: data.provisioning_uri })
+    } catch (err) {
+      showErrorToast({ title: err instanceof Error ? err.message : i18n.t('admin:toast.error') })
+      setSetupDialogOpen(false)
+    } finally {
+      setMfaLoading(false)
+    }
   }
 
-  const handleVerifyEnable = () => {
-    // TODO: API call to enable MFA with otpValue
-    completeMfaSetup()
-    showSuccessToast({ title: i18n.t('admin:toast.mfaEnabled') })
-    setSetupDialogOpen(false)
+  const handleVerifyEnable = async () => {
+    setMfaLoading(true)
+    try {
+      await authApi.enableMfa(otpValue)
+      completeMfaSetup()
+      showSuccessToast({ title: i18n.t('admin:toast.mfaEnabled') })
+      setSetupDialogOpen(false)
+    } catch (err) {
+      showErrorToast({ title: err instanceof Error ? err.message : i18n.t('admin:toast.error') })
+      setOtpValue('')
+    } finally {
+      setMfaLoading(false)
+    }
   }
 
-  const handleDisable2fa = () => {
-    // TODO: API call to disable MFA with disableOtp
-    showSuccessToast({ title: i18n.t('admin:toast.mfaDisabled') })
-    setDisableDialogOpen(false)
-    setDisableOtp('')
+  const handleDisable2fa = async () => {
+    setMfaLoading(true)
+    try {
+      await authApi.disableMfa(disableOtp)
+      useAuthStore.setState((state) => ({
+        admin: state.admin ? { ...state.admin, mfaEnabled: false } : null,
+      }))
+      showSuccessToast({ title: i18n.t('admin:toast.mfaDisabled') })
+      setDisableDialogOpen(false)
+      setDisableOtp('')
+    } catch (err) {
+      showErrorToast({ title: err instanceof Error ? err.message : i18n.t('admin:toast.error') })
+      setDisableOtp('')
+    } finally {
+      setMfaLoading(false)
+    }
   }
 
   return (
@@ -126,8 +167,9 @@ return null
               </div>
               <Button
                 type="submit"
-                disabled={!currentPassword || !newPassword || newPassword !== confirmPassword}
+                disabled={!currentPassword || !newPassword || newPassword !== confirmPassword || passwordChanging}
               >
+                {passwordChanging && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('profile.updatePassword')}
               </Button>
             </form>
@@ -181,25 +223,33 @@ return null
                   <DialogDescription>{t('profile.setup2faDescription')}</DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col items-center gap-4 py-2">
-                  <div className="rounded-lg border bg-white p-3">
-                    <QRCode
-                      value={`otpauth://totp/VDClip:${encodeURIComponent(`${admin.name} (${admin.email})`)}?secret=${MOCK_TOTP_SECRET}&issuer=VDClip`}
-                      size={192}
-                      level="H"
-                    />
-                  </div>
-                  <div className="w-full space-y-1.5">
-                    <p className="text-xs text-muted-foreground">{t('profile.setup2faSecretLabel')}</p>
-                    <code className="block w-full rounded-md bg-muted px-3 py-2 text-center font-mono text-sm tracking-widest">
-                      {MOCK_TOTP_SECRET}
-                    </code>
-                  </div>
+                  {mfaLoading ? (
+                    <div className="flex h-[220px] items-center justify-center">
+                      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : mfaSetupData ? (
+                    <>
+                      <div className="rounded-lg border bg-white p-3">
+                        <QRCode
+                          value={mfaSetupData.provisioningUri}
+                          size={192}
+                          level="H"
+                        />
+                      </div>
+                      <div className="w-full space-y-1.5">
+                        <p className="text-xs text-muted-foreground">{t('profile.setup2faSecretLabel')}</p>
+                        <code className="block w-full select-all rounded-md bg-muted px-3 py-2 text-center font-mono text-sm tracking-widest">
+                          {mfaSetupData.secret}
+                        </code>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setSetupDialogOpen(false)}>
                     {t('cancel')}
                   </Button>
-                  <Button onClick={() => setSetupStep('verify')}>
+                  <Button onClick={() => setSetupStep('verify')} disabled={!mfaSetupData}>
                     {t('profile.setup2faVerify')}
                   </Button>
                 </DialogFooter>
@@ -223,7 +273,8 @@ return null
                   <Button variant="outline" onClick={() => setSetupStep('scan')}>
                     {t('profile.setup2faBack')}
                   </Button>
-                  <Button onClick={handleVerifyEnable} disabled={otpValue.length < 6}>
+                  <Button onClick={handleVerifyEnable} disabled={otpValue.length < 6 || mfaLoading}>
+                    {mfaLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {t('profile.setup2faVerify')}
                   </Button>
                 </DialogFooter>
@@ -252,7 +303,8 @@ return null
               <Button variant="outline" onClick={() => setDisableDialogOpen(false)}>
                 {t('cancel')}
               </Button>
-              <Button variant="destructive" onClick={handleDisable2fa} disabled={disableOtp.length < 6}>
+              <Button variant="destructive" onClick={handleDisable2fa} disabled={disableOtp.length < 6 || mfaLoading}>
+                {mfaLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('profile.disable2faConfirm')}
               </Button>
             </DialogFooter>
@@ -316,6 +368,7 @@ return null
                         size="sm"
                         className="shrink-0 text-destructive hover:text-destructive"
                         onClick={() => handleRevokeSession(session.id)}
+                        disabled={revokeSession.isPending}
                       >
                         {t('profile.sessions.revoke')}
                       </Button>

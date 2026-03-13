@@ -35,20 +35,14 @@ const mockCashFlowUSD = {
   currency: 'USD',
   total_inflow: '28450.00',
   total_outflow: '4680.00',
-  net_flow: '23770.00',
-  monthly_breakdown: [
-    { month: '2025-10', inflow: '22000.00', outflow: '3800.00' },
-    { month: '2025-11', inflow: '24500.00', outflow: '4100.00' },
-    { month: '2025-12', inflow: '26200.00', outflow: '4300.00' },
-    { month: '2026-01', inflow: '25800.00', outflow: '4500.00' },
-    { month: '2026-02', inflow: '27100.00', outflow: '4600.00' },
-    { month: '2026-03', inflow: '28450.00', outflow: '4680.00' },
-  ],
+  total_net: '23770.00',
   entries: [
-    { id: 'ft-1', transaction_date: '2026-03-05', description: 'Paddle subscription payments', category_name: 'Receita SaaS', direction: 'inflow', currency: 'USD', amount: '12500.00', type: 'revenue', created_at: '2026-03-05T00:00:00Z' },
-    { id: 'ft-2', transaction_date: '2026-03-04', description: 'AWS infrastructure costs', category_name: 'Infraestrutura', direction: 'outflow', currency: 'USD', amount: '2800.00', type: 'expense', created_at: '2026-03-04T00:00:00Z' },
-    { id: 'ft-3', transaction_date: '2026-03-03', description: 'Credit package purchases', category_name: 'Créditos', direction: 'inflow', currency: 'USD', amount: '8950.00', type: 'revenue', created_at: '2026-03-03T00:00:00Z' },
-    { id: 'ft-4', transaction_date: '2026-03-02', description: 'Stripe processing fees', category_name: 'Taxas', direction: 'outflow', currency: 'USD', amount: '450.00', type: 'tax', created_at: '2026-03-02T00:00:00Z' },
+    { period: '2025-10', inflow: '22000.00', outflow: '3800.00', net: '18200.00', currency: 'USD' },
+    { period: '2025-11', inflow: '24500.00', outflow: '4100.00', net: '20400.00', currency: 'USD' },
+    { period: '2025-12', inflow: '26200.00', outflow: '4300.00', net: '21900.00', currency: 'USD' },
+    { period: '2026-01', inflow: '25800.00', outflow: '4500.00', net: '21300.00', currency: 'USD' },
+    { period: '2026-02', inflow: '27100.00', outflow: '4600.00', net: '22500.00', currency: 'USD' },
+    { period: '2026-03', inflow: '28450.00', outflow: '4680.00', net: '23770.00', currency: 'USD' },
   ],
 }
 
@@ -56,20 +50,14 @@ const mockCashFlowBRL = {
   currency: 'BRL',
   total_inflow: '85200.00',
   total_outflow: '12400.00',
-  net_flow: '72800.00',
-  monthly_breakdown: [
-    { month: '2025-10', inflow: '68000.00', outflow: '9500.00' },
-    { month: '2025-11', inflow: '72000.00', outflow: '10200.00' },
-    { month: '2025-12', inflow: '78000.00', outflow: '11000.00' },
-    { month: '2026-01', inflow: '80000.00', outflow: '11500.00' },
-    { month: '2026-02', inflow: '82500.00', outflow: '12000.00' },
-    { month: '2026-03', inflow: '85200.00', outflow: '12400.00' },
-  ],
+  total_net: '72800.00',
   entries: [
-    { id: 'ft-9', transaction_date: '2026-03-05', description: 'PIX subscription payments', category_name: 'Receita SaaS', direction: 'inflow', currency: 'BRL', amount: '35000.00', type: 'revenue', created_at: '2026-03-05T00:00:00Z' },
-    { id: 'ft-10', transaction_date: '2026-03-04', description: 'Woovi gateway fees', category_name: 'Taxas', direction: 'outflow', currency: 'BRL', amount: '1200.00', type: 'tax', created_at: '2026-03-04T00:00:00Z' },
-    { id: 'ft-11', transaction_date: '2026-03-03', description: 'PIX subscription payments', category_name: 'Receita SaaS', direction: 'inflow', currency: 'BRL', amount: '28200.00', type: 'revenue', created_at: '2026-03-03T00:00:00Z' },
-    { id: 'ft-12', transaction_date: '2026-03-02', description: 'ISS/PIS/COFINS', category_name: 'Impostos', direction: 'outflow', currency: 'BRL', amount: '5400.00', type: 'tax', created_at: '2026-03-02T00:00:00Z' },
+    { period: '2025-10', inflow: '68000.00', outflow: '9500.00', net: '58500.00', currency: 'BRL' },
+    { period: '2025-11', inflow: '72000.00', outflow: '10200.00', net: '61800.00', currency: 'BRL' },
+    { period: '2025-12', inflow: '78000.00', outflow: '11000.00', net: '67000.00', currency: 'BRL' },
+    { period: '2026-01', inflow: '80000.00', outflow: '11500.00', net: '68500.00', currency: 'BRL' },
+    { period: '2026-02', inflow: '82500.00', outflow: '12000.00', net: '70500.00', currency: 'BRL' },
+    { period: '2026-03', inflow: '85200.00', outflow: '12400.00', net: '72800.00', currency: 'BRL' },
   ],
 }
 
@@ -251,15 +239,10 @@ export const financeHandlers = [
     return HttpResponse.json(currency === 'BRL' ? mockCashFlowBRL : mockCashFlowUSD)
   }),
 
-  // Business metrics (SaaS)
+  // Business metrics (SaaS) — hook expects direct array, not paginated
   http.get(`${BASE}/business-metrics`, () =>
-    HttpResponse.json({
-      items: mockBusinessMetrics,
-      total: mockBusinessMetrics.length,
-      page: 1,
-      per_page: 20,
-      total_pages: 1,
-    }),  ),
+    HttpResponse.json(mockBusinessMetrics),
+  ),
 
   // Financial notes — list
   http.get(`${BASE}/financial-notes`, ({ request }) => {

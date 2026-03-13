@@ -1,149 +1,73 @@
+import type { SessionResponse } from '@/features/auth/types'
 import type { AdminSession } from '../types'
 
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-const mockSessions: AdminSession[] = [
-  {
-    id: '1',
-    adminId: '1',
-    adminName: 'Admin Principal',
-    ipAddress: '189.45.32.100',
-    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) Chrome/122.0.0.0',
-    city: 'Sao Paulo',
-    country: 'Brasil',
-    createdAt: '2026-03-06T10:00:00Z',
-    expiresAt: '2026-03-06T22:00:00Z',
-    isActive: true,
-  },
-  {
-    id: '2',
-    adminId: '2',
-    adminName: 'Financeiro',
-    ipAddress: '201.12.45.88',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X) Safari/17.2',
-    city: 'Rio de Janeiro',
-    country: 'Brasil',
-    createdAt: '2026-03-05T16:30:00Z',
-    expiresAt: '2026-03-06T04:30:00Z',
-    isActive: false,
-  },
-  {
-    id: '3',
-    adminId: '3',
-    adminName: 'Suporte',
-    ipAddress: '177.20.10.55',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0) Firefox/123.0',
-    city: 'Curitiba',
-    country: 'Brasil',
-    createdAt: '2026-03-06T08:45:00Z',
-    expiresAt: '2026-03-06T20:45:00Z',
-    isActive: true,
-  },
-  {
-    id: '4',
-    adminId: '1',
-    adminName: 'Admin Principal',
-    ipAddress: '189.45.32.101',
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3) Safari/604.1',
-    createdAt: '2026-03-04T09:00:00Z',
-    expiresAt: '2026-03-04T21:00:00Z',
-    isActive: false,
-  },
-  {
-    id: '5',
-    adminId: '2',
-    adminName: 'Financeiro',
-    ipAddress: '201.12.45.90',
-    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) Chrome/122.0.0.0',
-    country: 'Brasil',
-    createdAt: '2026-03-06T09:15:00Z',
-    expiresAt: '2026-03-06T21:15:00Z',
-    isActive: true,
-  },
-  {
-    id: '6',
-    adminId: '3',
-    adminName: 'Suporte',
-    ipAddress: '200.150.60.44',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/122.0.0.0',
-    city: 'Belo Horizonte',
-    country: 'Brasil',
-    createdAt: '2026-03-05T14:00:00Z',
-    expiresAt: '2026-03-06T02:00:00Z',
-    isActive: false,
-  },
-  {
-    id: '7',
-    adminId: '1',
-    adminName: 'Admin Principal',
-    ipAddress: '189.45.32.102',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X) Chrome/122.0.0.0',
-    city: 'Sao Paulo',
-    country: 'Brasil',
-    createdAt: '2026-03-05T11:30:00Z',
-    expiresAt: '2026-03-05T23:30:00Z',
-    isActive: false,
-  },
-  {
-    id: '8',
-    adminId: '4',
-    adminName: 'Viewer',
-    ipAddress: '177.90.12.34',
-    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) Firefox/123.0',
-    city: 'Porto Alegre',
-    country: 'Brasil',
-    createdAt: '2026-03-06T07:00:00Z',
-    expiresAt: '2026-03-06T19:00:00Z',
-    isActive: true,
-  },
-  {
-    id: '9',
-    adminId: '2',
-    adminName: 'Financeiro',
-    ipAddress: '201.12.45.89',
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3) Safari/604.1',
-    city: 'Rio de Janeiro',
-    country: 'Brasil',
-    createdAt: '2026-03-04T20:00:00Z',
-    expiresAt: '2026-03-05T08:00:00Z',
-    isActive: false,
-  },
-  {
-    id: '10',
-    adminId: '3',
-    adminName: 'Suporte',
-    ipAddress: '200.150.60.50',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0) Edge/120.0.0.0',
-    city: 'Brasilia',
-    country: 'Brasil',
-    createdAt: '2026-03-04T08:00:00Z',
-    expiresAt: '2026-03-04T20:00:00Z',
-    isActive: false,
-  },
-  {
-    id: '11',
-    adminId: '1',
-    adminName: 'Admin Principal',
-    ipAddress: '189.45.32.100',
-    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) Chrome/122.0.0.0',
-    city: 'Sao Paulo',
-    country: 'Brasil',
-    createdAt: '2026-03-03T10:00:00Z',
-    expiresAt: '2026-03-03T22:00:00Z',
-    isActive: false,
-  },
-]
+import { authApi } from '@/features/auth/lib/auth-api'
+import { useAuthStore } from '@/features/auth/stores/auth-store'
+import i18n from '@/i18n'
+import { showSuccessToast } from '@/lib/toast'
 
 const adminSessionsKeys = {
   all: ['admin-sessions'] as const,
 }
 
+function mapSession(
+  s: SessionResponse,
+  admin: { id: string, name: string },
+  isCurrent: boolean,
+): AdminSession {
+  return {
+    id: s.id,
+    adminId: admin.id,
+    adminName: admin.name,
+    ipAddress: s.ip_address,
+    userAgent: s.user_agent,
+    city: s.city ?? undefined,
+    region: s.region ?? undefined,
+    country: s.country ?? undefined,
+    lastActivityAt: s.last_activity_at,
+    createdAt: s.created_at,
+    isCurrent,
+  }
+}
+
 export function useAdminSessions() {
+  const admin = useAuthStore((s) => s.admin)
+
   return useQuery({
     queryKey: adminSessionsKeys.all,
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      return mockSessions
+      const { sessions } = await authApi.getSessions()
+      const adminInfo = { id: admin?.id ?? '', name: admin?.name ?? '' }
+      // Backend returns sessions ordered by last_activity_at DESC — first is the current session
+      return sessions.map((s, index) => mapSession(s, adminInfo, index === 0))
+    },
+  })
+}
+
+export function useRevokeSession() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (sessionId: string) => authApi.revokeSession(sessionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminSessionsKeys.all })
+      showSuccessToast({ title: i18n.t('admin:toast.sessionRevoked') })
+    },
+  })
+}
+
+export function useRevokeOtherSessions() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (sessionIds: string[]) => {
+      await Promise.all(sessionIds.map((id) => authApi.revokeSession(id)))
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminSessionsKeys.all })
+      showSuccessToast({ title: i18n.t('admin:toast.allSessionsRevoked') })
     },
   })
 }

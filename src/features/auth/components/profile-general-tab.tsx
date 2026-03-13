@@ -67,14 +67,18 @@ return null
                 )}
               </Badge>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">{t('profile.lastLogin')}</span>
-              <span>{new Date(admin.lastLoginAt).toLocaleString()}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">{t('profile.memberSince')}</span>
-              <span>{new Date(admin.createdAt).toLocaleDateString()}</span>
-            </div>
+            {admin.lastLoginAt && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t('profile.lastLogin')}</span>
+                <span>{new Date(admin.lastLoginAt).toLocaleString()}</span>
+              </div>
+            )}
+            {admin.createdAt && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t('profile.memberSince')}</span>
+                <span>{new Date(admin.createdAt).toLocaleDateString()}</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

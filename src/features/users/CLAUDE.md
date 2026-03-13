@@ -29,8 +29,7 @@ useUserTemplates(userId)           → Template[]
 
 // Mutations
 useUserMutations()  → {
-  updateStatus: mutation({ userId, status })  // otimista: atualiza cache local + toast
-  deleteUser: mutation(userId)                // remove do cache + navega para /users
+  updateStatus: mutation({ userId, status })  // suspend/unsuspend via API + toast
 }
 ```
 

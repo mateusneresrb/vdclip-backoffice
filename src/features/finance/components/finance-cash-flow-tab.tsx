@@ -48,7 +48,7 @@ import { DateRangeFilter } from '@/features/dashboard/components/date-range-filt
 import { usePagination } from '@/hooks/use-pagination'
 
 import { cn } from '@/lib/utils'
-import { useAdminCashFlow } from '../hooks/use-cash-flow'
+import { useAdminCashFlow } from '@/features/admin/hooks/use-admin-cash-flow'
 
 const categoryColors: Record<CashFlowEntry['category'], string> = {
   revenue: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
@@ -258,8 +258,8 @@ export function FinanceCashFlowTab() {
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<MetricsDateRange>('30d')
 
-  const { data: usdData, isLoading: loadingUsd } = useAdminCashFlow('USD')
-  const { data: brlData, isLoading: loadingBrl } = useAdminCashFlow('BRL')
+  const { data: usdData, isLoading: loadingUsd } = useAdminCashFlow('USD', dateRange)
+  const { data: brlData, isLoading: loadingBrl } = useAdminCashFlow('BRL', dateRange)
   const isLoading = loadingUsd || loadingBrl
 
   const allEntries = useMemo(() => {

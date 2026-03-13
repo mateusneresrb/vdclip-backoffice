@@ -34,9 +34,10 @@ type LoginValues = z.infer<typeof loginSchema>
 
 export function LoginForm({ className }: { className?: string }) {
   const { t } = useTranslation('admin')
-  const { login, status } = useAuth()
+  const { login, verifyMfa, status } = useAuth()
   const [step, setStep] = useState<'credentials' | 'mfa'>('credentials')
   const [mfaCode, setMfaCode] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -45,15 +46,28 @@ export function LoginForm({ className }: { className?: string }) {
 
   const isLoading = status === 'loading'
 
-  const onLoginSubmit = (_data: LoginValues) => {
-    setStep('mfa')
+  const onLoginSubmit = async (data: LoginValues) => {
+    setError(null)
+    try {
+      const result = await login(data.email, data.password)
+      if (result.mfaRequired) {
+        setStep('mfa')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('auth.loginError'))
+    }
   }
 
   const onMfaSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (mfaCode.length !== 6) 
-return
-    await login()
+    if (mfaCode.length !== 6) return
+    setError(null)
+    try {
+      await verifyMfa(mfaCode)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('auth.mfaError'))
+      setMfaCode('')
+    }
   }
 
   return (
@@ -73,6 +87,11 @@ return
 
           <Form {...loginForm}>
             <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+              {error && (
+                <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-center text-sm text-red-400">
+                  {error}
+                </div>
+              )}
               <FormField
                 control={loginForm.control}
                 name="email"
@@ -113,8 +132,10 @@ return
               />
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="h-10 w-full bg-gradient-to-r from-orange-500 to-orange-600 font-medium text-white shadow-lg shadow-orange-500/20 transition-all hover:from-orange-600 hover:to-orange-700 hover:shadow-orange-500/30"
               >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('auth.login')}
               </Button>
             </form>
@@ -149,6 +170,11 @@ return
           </div>
 
           <form onSubmit={onMfaSubmit} className="space-y-5">
+            {error && (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-center text-sm text-red-400">
+                {error}
+              </div>
+            )}
             <div className="flex justify-center">
               <InputOTP
                 maxLength={6}
@@ -185,6 +211,7 @@ return
                 onClick={() => {
                   setStep('credentials')
                   setMfaCode('')
+                  setError(null)
                 }}
                 disabled={isLoading}
               >

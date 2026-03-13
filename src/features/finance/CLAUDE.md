@@ -22,18 +22,27 @@ Mutations via `use-{entity}-mutations.ts` com invalidação de queries.
 
 ## Hooks
 ```ts
-useCashFlow(filters)            → CashFlowSummary       (usa api-client → GET /dashboard/cash-flow)
-useCostEntries(filters)         → CostEntry[]           (usa api-client → GET /cost-entries)
-useBankAccounts()               → BankAccount[]         (usa api-client → GET /bank-accounts)
-useFinancialCategories()        → FinancialCategory[]   (usa api-client → GET /financial-categories)
-useTaxConfig()                  → TaxConfig[]
-useCostCenters()                → CostCenter[]
-useReceivables(filters)         → Receivable[]          (usa api-client → GET /receivables)
+// Queries (todas usam api-client)
+useCostEntries(filters)         → CostEntry[]           (GET /cost-entries)
+useBankAccounts()               → BankAccount[]         (GET /bank-accounts)
+useFinancialCategories()        → FinancialCategory[]   (GET /financial-categories)
+useTaxConfig()                  → TaxConfig[]           (GET /tax-configurations)
+useCostCenters()                → CostCenter[]          (GET /cost-centers)
+useReceivables(filters)         → Receivable[]          (GET /receivables)
+
+// Mutations (CRUD)
+useCostEntryMutations()         → { create, update, remove, approve, pay }
+useBankAccountMutations()       → { create, update, remove }
+useCategoryMutations()          → { create, update, remove }
+useTaxConfigMutations()         → { create, update, remove }
 
 // Notas financeiras
 useFinancialNotes(entityType, entityId)          → FinancialNote[]
 useCreateFinancialNote(entityType, entityId)     → mutation (POST /financial-notes)
 useDeleteFinancialNote(entityType, entityId)     → mutation (DELETE /financial-notes/{id})
+
+// Cash flow: re-importado de @/features/admin/hooks/use-admin-cash-flow
+// useAdminCashFlow(currency, dateRange) → CashFlowSummary
 ```
 
 ## Componentes

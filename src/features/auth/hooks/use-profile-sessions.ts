@@ -1,4 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { authApi } from '@/features/auth/lib/auth-api'
 
 export interface ProfileSession {
   id: string
@@ -10,35 +12,6 @@ export interface ProfileSession {
   isCurrent: boolean
 }
 
-const mockSessions: ProfileSession[] = [
-  {
-    id: '1',
-    device: 'Chrome 124 - Linux',
-    ip: '189.40.72.15',
-    city: 'São Paulo',
-    country: 'Brasil',
-    lastActiveAt: new Date().toISOString(),
-    isCurrent: true,
-  },
-  {
-    id: '2',
-    device: 'Firefox 126 - Windows',
-    ip: '200.158.10.42',
-    city: 'Rio de Janeiro',
-    country: 'Brasil',
-    lastActiveAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-    isCurrent: false,
-  },
-  {
-    id: '3',
-    device: 'Safari 17 - macOS',
-    ip: '177.22.88.100',
-    country: 'Brasil',
-    lastActiveAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-    isCurrent: false,
-  },
-]
-
 const profileSessionKeys = {
   all: ['profile-sessions'] as const,
 }
@@ -47,8 +20,24 @@ export function useProfileSessions() {
   return useQuery({
     queryKey: profileSessionKeys.all,
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 300))
-      return mockSessions
+      const { sessions } = await authApi.getSessions()
+      return sessions.map((s, index): ProfileSession => ({
+        id: s.id,
+        device: s.user_agent,
+        ip: s.ip_address,
+        city: s.city ?? undefined,
+        country: s.country ?? undefined,
+        lastActiveAt: s.last_activity_at,
+        isCurrent: index === 0,
+      }))
     },
+  })
+}
+
+export function useRevokeSession() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (sessionId: string) => authApi.revokeSession(sessionId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: profileSessionKeys.all }),
   })
 }

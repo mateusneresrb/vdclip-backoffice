@@ -2,485 +2,7 @@ import type { AuditLogEntry } from '../types'
 
 import { useQuery } from '@tanstack/react-query'
 
-// Comprehensive audit log mock — covers all writable operations in the backoffice.
-// `target` is a human-readable context label, not necessarily a DB table.
-const mockAuditLogs: AuditLogEntry[] = [
-  // ── Users ──────────────────────────────────────────────────────────────────
-  {
-    id: '1',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'user.status_changed',
-    resource: 'user', 
-resourceId: 'usr_102',
-    target: 'Conta de Usuário',
-    oldValues: { status: 'active' },
-    newValues: { status: 'suspended', reason: 'fraud_suspected', suspendedBy: 'adm_1' },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-06T09:55:00Z',
-  },
-  {
-    id: '2',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'user.plan_changed',
-    resource: 'user', 
-resourceId: 'usr_101',
-    target: 'Plano / Assinatura',
-    oldValues: { plan: 'free', planProvider: 'internal' },
-    newValues: { plan: 'premium', planProvider: 'internal' },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-06T09:30:00Z',
-  },
-  {
-    id: '3',
-    adminId: 'adm_3', 
-adminName: 'Camila Suporte', 
-adminEmail: 'camila@vdclip.com', 
-adminRole: 'support',
-    action: 'user.credit_added',
-    resource: 'user', 
-resourceId: 'usr_102',
-    target: 'Créditos do Usuário',
-    oldValues: { credits: 50 },
-    newValues: { credits: 150, reason: 'compensation_failed_export' },
-    ipAddress: '177.20.10.55',
-    createdAt: '2026-03-06T09:15:00Z',
-  },
-  {
-    id: '4',
-    adminId: 'adm_3', 
-adminName: 'Camila Suporte', 
-adminEmail: 'camila@vdclip.com', 
-adminRole: 'support',
-    action: 'user.account_unlocked',
-    resource: 'user', 
-resourceId: 'usr_102',
-    target: 'Conta de Usuário',
-    oldValues: { locked: true, lockedReason: 'too_many_failed_attempts' },
-    newValues: { locked: false, unlockedBy: 'adm_3' },
-    ipAddress: '177.20.10.55',
-    createdAt: '2026-03-06T09:00:00Z',
-  },
-  {
-    id: '5',
-    adminId: 'adm_3', 
-adminName: 'Camila Suporte', 
-adminEmail: 'camila@vdclip.com', 
-adminRole: 'support',
-    action: 'user.deleted',
-    resource: 'user', 
-resourceId: 'usr_420',
-    target: 'Conta de Usuário',
-    oldValues: { email: 'spam@example.com', status: 'active' },
-    newValues: { deletedAt: '2026-03-06T08:45:00Z', deletedBy: 'adm_3', reason: 'spam_account' },
-    ipAddress: '177.20.10.55',
-    createdAt: '2026-03-06T08:45:00Z',
-  },
-  // ── Subscriptions ──────────────────────────────────────────────────────────
-  {
-    id: '6',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'subscription.cancelled',
-    resource: 'subscription', 
-resourceId: 'sub_456',
-    target: 'Assinatura',
-    oldValues: { status: 'active', plan: 'premium', billingCycle: 'monthly' },
-    newValues: { status: 'cancelled', reason: 'user_request', cancelledAt: '2026-03-05T11:30:00Z' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-05T11:30:00Z',
-  },
-  {
-    id: '7',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'subscription.extended',
-    resource: 'subscription', 
-resourceId: 'sub_789',
-    target: 'Assinatura',
-    oldValues: { expiresAt: '2026-03-01', status: 'active' },
-    newValues: { expiresAt: '2026-04-01', reason: 'goodwill_extension', extendedBy: 'adm_2' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-05T11:35:00Z',
-  },
-  {
-    id: '8',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'subscription.reactivated',
-    resource: 'subscription', 
-resourceId: 'sub_333',
-    target: 'Assinatura',
-    oldValues: { status: 'cancelled' },
-    newValues: { status: 'active', reactivatedBy: 'adm_2', reason: 'payment_received' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-04T10:00:00Z',
-  },
-  {
-    id: '9',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'user.refund_issued',
-    resource: 'user', 
-resourceId: 'usr_456',
-    target: 'Reembolso de Transação',
-    oldValues: { transactionStatus: 'completed', amount: 29.90 },
-    newValues: { transactionStatus: 'refunded', refundReason: 'duplicate_charge', transactionId: 'txn_789', refundedAt: '2026-03-05T11:40:00Z' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-05T11:40:00Z',
-  },
-  // ── Finance — Cost Entries ──────────────────────────────────────────────────
-  {
-    id: '10',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.cost_entry_created',
-    resource: 'finance.cost_entry', 
-resourceId: 'ce_1001',
-    target: 'Fluxo de Caixa — Entrada de Custo',
-    oldValues: null,
-    newValues: { description: 'AWS EC2 — Março 2026', amount: 1850.00, currency: 'USD', category: 'infrastructure', billedAt: '2026-03-05' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-05T10:00:00Z',
-  },
-  {
-    id: '11',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.cost_entry_updated',
-    resource: 'finance.cost_entry', 
-resourceId: 'ce_995',
-    target: 'Fluxo de Caixa — Entrada de Custo',
-    oldValues: { amount: 500.00, description: 'Licença software' },
-    newValues: { amount: 620.00, description: 'Licença software — renovação anual', updatedAt: '2026-03-04' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-04T15:20:00Z',
-  },
-  {
-    id: '12',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.cost_entry_deleted',
-    resource: 'finance.cost_entry', 
-resourceId: 'ce_910',
-    target: 'Fluxo de Caixa — Entrada de Custo',
-    oldValues: { description: 'Entrada duplicada', amount: 200.00, currency: 'BRL' },
-    newValues: null,
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-04T15:25:00Z',
-  },
-  // ── Finance — Bank Accounts ─────────────────────────────────────────────────
-  {
-    id: '13',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.bank_account_created',
-    resource: 'finance.bank_account', 
-resourceId: 'ba_40',
-    target: 'Conta Bancária',
-    oldValues: null,
-    newValues: { name: 'Conta Internacional USD', currency: 'USD', bank: 'Wise', type: 'checking' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-03T11:00:00Z',
-  },
-  {
-    id: '14',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.bank_account_updated',
-    resource: 'finance.bank_account', 
-resourceId: 'ba_38',
-    target: 'Conta Bancária',
-    oldValues: { name: 'Conta Principal', isActive: true },
-    newValues: { name: 'Conta Principal BRL', isActive: true },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-03T11:05:00Z',
-  },
-  // ── Finance — Categories ────────────────────────────────────────────────────
-  {
-    id: '15',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.category_created',
-    resource: 'finance.category', 
-resourceId: 'cat_55',
-    target: 'Categoria Financeira',
-    oldValues: null,
-    newValues: { name: 'Infraestrutura Cloud', type: 'expense', parentId: null },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-02T09:00:00Z',
-  },
-  {
-    id: '16',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.category_updated',
-    resource: 'finance.category', 
-resourceId: 'cat_12',
-    target: 'Categoria Financeira',
-    oldValues: { name: 'Marketing', type: 'expense' },
-    newValues: { name: 'Marketing & Growth', type: 'expense' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-02T09:10:00Z',
-  },
-  {
-    id: '17',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.category_deleted',
-    resource: 'finance.category', 
-resourceId: 'cat_8',
-    target: 'Categoria Financeira',
-    oldValues: { name: 'Despesa Avulsa', type: 'expense' },
-    newValues: null,
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-02T09:15:00Z',
-  },
-  // ── Finance — Tax Configs ────────────────────────────────────────────────────
-  {
-    id: '18',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.tax_config_created',
-    resource: 'finance.tax_config', 
-resourceId: 'tax_9',
-    target: 'Configurações de Imposto',
-    oldValues: null,
-    newValues: { name: 'ISS Digital', rate: 2.5, country: 'BR', applicablePlans: ['premium', 'lite'] },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-01T14:00:00Z',
-  },
-  {
-    id: '19',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'finance.tax_config_updated',
-    resource: 'finance.tax_config', 
-resourceId: 'tax_5',
-    target: 'Configurações de Imposto',
-    oldValues: { rate: 15.0 },
-    newValues: { rate: 17.5, reason: 'regulatory_update_2026' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-03-01T14:10:00Z',
-  },
-  // ── Teams ──────────────────────────────────────────────────────────────────
-  {
-    id: '20',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'team.settings_updated',
-    resource: 'team', 
-resourceId: 'team_10',
-    target: 'Configurações do Time',
-    oldValues: { maxMembers: 5, storageLimit: 10240 },
-    newValues: { maxMembers: 10, storageLimit: 20480 },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-04T16:45:00Z',
-  },
-  {
-    id: '21',
-    adminId: 'adm_3', 
-adminName: 'Camila Suporte', 
-adminEmail: 'camila@vdclip.com', 
-adminRole: 'support',
-    action: 'team.member_removed',
-    resource: 'team', 
-resourceId: 'team_5',
-    target: 'Membros do Time',
-    oldValues: { memberId: 'usr_301', role: 'admin' },
-    newValues: { removedAt: '2026-03-03T09:00:00Z', removedBy: 'adm_3', reason: 'user_request' },
-    ipAddress: '177.20.10.55',
-    createdAt: '2026-03-03T09:00:00Z',
-  },
-  // ── Providers / Feature Toggle ─────────────────────────────────────────────
-  {
-    id: '22',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'provider.toggled',
-    resource: 'provider', 
-resourceId: 'prov_tiktok',
-    target: 'Feature Toggle — TikTok',
-    oldValues: { enabled: false },
-    newValues: { enabled: true },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-05T18:00:00Z',
-  },
-  {
-    id: '23',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'provider.config_updated',
-    resource: 'provider', 
-resourceId: 'prov_paddle',
-    target: 'Configurações do Provedor — Paddle',
-    oldValues: { webhookUrl: 'https://old.example.com/hook', sandboxMode: true },
-    newValues: { webhookUrl: 'https://api.vdclip.com/hooks/paddle', sandboxMode: false },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-02T11:00:00Z',
-  },
-  {
-    id: '22b',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'provider.toggled',
-    resource: 'provider', 
-resourceId: 'prov_kwai',
-    target: 'Feature Toggle — Kwai',
-    oldValues: { enabled: true },
-    newValues: { enabled: false },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-05T17:55:00Z',
-  },
-  // ── Admin Users (backoffice) ────────────────────────────────────────────────
-  {
-    id: '24',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'admin.created',
-    resource: 'admin', 
-resourceId: 'adm_4',
-    target: 'Administradores do Backoffice',
-    oldValues: null,
-    newValues: { name: 'Camila Suporte', email: 'camila@vdclip.com', role: 'support' },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-05T14:00:00Z',
-  },
-  {
-    id: '25',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'admin.role_changed',
-    resource: 'admin', 
-resourceId: 'adm_5',
-    target: 'Cargo do Administrador',
-    oldValues: { role: 'viewer' },
-    newValues: { role: 'finance_viewer' },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-04T10:00:00Z',
-  },
-  {
-    id: '26',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'admin.permissions_updated',
-    resource: 'admin', 
-resourceId: 'adm_3',
-    target: 'Permissões do Administrador',
-    oldValues: { permissions: ['users:read', 'audit:read'] },
-    newValues: { permissions: ['users:read', 'users:write', 'audit:read', 'finance:read'] },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-02-26T09:00:00Z',
-  },
-  {
-    id: '27',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'admin.deactivated',
-    resource: 'admin', 
-resourceId: 'adm_6',
-    target: 'Conta do Administrador',
-    oldValues: { isActive: true, name: 'Leandro Temp' },
-    newValues: { isActive: false, deactivatedBy: 'adm_1', reason: 'contractor_offboarded' },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-02-25T17:00:00Z',
-  },
-  {
-    id: '28',
-    adminId: 'adm_1', 
-adminName: 'Bruno Martins', 
-adminEmail: 'bruno@vdclip.com', 
-adminRole: 'super_admin',
-    action: 'admin.session_revoked',
-    resource: 'session', 
-resourceId: 'sess_99',
-    target: 'Sessão do Administrador',
-    oldValues: { isActive: true, adminId: 'adm_6' },
-    newValues: { isActive: false, revokedBy: 'adm_1', reason: 'security_review' },
-    ipAddress: '189.45.32.100',
-    createdAt: '2026-03-03T20:00:00Z',
-  },
-  // ── Older entries for date filter testing ──────────────────────────────────
-  {
-    id: '29',
-    adminId: 'adm_2', 
-adminName: 'Fernanda Finance', 
-adminEmail: 'fernanda@vdclip.com', 
-adminRole: 'finance_admin',
-    action: 'user.plan_changed',
-    resource: 'user', 
-resourceId: 'usr_401',
-    target: 'Plano / Assinatura',
-    oldValues: { plan: 'lite', planProvider: 'internal' },
-    newValues: { plan: 'premium', planProvider: 'internal' },
-    ipAddress: '201.12.45.88',
-    createdAt: '2026-02-28T14:10:00Z',
-  },
-  {
-    id: '30',
-    adminId: 'adm_3', 
-adminName: 'Camila Suporte', 
-adminEmail: 'camila@vdclip.com', 
-adminRole: 'support',
-    action: 'user.credit_added',
-    resource: 'user', 
-resourceId: 'usr_310',
-    target: 'Créditos do Usuário',
-    oldValues: { credits: 0 },
-    newValues: { credits: 50, reason: 'compensation_timeout' },
-    ipAddress: '177.20.10.55',
-    createdAt: '2026-02-27T09:45:00Z',
-  },
-]
+import { apiClient } from '@/lib/api-client'
 
 export interface AuditLogFilters {
   search?: string
@@ -496,39 +18,45 @@ const auditLogsKeys = {
   list: (filters: AuditLogFilters) => [...auditLogsKeys.all, 'list', filters] as const,
 }
 
-function applyFilters(logs: AuditLogEntry[], filters: AuditLogFilters): AuditLogEntry[] {
-  const { search, action, resource, adminId, dateFrom, dateTo } = filters
-  return logs.filter((log) => {
-    if (search) {
-      const q = search.toLowerCase()
-      const matches =
-        log.resourceId?.toLowerCase().includes(q) ||
-        log.ipAddress.includes(q) ||
-        log.adminEmail.toLowerCase().includes(q) ||
-        log.target.toLowerCase().includes(q)
-      if (!matches) 
-return false
-    }
-    if (action && action !== 'all' && log.action !== action) 
-return false
-    if (resource && resource !== 'all' && log.resource !== resource) 
-return false
-    if (adminId && adminId !== 'all' && log.adminId !== adminId) 
-return false
-    if (dateFrom && log.createdAt < dateFrom) 
-return false
-    if (dateTo && log.createdAt > `${dateTo}T23:59:59Z`) 
-return false
-    return true
-  })
+function mapAuditLog(data: Record<string, unknown>): AuditLogEntry {
+  return {
+    id: String(data.id),
+    adminId: String(data.admin_user_id ?? data.adminId ?? ''),
+    adminName: String(data.admin_name ?? data.adminName ?? ''),
+    adminEmail: String(data.admin_email ?? data.adminEmail ?? ''),
+    adminRole: (data.admin_role ?? data.adminRole ?? 'viewer') as AuditLogEntry['adminRole'],
+    action: String(data.action ?? ''),
+    resource: String(data.entity_type ?? data.resource ?? ''),
+    resourceId: (data.entity_id ?? data.resourceId ?? null) as string | null,
+    target: String(data.target ?? data.entity_type ?? ''),
+    oldValues: (data.old_values ?? data.oldValues ?? null) as Record<string, unknown> | null,
+    newValues: (data.new_values ?? data.newValues ?? null) as Record<string, unknown> | null,
+    ipAddress: String(data.ip_address ?? data.ipAddress ?? ''),
+    createdAt: String(data.created_at ?? data.createdAt ?? ''),
+  }
 }
 
 export function useAuditLogs(filters: AuditLogFilters = {}) {
   return useQuery({
     queryKey: auditLogsKeys.list(filters),
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      return applyFilters(mockAuditLogs, filters)
+      const params: Record<string, string | number | boolean | undefined> = {
+        page: 1,
+        per_page: 50,
+      }
+      if (filters.search) params.search = filters.search
+      if (filters.action && filters.action !== 'all') params.action = filters.action
+      if (filters.resource && filters.resource !== 'all') params.entity_type = filters.resource
+      if (filters.adminId && filters.adminId !== 'all') params.admin_user_id = filters.adminId
+      if (filters.dateFrom) params.date_from = filters.dateFrom
+      if (filters.dateTo) params.date_to = filters.dateTo
+
+      const data = await apiClient.get<
+        Record<string, unknown>[]
+        | { items: Record<string, unknown>[], total?: number }
+      >('/audit-logs', params)
+      const items = Array.isArray(data) ? data : (data.items ?? [])
+      return items.map(mapAuditLog)
     },
   })
 }
@@ -537,8 +65,12 @@ export function useAuditLogsRaw() {
   return useQuery({
     queryKey: auditLogsKeys.all,
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      return mockAuditLogs
+      const data = await apiClient.get<
+        Record<string, unknown>[]
+        | { items: Record<string, unknown>[] }
+      >('/audit-logs', { page: 1, per_page: 200 })
+      const items = Array.isArray(data) ? data : (data.items ?? [])
+      return items.map(mapAuditLog)
     },
   })
 }

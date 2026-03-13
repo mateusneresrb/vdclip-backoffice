@@ -50,7 +50,9 @@
     "mfaDescription": "Digite o código de 6 dígitos do seu autenticador.",
     "mfaCode": "Código MFA",
     "verify": "Verificar",
-    "back": "Voltar"
+    "back": "Voltar",
+    "loginError": "Credenciais inválidas. Tente novamente.",
+    "mfaError": "Código MFA inválido. Tente novamente."
   },
   "dashboard": {
     "consolidatedDescription": "Visão consolidada de todos os produtos VDClip. Métricas detalhadas por produto estão nas respectivas seções.",
@@ -982,6 +984,8 @@
       "confirmDescription": "Confirme o recebimento de \"{{description}}\" do cliente {{customer}}.",
       "confirmButton": "Confirmar Recebimento",
       "receivedAt": "Data de Recebimento",
+      "bankAccount": "Conta Bancária",
+      "selectBankAccount": "Selecione a conta bancária",
       "status": {
         "pending": "Pendente",
         "received": "Recebido",
@@ -1103,7 +1107,7 @@
     "permissions": "Permissões",
     "admins": "Admins",
     "noSessions": "Nenhuma sessão encontrada.",
-    "noSessionsHint": "Nenhuma sessão ativa ou expirada para o filtro aplicado.",
+    "noSessionsHint": "Nenhuma sessão ativa encontrada.",
     "sessionActive": "Ativa",
     "sessionExpired": "Expirada",
     "createdAt": "Criado em",
@@ -1131,9 +1135,9 @@
     "create": "Criar",
     "viewPermissions": "Ver Permissões",
     "hidePermissions": "Ocultar Permissões",
-    "searchSessionsPlaceholder": "Buscar por nome do admin...",
-    "filterSessionStatus": "Filtrar por status",
-    "allSessions": "Todas as sessões",
+    "searchSessionsPlaceholder": "Buscar por IP ou dispositivo...",
+    "currentSession": "Sessão Atual",
+    "lastActivity": "Última atividade",
     "createAdmin": "Criar Administrador",
     "createAdminTitle": "Criar Administrador",
     "createAdminDescription": "Preencha os dados para criar um novo administrador.",
@@ -1160,7 +1164,7 @@
     "confirmRevokeTitle": "Revogar Sessão",
     "confirmRevokeDescription": "Tem certeza que deseja revogar a sessão de {{name}}? O administrador será desconectado imediatamente.",
     "confirmRevokeAllTitle": "Revogar Todas as Sessões",
-    "confirmRevokeAllDescription": "Tem certeza que deseja revogar todas as sessões ativas? Todos os administradores serão desconectados imediatamente.",
+    "confirmRevokeAllDescription": "Tem certeza que deseja revogar todas as outras sessões? Você permanecerá conectado apenas nesta sessão atual.",
     "permAction": {
       "read": "Leitura",
       "write": "Escrita",

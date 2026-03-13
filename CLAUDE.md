@@ -107,7 +107,7 @@ src/
 - `src/lib/api-client.ts` — cliente HTTP base (`get/post/patch/delete`) com `Authorization` header do auth-store
 - `src/mocks/handlers/finance.ts` — handlers MSW para todos os endpoints financeiros
 - `src/mocks/browser.ts` — setup do service worker (ativado em `main.tsx` apenas em `import.meta.env.DEV`)
-- Hooks **ainda mock**: `useTaxConfig`, `useCostCenters`, `useFinancialCategories`, `useSaasMetrics`, `useAdminRevenue`
+- Hooks **ainda mock**: `useAdminUserAffiliate` (no backend endpoint)
 
 ## Path-Specific Rules
 

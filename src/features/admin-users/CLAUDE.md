@@ -9,7 +9,7 @@ Gerenciamento de contas, roles e sessões dos administradores do backoffice.
 - `AdminUsersPage` — página com 3 tabs
 - `AdminUsersListTab` — lista de contas de administrador
 - `AdminRolesTab` — roles disponíveis e suas permissões
-- `AdminSessionsTab` — sessões ativas e histório
+- `AdminSessionsTab` — sessões ativas do admin logado (API real via `GET /auth/sessions`)
 
 ## Tabs
 
@@ -24,9 +24,11 @@ Tab ativa via `?tab=` search param. Navegação via `useNavigate` + `useSearch({
 ## Hooks
 
 ```ts
-useAdminAccounts()  → BackofficeAdmin[]
-useAdminRoles()     → AdminRoleInfo[]
-useAdminSessions()  → AdminSession[]
+useAdminAccounts()        → BackofficeAdmin[]
+useAdminRoles()           → AdminRoleInfo[]
+useAdminSessions()        → AdminSession[]        // GET /auth/sessions (admin logado)
+useRevokeSession()        → mutation(sessionId)    // DELETE /auth/sessions/{id}
+useRevokeOtherSessions()  → mutation(sessionIds[]) // revoga todas exceto a atual
 ```
 
 ## Types
@@ -51,9 +53,9 @@ AdminRoleInfo {
 AdminSession {
   id, adminId, adminName
   ipAddress, userAgent
-  city?, country?
-  createdAt, expiresAt: string
-  isActive: boolean
+  city?, region?, country?
+  lastActivityAt, createdAt: string
+  isCurrent: boolean              // true para a sessão ativa no momento
 }
 ```
 

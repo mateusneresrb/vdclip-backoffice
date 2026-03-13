@@ -2,23 +2,36 @@ import type { UserSocialConnection } from '@/features/admin/types'
 
 import { useQuery } from '@tanstack/react-query'
 
-const mockConnections: UserSocialConnection[] = [
-  { id: '1', platform: 'youtube', displayName: 'Canal Principal', username: '@canalvdclip', connectedAt: '2025-06-01T00:00:00Z', lastUsedAt: '2026-03-05T14:00:00Z', hasError: false, errorMessage: null, postsCount: 48 },
-  { id: '2', platform: 'tiktok', displayName: 'VDClip TikTok', username: '@vdclip', connectedAt: '2025-08-15T00:00:00Z', lastUsedAt: '2026-03-04T10:00:00Z', hasError: false, errorMessage: null, postsCount: 132 },
-  { id: '3', platform: 'instagram', displayName: 'VDClip Insta', username: '@vdclip.app', connectedAt: '2025-09-10T00:00:00Z', lastUsedAt: null, hasError: true, errorMessage: 'Token expirado — reconectar necessario', postsCount: 27 },
-]
+import { apiClient } from '@/lib/api-client'
 
 const userSocialKeys = {
   all: ['user-social-connections'] as const,
   byUser: (userId: string) => [...userSocialKeys.all, userId] as const,
 }
 
+function mapConnection(data: Record<string, unknown>): UserSocialConnection {
+  return {
+    id: String(data.id),
+    platform: String(data.platform ?? ''),
+    displayName: String(data.display_name ?? data.displayName ?? ''),
+    username: String(data.username ?? ''),
+    connectedAt: String(data.connected_at ?? data.connectedAt ?? ''),
+    lastUsedAt: (data.last_used_at ?? data.lastUsedAt ?? null) as string | null,
+    hasError: Boolean(data.has_error ?? data.hasError ?? false),
+    errorMessage: (data.error_message ?? data.errorMessage ?? null) as string | null,
+    postsCount: Number(data.posts_count ?? data.postsCount ?? 0),
+  }
+}
+
 export function useUserSocialConnections(userId: string) {
   return useQuery({
     queryKey: userSocialKeys.byUser(userId),
     queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 400))
-      return mockConnections
+      const data = await apiClient.get<Record<string, unknown>[] | { items: Record<string, unknown>[] }>(
+        `/platform/users/${userId}/social-connections`,
+      )
+      const items = Array.isArray(data) ? data : (data.items ?? [])
+      return items.map(mapConnection)
     },
   })
 }

@@ -8,11 +8,28 @@ import { useAuthStore } from '@/features/auth/stores/auth-store'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8001'
 
+let isRefreshing: Promise<boolean> | null = null
+
 function getAuthHeader(): HeadersInit {
-  // In dev with MSW, token can be empty — MSW doesn't validate JWTs.
-  // In prod, the real JWT from the auth session would go here.
-  const token = (useAuthStore.getState() as { _token?: string })._token ?? 'dev-mock-token'
+  const token = useAuthStore.getState()._token
+  if (!token) return {}
   return { Authorization: `Bearer ${token}` }
+}
+
+async function tryRefresh(): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (!res.ok) return false
+    const data = await res.json()
+    useAuthStore.getState().setToken(data.access_token)
+    return true
+  } catch {
+    return false
+  }
 }
 
 async function request<T>(
@@ -30,14 +47,32 @@ async function request<T>(
     }
   }
 
-  const res = await fetch(url.toString(), {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeader(),
-    },
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
-  })
+  const doFetch = () =>
+    fetch(url.toString(), {
+      method,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    })
+
+  let res = await doFetch()
+
+  // On 401, try to refresh the token and retry once
+  if (res.status === 401 && useAuthStore.getState()._token) {
+    if (!isRefreshing) {
+      isRefreshing = tryRefresh().finally(() => { isRefreshing = null })
+    }
+    const refreshed = await isRefreshing
+    if (refreshed) {
+      res = await doFetch()
+    } else {
+      useAuthStore.getState().clearAuth()
+      throw new Error('Sessão expirada')
+    }
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: { message: res.statusText } }))
@@ -51,6 +86,7 @@ export const apiClient = {
   get: <T>(path: string, params?: Record<string, string | number | boolean | undefined>) =>
     request<T>('GET', path, { params }),
   post: <T>(path: string, body: unknown) => request<T>('POST', path, { body }),
+  put: <T>(path: string, body: unknown) => request<T>('PUT', path, { body }),
   patch: <T>(path: string, body: unknown) => request<T>('PATCH', path, { body }),
   delete: <T>(path: string) => request<T>('DELETE', path),
 }

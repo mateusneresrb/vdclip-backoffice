@@ -2,14 +2,7 @@ import type { MetricsDateRange, RevenueDailySnapshot } from '../types'
 
 import { useQuery } from '@tanstack/react-query'
 
-const mockSnapshots: RevenueDailySnapshot[] = [
-  { snapshotDate: '2026-03-05', currency: 'USD', mrr: 18750, newMrr: 2340, expansionMrr: 890, contractionMrr: 320, churnedMrr: 1150, reactivationMrr: 480, activeSubscriptionsCount: 480, newSubscriptionsCount: 12, churnedSubscriptionsCount: 3, creditRevenue: 1200 },
-  { snapshotDate: '2026-03-05', currency: 'BRL', mrr: 42500, newMrr: 5800, expansionMrr: 1200, contractionMrr: 800, churnedMrr: 2300, reactivationMrr: 950, activeSubscriptionsCount: 247, newSubscriptionsCount: 8, churnedSubscriptionsCount: 2, creditRevenue: 2800 },
-  { snapshotDate: '2026-03-04', currency: 'USD', mrr: 18200, newMrr: 1800, expansionMrr: 500, contractionMrr: 200, churnedMrr: 900, reactivationMrr: 300, activeSubscriptionsCount: 475, newSubscriptionsCount: 8, churnedSubscriptionsCount: 2, creditRevenue: 900 },
-  { snapshotDate: '2026-03-04', currency: 'BRL', mrr: 41800, newMrr: 4200, expansionMrr: 900, contractionMrr: 600, churnedMrr: 1800, reactivationMrr: 700, activeSubscriptionsCount: 243, newSubscriptionsCount: 5, churnedSubscriptionsCount: 1, creditRevenue: 2100 },
-  { snapshotDate: '2026-03-03', currency: 'USD', mrr: 17900, newMrr: 1500, expansionMrr: 400, contractionMrr: 150, churnedMrr: 700, reactivationMrr: 200, activeSubscriptionsCount: 470, newSubscriptionsCount: 6, churnedSubscriptionsCount: 1, creditRevenue: 750 },
-  { snapshotDate: '2026-03-03', currency: 'BRL', mrr: 41200, newMrr: 3800, expansionMrr: 700, contractionMrr: 400, churnedMrr: 1500, reactivationMrr: 500, activeSubscriptionsCount: 240, newSubscriptionsCount: 4, churnedSubscriptionsCount: 1, creditRevenue: 1800 },
-]
+import { apiClient } from '@/lib/api-client'
 
 const adminRevenueKeys = {
   all: ['admin-revenue'] as const,
@@ -17,12 +10,80 @@ const adminRevenueKeys = {
     [...adminRevenueKeys.all, range] as const,
 }
 
+function getDateParams(range: MetricsDateRange): Record<string, string> {
+  const now = new Date()
+  const to = now.toISOString().split('T')[0]
+  let from: string
+
+  switch (range) {
+    case '1d': {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 1)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+    case '3d': {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 3)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+    case '7d': {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 7)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+    case '90d': {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 90)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+    case 'ytd': {
+      from = `${now.getFullYear()}-01-01`
+      break
+    }
+    case 'all': {
+      from = '2024-01-01'
+      break
+    }
+    case '30d':
+    default: {
+      const d = new Date(now)
+      d.setDate(d.getDate() - 30)
+      from = d.toISOString().split('T')[0]
+      break
+    }
+  }
+
+  return { date_from: from, date_to: to }
+}
+
+function mapSnapshot(s: Record<string, unknown>): RevenueDailySnapshot {
+  return {
+    snapshotDate: String(s.snapshot_date ?? s.snapshotDate ?? ''),
+    currency: (s.currency as RevenueDailySnapshot['currency']) ?? 'USD',
+    mrr: Number(s.mrr ?? 0),
+    newMrr: Number(s.new_mrr ?? s.newMrr ?? 0),
+    expansionMrr: Number(s.expansion_mrr ?? s.expansionMrr ?? 0),
+    contractionMrr: Number(s.contraction_mrr ?? s.contractionMrr ?? 0),
+    churnedMrr: Number(s.churned_mrr ?? s.churnedMrr ?? 0),
+    reactivationMrr: Number(s.reactivation_mrr ?? s.reactivationMrr ?? 0),
+    activeSubscriptionsCount: Number(s.active_subscriptions_count ?? s.activeSubscriptionsCount ?? 0),
+    newSubscriptionsCount: Number(s.new_subscriptions_count ?? s.newSubscriptionsCount ?? 0),
+    churnedSubscriptionsCount: Number(s.churned_subscriptions_count ?? s.churnedSubscriptionsCount ?? 0),
+    creditRevenue: Number(s.credit_revenue ?? s.creditRevenue ?? 0),
+  }
+}
+
 export function useAdminRevenue(dateRange: MetricsDateRange = '30d') {
   return useQuery({
     queryKey: adminRevenueKeys.byRange(dateRange),
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      return mockSnapshots
+      const params = getDateParams(dateRange)
+      const data = await apiClient.get<Record<string, unknown>[]>('/platform/revenue', params)
+      return data.map(mapSnapshot)
     },
   })
 }

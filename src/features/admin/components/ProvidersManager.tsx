@@ -1,4 +1,5 @@
 import type { SupportedProvider } from '../types'
+import { useQueryClient } from '@tanstack/react-query'
 import { ToggleRight } from 'lucide-react'
 
 import { useTranslation } from 'react-i18next'
@@ -7,6 +8,7 @@ import { PageHeader } from '@/components/shared/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { ProviderCard } from '@/features/providers/components/provider-card'
+import { showSuccessToast } from '@/lib/toast'
 import { useAdminProviders } from '../hooks/use-admin-providers'
 
 function ProviderSection({
@@ -35,6 +37,7 @@ return null
 
 export function ProvidersManager() {
   const { t } = useTranslation('admin')
+  const queryClient = useQueryClient()
   const { data: providers, isLoading } = useAdminProviders()
 
   if (isLoading) {
@@ -64,8 +67,15 @@ export function ProvidersManager() {
   const aiProcessingProviders = providers.filter((p) => p.category === 'ai_processing')
   const publishingProviders = providers.filter((p) => p.category === 'publishing')
 
-  const handleToggle = (_provider: SupportedProvider) => {
-    // TODO: API call to toggle provider
+  const handleToggle = (provider: SupportedProvider) => {
+    // TODO: Wire to API when provider toggle endpoint is available
+    // (e.g., PATCH /platform/providers/{id} with { enabled: boolean }).
+    // For now, apply optimistic update to the query cache.
+    queryClient.setQueryData<SupportedProvider[]>(
+      ['admin-providers'],
+      (old) => old?.map((p) => (p.id === provider.id ? { ...p, enabled: !p.enabled } : p)),
+    )
+    showSuccessToast({ title: t('toast.providerToggled') })
   }
 
   return (
