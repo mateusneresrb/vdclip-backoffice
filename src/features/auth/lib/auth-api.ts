@@ -8,7 +8,7 @@ import type {
 
 import { useAuthStore } from '@/features/auth/stores/auth-store'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8001'
+const BASE_URL = import.meta.env.VITE_API_URL
 
 async function authFetch<T>(
   path: string,

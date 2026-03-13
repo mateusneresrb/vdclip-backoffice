@@ -29,7 +29,7 @@ apiClient.patch<T>(path, body)    // PATCH com JSON body
 apiClient.delete<T>(path)         // DELETE
 ```
 
-- Base URL: `VITE_API_URL` (default `http://localhost:8001`)
+- Base URL: `VITE_API_URL` (obrigatório — sem fallback)
 - Prefixa automaticamente `/api` no path
 - Inclui `Authorization: Bearer {token}` do auth store
 - `credentials: 'include'` para cookies (refresh token)
