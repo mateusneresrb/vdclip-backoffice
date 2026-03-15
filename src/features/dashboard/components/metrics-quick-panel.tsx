@@ -8,6 +8,7 @@ import {
   Wallet,
   Zap,
 } from 'lucide-react'
+import { InfoTooltip } from '@/components/info-tooltip'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
@@ -32,12 +33,13 @@ interface KpiCardProps {
   label: string
   value: string
   subtitle?: string
+  tooltip?: string
   icon: React.ComponentType<{ className?: string }>
   status?: 'good' | 'warn' | 'bad' | 'neutral'
   href?: string
 }
 
-function KpiCard({ label, value, subtitle, icon: Icon, status = 'neutral', href }: KpiCardProps) {
+function KpiCard({ label, value, subtitle, tooltip, icon: Icon, status = 'neutral', href }: KpiCardProps) {
   const { t } = useTranslation('admin')
   const statusClass = {
     good: 'text-emerald-600 dark:text-emerald-400',
@@ -56,7 +58,10 @@ function KpiCard({ label, value, subtitle, icon: Icon, status = 'neutral', href 
   return (
     <Card className="group relative overflow-hidden transition-shadow hover:shadow-md">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+        <CardTitle className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+          {label}
+          {tooltip && <InfoTooltip content={tooltip} />}
+        </CardTitle>
         <div className={cn('flex size-8 items-center justify-center rounded-lg', iconBg)}>
           <Icon className={cn('size-4', statusClass)} />
         </div>
@@ -165,6 +170,7 @@ return null
           label={t('saasMetrics.runway')}
           value={`${latest.runwayMonths}m`}
           subtitle={formatCurrency(latest.cashBalance, latest.currency)}
+          tooltip={t('dashboard.kpiTooltips.runway')}
           icon={Wallet}
           status={runwayStatus}
           href="/finance"
@@ -172,6 +178,7 @@ return null
         <KpiCard
           label={t('saasMetrics.mrr')}
           value={formatCurrency(latest.grossRevenue, latest.currency)}
+          tooltip={t('dashboard.kpiTooltips.mrr')}
           subtitle={
             mrrChange !== null
               ? `${mrrChange >= 0 ? '+' : ''}${mrrChange.toFixed(1)}% ${t('dashboard.vsLastMonth')}`
@@ -185,6 +192,7 @@ return null
           label={t('saasMetrics.ltvCac')}
           value={`${latest.ltvCacRatio.toFixed(1)  }x`}
           subtitle={`CAC ${formatCurrency(latest.cac, latest.currency)} · LTV ${formatCurrency(latest.ltv, latest.currency)}`}
+          tooltip={t('dashboard.kpiTooltips.ltvCac')}
           icon={BarChart2}
           status={ltvCacStatus}
           href="/revenue"
@@ -193,6 +201,7 @@ return null
           label={t('saasMetrics.churnRate')}
           value={formatPct(latest.churnRatePct)}
           subtitle={`${latest.churnedCustomers} ${t('dashboard.customers')}`}
+          tooltip={t('dashboard.kpiTooltips.churn')}
           icon={TrendingDown}
           status={churnStatus}
           href="/revenue"
@@ -201,6 +210,7 @@ return null
           label={t('saasMetrics.nrr')}
           value={formatPct(latest.nrrPct)}
           subtitle={t('dashboard.nrr')}
+          tooltip={t('dashboard.kpiTooltips.nrr')}
           icon={Gauge}
           status={nrrStatus}
           href="/revenue"
@@ -209,6 +219,7 @@ return null
           label={t('saasMetrics.activeCustomers')}
           value={latest.totalCustomers.toLocaleString('pt-BR')}
           subtitle={`+${latest.newCustomers} ${t('dashboard.new')}`}
+          tooltip={t('dashboard.kpiTooltips.activeCustomers')}
           icon={Users}
           status="neutral"
           href="/revenue"

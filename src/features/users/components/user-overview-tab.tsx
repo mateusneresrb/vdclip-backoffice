@@ -281,8 +281,8 @@ return
                     </Badge>
                   </div>
                 )}
-                <div className="mt-1 flex flex-col gap-2 sm:flex-row">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedPlan(user.plan); setEditingPlan(true) }}>
+                <div className="mt-1 flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" onClick={() => { setSelectedPlan(user.plan); setEditingPlan(true) }}>
                     {t('userDetail.changePlan')}
                   </Button>
                   {user.plan !== 'free' && (
@@ -302,7 +302,7 @@ return
                     onClick={() => setPixDialogOpen(true)}
                   >
                     <QrCode className="h-3 w-3" />
-                    Pix
+                    Pix Automático
                   </Button>
                 </div>
               </>

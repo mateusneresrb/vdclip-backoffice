@@ -104,7 +104,7 @@ export function UserDetail({ userId }: { userId: string }) {
   const [selectedTeamPlan, setSelectedTeamPlan] = useState<UserPlan>('free')
 
   const { data: affiliate, isLoading: affiliateLoading } =
-    useAdminUserAffiliate(userId, showAffiliate)
+    useAdminUserAffiliate(userId, showAffiliate) as { data: any, isLoading: boolean }
 
   const { data: userTemplates, isLoading: userTemplatesLoading } =
     useAdminUserTemplates(userId, showTemplates)

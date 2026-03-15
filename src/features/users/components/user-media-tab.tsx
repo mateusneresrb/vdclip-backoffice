@@ -45,13 +45,6 @@ const statusStyles: Record<MediaStatus, string> = {
   pending: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
 }
 
-const statusDot: Record<MediaStatus, string> = {
-  completed: 'bg-emerald-500',
-  processing: 'bg-blue-500 animate-pulse',
-  failed: 'bg-red-500',
-  pending: 'bg-amber-500',
-}
-
 const renderingStatusStyles: Record<string, string> = {
   created: 'bg-muted text-muted-foreground',
   completed: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
@@ -320,7 +313,7 @@ setRenderTarget(null) }}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('users.media.actions.renderTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('users.media.actions.renderDescription', { title: renderTarget?.title ?? '' })}
+              {(t as Function)('users.media.actions.renderDescription', { title: renderTarget?.title ?? '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -580,7 +573,7 @@ setReprocessTarget(null) }}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('users.media.actions.reprocessTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('users.media.actions.reprocessDescription', { title: reprocessTarget?.title ?? '' })}
+              {(t as Function)('users.media.actions.reprocessDescription', { title: reprocessTarget?.title ?? '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -151,6 +151,11 @@ return entries
                       {entry.costCenterName && (
                         <Badge variant="outline" className="text-[10px]">{entry.costCenterName}</Badge>
                       )}
+                      {entry.competenceMonth && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(entry.competenceMonth + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 self-end sm:self-auto">

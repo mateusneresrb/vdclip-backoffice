@@ -85,6 +85,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
           value={metrics.subscriptions.activeSubscriptions.toLocaleString()}
           icon={Users}
           iconClassName="bg-blue-500/10 text-blue-600 dark:text-blue-400"
+          tooltip={t('dashboard.summaryHints.activeSubsTooltip')}
           subtitle={t('dashboard.summaryHints.activeSubs')}
         />
         <MetricCard
@@ -111,6 +112,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
           value={metrics.content.completedProjects.toLocaleString()}
           icon={Film}
           iconClassName="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+          tooltip={t('dashboard.summaryHints.completedTooltip')}
           subtitle={t('dashboard.summaryHints.completedDesc')}
         />
         <MetricCard
@@ -126,6 +128,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
           value={metrics.credits.totalCreditsUsed.toLocaleString()}
           icon={Layers}
           iconClassName="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+          tooltip={t('dashboard.summaryHints.usedTooltip')}
           subtitle={t('dashboard.summaryHints.usedDesc')}
         />
       </div>
