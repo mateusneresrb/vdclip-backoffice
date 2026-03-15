@@ -7,11 +7,6 @@ import './index.css'
 import './i18n'
 
 async function bootstrap() {
-  if (import.meta.env.DEV) {
-    const { worker } = await import('./mocks/browser')
-    await worker.start({ onUnhandledRequest: 'bypass' })
-  }
-
   // Try to restore session from refresh token cookie
   await restoreSession()
 

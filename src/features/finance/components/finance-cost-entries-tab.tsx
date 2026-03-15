@@ -37,6 +37,7 @@ import { usePagination } from '@/hooks/use-pagination'
 
 import { cn } from '@/lib/utils'
 import { useCostEntries } from '../hooks/use-cost-entries'
+import { useCostEntryMutations } from '../hooks/use-cost-entry-mutations'
 import { useFinancialCategories } from '../hooks/use-financial-categories'
 import { CostEntryFormDialog } from './cost-entry-form-dialog'
 import { FinancialNotes } from './financial-notes'
@@ -65,6 +66,7 @@ export function FinanceCostEntriesTab() {
   const { t } = useTranslation('admin')
   const { data: entries, isLoading } = useCostEntries()
   const { data: categories } = useFinancialCategories()
+  const { remove } = useCostEntryMutations()
   const [formOpen, setFormOpen] = useState(false)
   const [editEntry, setEditEntry] = useState<CostEntry | undefined>()
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -227,7 +229,8 @@ setNotesEntry(null) }}>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('finance.form.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setDeleteId(null)}>{t('finance.confirmDelete')}</AlertDialogAction>
+            <AlertDialogAction onClick={() => { if (deleteId) 
+remove.mutate(deleteId); setDeleteId(null) }}>{t('finance.confirmDelete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

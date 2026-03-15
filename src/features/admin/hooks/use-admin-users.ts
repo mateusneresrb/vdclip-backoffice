@@ -1,4 +1,4 @@
-import type { AdminUser, AffiliateInfo, TeamSettings } from '../types'
+import type { AdminUser, TeamSettings } from '../types'
 
 import { useQuery } from '@tanstack/react-query'
 
@@ -81,53 +81,6 @@ function mapTeamSettings(t: Record<string, unknown>): TeamSettings {
   }
 }
 
-const mockAffiliateByUser: Record<string, AffiliateInfo> = {
-  '1': {
-    referralCode: 'ALICE2025',
-    commissionPercent: 20,
-    totalReferrals: 24,
-    activeReferrals: 18,
-    totalEarnings: 1250.0,
-    pendingPayout: 320.5,
-    tier: 'gold',
-  },
-  '2': {
-    referralCode: 'BRUNO2024',
-    commissionPercent: 25,
-    totalReferrals: 45,
-    activeReferrals: 32,
-    totalEarnings: 3800.0,
-    pendingPayout: 890.0,
-    tier: 'gold',
-  },
-  '6': {
-    referralCode: 'FELIPE25',
-    commissionPercent: 15,
-    totalReferrals: 8,
-    activeReferrals: 5,
-    totalEarnings: 240.0,
-    pendingPayout: 60.0,
-    tier: 'bronze',
-  },
-  '7': {
-    referralCode: 'GRACE2024',
-    commissionPercent: 20,
-    totalReferrals: 15,
-    activeReferrals: 12,
-    totalEarnings: 890.0,
-    pendingPayout: 150.0,
-    tier: 'silver',
-  },
-  '9': {
-    referralCode: 'ISA2025',
-    commissionPercent: 15,
-    totalReferrals: 10,
-    activeReferrals: 7,
-    totalEarnings: 420.0,
-    pendingPayout: 85.0,
-    tier: 'silver',
-  },
-}
 
 export function useAdminUsers(query: UserSearchQuery = { field: 'name', value: '' }) {
   return useQuery({
@@ -157,14 +110,11 @@ export function useAdminUser(userId: string) {
   })
 }
 
-export function useAdminUserAffiliate(userId: string, enabled: boolean) {
+export function useAdminUserAffiliate(_userId: string, _enabled: boolean) {
   return useQuery({
-    queryKey: adminUserKeys.affiliate(userId),
-    queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 400))
-      return mockAffiliateByUser[userId] ?? null
-    },
-    enabled,
+    queryKey: adminUserKeys.affiliate(_userId),
+    queryFn: async () => null,
+    enabled: false,
   })
 }
 

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { apiClient } from '@/lib/api-client'
 import { useAuthStore } from '@/features/auth/stores/auth-store'
+import { apiClient } from '@/lib/api-client'
 
 export interface ProfileActivityEvent {
   id: string
@@ -15,11 +15,16 @@ const profileActivityKeys = {
 }
 
 function actionToType(action: string): string {
-  if (action.includes('login') || action.includes('auth')) return 'login'
-  if (action.includes('password')) return 'password_changed'
-  if (action.includes('mfa')) return 'mfa_enabled'
-  if (action.includes('oauth')) return 'oauth_connected'
-  if (action.includes('session')) return 'session_revoked'
+  if (action.includes('login') || action.includes('auth')) 
+return 'login'
+  if (action.includes('password')) 
+return 'password_changed'
+  if (action.includes('mfa')) 
+return 'mfa_enabled'
+  if (action.includes('oauth')) 
+return 'oauth_connected'
+  if (action.includes('session')) 
+return 'session_revoked'
   return action
 }
 
@@ -64,7 +69,8 @@ export function useProfileActivity() {
   return useQuery({
     queryKey: profileActivityKeys.all,
     queryFn: async () => {
-      if (!adminId) return []
+      if (!adminId) 
+return []
 
       const data = await apiClient.get<
         Record<string, unknown>[]

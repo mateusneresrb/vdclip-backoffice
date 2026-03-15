@@ -24,14 +24,24 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 import { useTaxConfigMutations } from '../hooks/use-tax-config-mutations'
+
+const TAX_TYPES = ['iss', 'pis', 'cofins', 'csll', 'irpj', 'inss', 'cbs', 'ibs'] as const
+const TAX_REGIMES = ['simples_nacional', 'lucro_presumido', 'lucro_real'] as const
 
 const taxConfigSchema = z.object({
   taxType: z.string().min(1, 'Tipo de imposto obrigatorio'),
   rate: z.number().min(0, 'Aliquota deve ser positiva').max(100, 'Aliquota maxima 100%'),
   municipalityCode: z.string().nullable(),
-  taxRegime: z.string().nullable(),
+  taxRegime: z.string().min(1, 'Regime tributario obrigatorio'),
   effectiveFrom: z.string().min(1, 'Data de inicio obrigatoria'),
   effectiveTo: z.string().nullable(),
 })
@@ -59,7 +69,7 @@ export function TaxConfigFormDialog({
       taxType: '',
       rate: 0,
       municipalityCode: null,
-      taxRegime: null,
+      taxRegime: 'simples_nacional',
       effectiveFrom: '',
       effectiveTo: null,
     },
@@ -81,7 +91,7 @@ export function TaxConfigFormDialog({
               taxType: '',
               rate: 0,
               municipalityCode: null,
-              taxRegime: null,
+              taxRegime: 'simples_nacional',
               effectiveFrom: '',
               effectiveTo: null,
             },
@@ -104,7 +114,7 @@ export function TaxConfigFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing
@@ -124,9 +134,16 @@ export function TaxConfigFormDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('finance.form.taxType')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TAX_TYPES.map((tt) => (
+                        <SelectItem key={tt} value={tt}>{tt.toUpperCase()}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -175,12 +192,16 @@ export function TaxConfigFormDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('finance.form.taxRegime')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={field.value ?? ''}
-                        onChange={(e) => field.onChange(e.target.value || null)}
-                      />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value ?? ''}>
+                      <FormControl>
+                        <SelectTrigger className="w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TAX_REGIMES.map((tr) => (
+                          <SelectItem key={tr} value={tr}>{t(`finance.taxRegimes.${tr}`)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

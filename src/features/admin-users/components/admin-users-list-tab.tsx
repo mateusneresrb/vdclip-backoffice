@@ -402,7 +402,7 @@ onClose()
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('adminUsers.createAdminTitle')}</DialogTitle>
           <DialogDescription>{t('adminUsers.createAdminDescription')}</DialogDescription>
@@ -419,7 +419,7 @@ onClose()
           <div className="space-y-2">
             <Label>{t('adminUsers.role')}</Label>
             <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder={t('adminUsers.selectRole')} />
               </SelectTrigger>
               <SelectContent>
@@ -503,7 +503,7 @@ onClose()
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('adminUsers.editTitle')}</DialogTitle>
           <DialogDescription>{t('adminUsers.editDescription')}</DialogDescription>
@@ -520,7 +520,7 @@ onClose()
           <div className="space-y-2">
             <Label>{t('adminUsers.role')}</Label>
             <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

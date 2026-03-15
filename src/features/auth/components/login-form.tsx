@@ -60,7 +60,8 @@ export function LoginForm({ className }: { className?: string }) {
 
   const onMfaSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (mfaCode.length !== 6) return
+    if (mfaCode.length !== 6) 
+return
     setError(null)
     try {
       await verifyMfa(mfaCode)

@@ -2,7 +2,6 @@ import type { AdminUser, CreditType, UserPlan } from '@/features/admin/types'
 import { Link } from '@tanstack/react-router'
 import {
   AlertTriangle,
-  ArrowRight,
   Ban,
   Building2,
   Calendar,
@@ -11,13 +10,14 @@ import {
   CreditCard,
   ExternalLink,
   Film,
-  Infinity as InfinityIcon,
   Key,
   Link2,
   Mail,
   MailCheck,
   Package,
+  Minus,
   Plus,
+  QrCode,
   Save,
   Share2,
   TrendingUp,
@@ -39,10 +39,10 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -59,9 +59,11 @@ import {
 import { Separator } from '@/components/ui/separator'
 
 import { cn } from '@/lib/utils'
+import { useUserMutations } from '../hooks/use-user-mutations'
 
 const creditTypes: CreditType[] = ['plan_cycle', 'purchased', 'promotional', 'bonus', 'adjustment']
 const plans: UserPlan[] = ['free', 'lite', 'premium', 'ultimate']
+const billingPeriods = ['monthly', 'annual'] as const
 
 const planBadgeVariants: Record<UserPlan, string> = {
   free: 'bg-muted text-muted-foreground',
@@ -70,22 +72,28 @@ const planBadgeVariants: Record<UserPlan, string> = {
   ultimate: 'bg-violet-600/15 text-violet-700 dark:text-violet-400',
 }
 
-// Mock subscription history for display
-const mockSubscriptionHistory = [
-  { id: '1', from: 'free', to: 'lite', date: '2025-06-15', provider: 'paddle' },
-  { id: '2', from: 'lite', to: 'premium', date: '2026-02-28', provider: 'paddle' },
-]
-
 export function UserOverviewTab({ user }: { user: AdminUser }) {
   const { t } = useTranslation('admin')
+  const { grantCredits, deductCredits, changePlan, cancelPlan, sendVerificationEmail, createPixSubscription } = useUserMutations()
+
   const [editingPlan, setEditingPlan] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<UserPlan>(user.plan)
   const [creditDialogOpen, setCreditDialogOpen] = useState(false)
   const [creditAmount, setCreditAmount] = useState('')
   const [creditType, setCreditType] = useState<CreditType>('plan_cycle')
-  const [creditDays, setCreditDays] = useState('')
-  const [noExpiry, setNoExpiry] = useState(false)
+  const [creditDays, setCreditDays] = useState('30')
   const [cancelPlanDialogOpen, setCancelPlanDialogOpen] = useState(false)
+
+  // Remove credits dialog
+  const [removeCreditOpen, setRemoveCreditOpen] = useState(false)
+  const [removeCreditAmount, setRemoveCreditAmount] = useState('')
+  const [removeCreditReason, setRemoveCreditReason] = useState('')
+
+  // Pix subscription dialog
+  const [pixDialogOpen, setPixDialogOpen] = useState(false)
+  const [pixPlan, setPixPlan] = useState<UserPlan>('premium')
+  const [pixBillingPeriod, setPixBillingPeriod] = useState<'monthly' | 'annual'>('monthly')
+  const [pixQuantity, setPixQuantity] = useState('1')
 
   const totalCredits = user.creditPackages.reduce((sum, p) => sum + p.amount, 0)
   const usedCredits = user.creditPackages.reduce((sum, p) => sum + p.used, 0)
@@ -95,6 +103,72 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
   const daysSinceCreation = Math.floor(
     (Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24),
   )
+
+  const handleGrantCredits = () => {
+    const amount = Number(creditAmount)
+    if (!amount || amount <= 0) 
+return
+    const days = Number(creditDays) || 30
+    const expiresAt = new Date(Date.now() + days * 86400000).toISOString()
+    grantCredits.mutate(
+      {
+        userId: user.id,
+        amount,
+        creditType,
+        description: `Admin grant: ${amount} ${creditType} credits`,
+        expiresAt,
+      },
+      {
+        onSuccess: () => {
+          setCreditDialogOpen(false)
+          setCreditAmount('')
+          setCreditDays('30')
+          setCreditType('plan_cycle')
+        },
+      },
+    )
+  }
+
+  const handleChangePlan = () => {
+    if (selectedPlan === user.plan) {
+      setEditingPlan(false)
+      return
+    }
+    changePlan.mutate(
+      { userId: user.id, plan: selectedPlan },
+      { onSuccess: () => setEditingPlan(false) },
+    )
+  }
+
+  const handleCancelPlan = () => {
+    cancelPlan.mutate(
+      { userId: user.id },
+      { onSuccess: () => setCancelPlanDialogOpen(false) },
+    )
+  }
+
+  const handleDeductCredits = () => {
+    const amount = Number(removeCreditAmount)
+    if (!amount || amount <= 0) return
+    deductCredits.mutate(
+      { userId: user.id, amount, reason: removeCreditReason || 'Admin deduction' },
+      {
+        onSuccess: () => {
+          setRemoveCreditOpen(false)
+          setRemoveCreditAmount('')
+          setRemoveCreditReason('')
+        },
+      },
+    )
+  }
+
+  const handleCreatePix = () => {
+    const qty = Number(pixQuantity) || 1
+    createPixSubscription.mutate(
+      { userId: user.id, plan: pixPlan, billingPeriod: pixBillingPeriod, quantity: qty },
+      { onSuccess: () => setPixDialogOpen(false) },
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -149,7 +223,7 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
         </Card>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
         {/* Plan Info */}
         <Card>
           <CardHeader className="pb-3">
@@ -175,7 +249,7 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
                   </Select>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1" onClick={() => setEditingPlan(false)}>
+                  <Button size="sm" className="flex-1" disabled={changePlan.isPending} onClick={handleChangePlan}>
                     <Save className="mr-1 h-3 w-3" />{t('userDetail.save')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setEditingPlan(false)}>
@@ -197,17 +271,17 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('userDetail.expires')}</span>
-                  <span>{user.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : t('userDetail.noExpiry')}</span>
+                  <span>{user.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : '—'}</span>
                 </div>
                 {user.subscriptionId && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('userDetail.subscriptionId')}</span>
-                    <Badge variant="secondary" className="max-w-[160px] truncate font-mono text-[11px]">
+                    <Badge variant="secondary" className="max-w-[240px] truncate font-mono text-[11px]">
                       {user.subscriptionId}
                     </Badge>
                   </div>
                 )}
-                <div className="mt-1 flex gap-2">
+                <div className="mt-1 flex flex-col gap-2 sm:flex-row">
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedPlan(user.plan); setEditingPlan(true) }}>
                     {t('userDetail.changePlan')}
                   </Button>
@@ -221,6 +295,15 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
                       <Ban className="mr-1 h-3 w-3" />{t('userDetail.cancelPlan')}
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                    onClick={() => setPixDialogOpen(true)}
+                  >
+                    <QrCode className="h-3 w-3" />
+                    Pix
+                  </Button>
                 </div>
               </>
             )}
@@ -234,6 +317,15 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Key className="h-4 w-4" />{t('userDetail.credits')}
               </CardTitle>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs text-destructive hover:text-destructive"
+                  onClick={() => setRemoveCreditOpen(true)}
+                >
+                  <Minus className="mr-1 h-3 w-3" />{t('userDetail.removeCredit')}
+                </Button>
               <Dialog open={creditDialogOpen} onOpenChange={setCreditDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-xs">
@@ -257,42 +349,33 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
                       <Input type="number" min={1} placeholder="100" value={creditAmount} onChange={(e) => setCreditAmount(e.target.value)} />
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label>{t('userDetail.creditValidDays')}</Label>
-                        <div className="flex items-center gap-1.5">
-                          <Checkbox
-                            id="no-expiry"
-                            checked={noExpiry}
-                            onCheckedChange={(v) => setNoExpiry(!!v)}
-                          />
-                          <label htmlFor="no-expiry" className="flex cursor-pointer items-center gap-1 text-xs text-muted-foreground">
-                            <InfinityIcon className="h-3 w-3" />{t('userDetail.noExpiryLabel')}
-                          </label>
-                        </div>
-                      </div>
+                      <Label>{t('userDetail.creditValidDays')}</Label>
                       <Input
                         type="number"
                         min={1}
                         placeholder="30"
                         value={creditDays}
-                        disabled={noExpiry}
                         onChange={(e) => setCreditDays(e.target.value)}
-                        className={noExpiry ? 'opacity-50' : ''}
                       />
-                      {!noExpiry && <p className="text-xs text-muted-foreground">{t('userDetail.creditValidDaysHint')}</p>}
+                      <p className="text-xs text-muted-foreground">{t('userDetail.creditValidDaysHint')}</p>
                     </div>
-                    <Button className="w-full" onClick={() => { setCreditDialogOpen(false); setCreditAmount(''); setCreditDays(''); setCreditType('plan_cycle'); setNoExpiry(false) }}>
+                    <Button
+                      className="w-full"
+                      disabled={!creditAmount || Number(creditAmount) <= 0 || grantCredits.isPending}
+                      onClick={handleGrantCredits}
+                    >
                       {t('userDetail.confirmAddCredit')}
                     </Button>
                   </div>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <div className="flex items-baseline justify-between">
-                <p className="text-2xl font-bold sm:text-3xl">{user.credits}</p>
+                <p className="text-lg font-bold sm:text-3xl">{user.credits}</p>
                 <span className="text-xs text-muted-foreground">{usagePercent}% {t('userDetail.creditsUsed').toLowerCase()}</span>
               </div>
               <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
@@ -310,7 +393,7 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
               </div>
             </div>
             {user.creditPackages.length > 0 && (
-              <div className="divide-y rounded-lg border">
+              <div className="max-h-[280px] divide-y overflow-y-auto rounded-lg border">
                 {user.creditPackages.map((pkg) => {
                   const isExpired = new Date(pkg.expiresAt) < new Date()
                   const pkgUsage = pkg.amount > 0 ? Math.round((pkg.used / pkg.amount) * 100) : 0
@@ -424,7 +507,13 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
                   {user.emailVerified ? t('userDetail.yes') : t('userDetail.no')}
                 </Badge>
                 {!user.emailVerified && (
-                  <Button variant="outline" size="sm" className="h-6 gap-1 text-[11px]">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 gap-1 text-[11px]"
+                    disabled={sendVerificationEmail.isPending}
+                    onClick={() => sendVerificationEmail.mutate({ userId: user.id })}
+                  >
                     <MailCheck className="h-3 w-3" />
                     {t('users.actions.verifyEmail')}
                   </Button>
@@ -451,46 +540,6 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
             )}
           </CardContent>
         </Card>
-
-        {/* Subscription History */}
-        <Card className="sm:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <CreditCard className="h-4 w-4" />{t('userDetail.subscriptionHistory.title')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {mockSubscriptionHistory.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                {t('userDetail.subscriptionHistory.noHistory')}
-              </p>
-            ) : (
-              <div className="relative ml-3">
-                <div className="absolute left-[5px] top-1 bottom-1 w-px bg-border" />
-                {mockSubscriptionHistory.map((event, index) => (
-                  <div key={event.id} className={cn('relative pl-6', index < mockSubscriptionHistory.length - 1 && 'pb-4')}>
-                    <div className="absolute left-0 top-1.5 size-[11px] rounded-full bg-blue-500 ring-2 ring-background" />
-                    <div className="flex flex-wrap items-center gap-2 text-sm">
-                      <Badge variant="secondary" className={planBadgeVariants[event.from as UserPlan]}>
-                        {t(`plan.${event.from}`)}
-                      </Badge>
-                      <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                      <Badge variant="secondary" className={planBadgeVariants[event.to as UserPlan]}>
-                        {t(`plan.${event.to}`)}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(event.date).toLocaleDateString()}
-                      </span>
-                      <Badge variant="outline" className="text-[10px] capitalize">
-                        {event.provider}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
 
       {/* Cancel Plan Confirmation */}
@@ -504,13 +553,105 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
             <AlertDialogCancel>{t('userDetail.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => setCancelPlanDialogOpen(false)}
+              disabled={cancelPlan.isPending}
+              onClick={handleCancelPlan}
             >
               {t('userDetail.cancelPlanConfirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Remove Credits Dialog */}
+      <Dialog open={removeCreditOpen} onOpenChange={setRemoveCreditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('userDetail.removeCreditTitle')}</DialogTitle>
+            <DialogDescription>{t('userDetail.removeCreditDescription')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>{t('userDetail.creditAmount')}</Label>
+              <Input
+                type="number"
+                min={1}
+                max={user.credits}
+                placeholder="50"
+                value={removeCreditAmount}
+                onChange={(e) => setRemoveCreditAmount(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('userDetail.removeCreditAvailable', { credits: user.credits })}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('userDetail.removeCreditReason')}</Label>
+              <Input
+                placeholder={t('userDetail.removeCreditReasonPlaceholder')}
+                value={removeCreditReason}
+                onChange={(e) => setRemoveCreditReason(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full"
+              variant="destructive"
+              disabled={!removeCreditAmount || Number(removeCreditAmount) <= 0 || Number(removeCreditAmount) > user.credits || deductCredits.isPending}
+              onClick={handleDeductCredits}
+            >
+              {t('userDetail.confirmRemoveCredit')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pix Subscription Dialog */}
+      <Dialog open={pixDialogOpen} onOpenChange={setPixDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="h-5 w-5" />
+              {t('userDetail.pixTitle')}
+            </DialogTitle>
+            <DialogDescription>{t('userDetail.pixDescription')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>{t('userDetail.plan')}</Label>
+              <Select value={pixPlan} onValueChange={(v) => setPixPlan(v as UserPlan)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {plans.filter((p) => p !== 'free').map((p) => (
+                    <SelectItem key={p} value={p}>{t(`plan.${p}`)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('userDetail.pixBillingPeriod')}</Label>
+              <Select value={pixBillingPeriod} onValueChange={(v) => setPixBillingPeriod(v as 'monthly' | 'annual')}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {billingPeriods.map((bp) => (
+                    <SelectItem key={bp} value={bp}>{t(`userDetail.pixPeriod.${bp}`)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('userDetail.pixQuantity')}</Label>
+              <Input type="number" min={1} max={10} value={pixQuantity} onChange={(e) => setPixQuantity(e.target.value)} />
+            </div>
+            <Button
+              className="w-full"
+              disabled={createPixSubscription.isPending}
+              onClick={handleCreatePix}
+            >
+              <QrCode className="mr-2 h-4 w-4" />
+              {t('userDetail.pixGenerate')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -31,7 +31,7 @@ export function DashboardCreditsTab({ metrics }: { metrics: PlatformMetrics }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
         <MetricCard
           title={t('metrics.credits.totalIssued')}
           value={metrics.credits.totalCreditsIssued.toLocaleString()}
@@ -58,7 +58,7 @@ export function DashboardCreditsTab({ metrics }: { metrics: PlatformMetrics }) {
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
         <MetricCard
           title={t('metrics.credits.transactionVolume')}
           value={`$${metrics.credits.transactionVolume.toLocaleString()}`}
@@ -77,7 +77,7 @@ export function DashboardCreditsTab({ metrics }: { metrics: PlatformMetrics }) {
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
         <ChartCard
           title={t('charts.creditsByType')}
           description={t('dashboard.chartDescriptions.creditsByType')}

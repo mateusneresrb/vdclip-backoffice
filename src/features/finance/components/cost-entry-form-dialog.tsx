@@ -1,7 +1,7 @@
 import type { CostEntry, FinancialCategory } from '../types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
@@ -68,6 +68,103 @@ return data.recurrenceInterval !== null
   )
 
 type CostEntryFormValues = z.infer<typeof costEntrySchema>
+
+function formatAmountDisplay(value: number, currency: 'BRL' | 'USD'): string {
+  if (value === 0) 
+return ''
+  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
+}
+
+function parseLocaleNumber(input: string): number {
+  // Support both comma and dot as decimal separators
+  // If there's a comma after the last dot, treat comma as decimal (pt-BR: 1.000,50)
+  // If there's only commas, last comma is decimal
+  const lastComma = input.lastIndexOf(',')
+  const lastDot = input.lastIndexOf('.')
+
+  let cleaned: string
+  if (lastComma > lastDot) {
+    // pt-BR format: dots are thousands, comma is decimal
+    cleaned = input.replace(/\./g, '').replace(',', '.')
+  } else {
+    // en-US format or no comma: commas are thousands, dot is decimal
+    cleaned = input.replace(/,/g, '')
+  }
+
+  const num = Number.parseFloat(cleaned)
+  return Number.isNaN(num) ? 0 : num
+}
+
+function AmountInput({
+  value,
+  onChange,
+  currency,
+  label,
+}: {
+  value: number
+  onChange: (v: number) => void
+  currency: 'BRL' | 'USD'
+  label: string
+}) {
+  const [displayValue, setDisplayValue] = useState(() => formatAmountDisplay(value, currency))
+  const [isFocused, setIsFocused] = useState(false)
+
+  // Sync display when value changes externally (e.g. form reset)
+  useEffect(() => {
+    if (!isFocused) {
+      setDisplayValue(formatAmountDisplay(value, currency))
+    }
+  }, [value, currency, isFocused])
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value
+      // Allow digits, dots, commas
+      const sanitized = raw.replace(/[^\d.,]/g, '')
+      setDisplayValue(sanitized)
+      const parsed = parseLocaleNumber(sanitized)
+      onChange(parsed)
+    },
+    [onChange],
+  )
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false)
+    setDisplayValue(formatAmountDisplay(value, currency))
+  }, [value, currency])
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true)
+    // On focus show raw number for easier editing
+    if (value > 0) {
+      setDisplayValue(
+        currency === 'BRL'
+          ? value.toFixed(2).replace('.', ',')
+          : value.toFixed(2),
+      )
+    }
+  }, [value, currency])
+
+  return (
+    <FormItem>
+      <FormLabel>{label}</FormLabel>
+      <FormControl>
+        <Input
+          inputMode="decimal"
+          placeholder={currency === 'BRL' ? '0,00' : '0.00'}
+          value={displayValue}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )
+}
 
 interface CostEntryFormDialogProps {
   open: boolean
@@ -176,7 +273,7 @@ export function CostEntryFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {isEditing
@@ -215,13 +312,16 @@ export function CostEntryFormDialog({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full min-w-0">
                         <SelectValue
                           placeholder={t('finance.form.selectCategory')}
                         />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper">
+                      {categories.length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">{t('finance.noCategories')}</div>
+                      )}
                       {categories.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.code} - {c.name}
@@ -297,7 +397,7 @@ export function CostEntryFormDialog({
                         value={field.value ?? undefined}
                       >
                         <FormControl>
-                          <SelectTrigger className="w-full">
+                          <SelectTrigger className="w-full min-w-0">
                             <SelectValue
                               placeholder={t('finance.form.selectFrequency')}
                             />
@@ -327,15 +427,15 @@ export function CostEntryFormDialog({
                 control={form.control}
                 name="costAllocation"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>{t('finance.form.costAllocation')}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
+                        <SelectTrigger className="w-full min-w-0 overflow-hidden">
+                          <SelectValue className="truncate" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -362,7 +462,7 @@ export function CostEntryFormDialog({
                 control={form.control}
                 name="competenceMonth"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>{t('finance.form.competenceMonth')}</FormLabel>
                     <FormControl>
                       <Input type="month" {...field} />
@@ -385,7 +485,7 @@ export function CostEntryFormDialog({
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full min-w-0">
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
@@ -403,18 +503,12 @@ export function CostEntryFormDialog({
                 control={form.control}
                 name="amount"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('finance.form.amount')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  <AmountInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    currency={form.watch('currency')}
+                    label={t('finance.form.amount')}
+                  />
                 )}
               />
             </div>
@@ -466,7 +560,7 @@ export function CostEntryFormDialog({
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full min-w-0">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
@@ -493,7 +587,7 @@ export function CostEntryFormDialog({
             <DialogFooter className="flex-col gap-2 sm:flex-row sm:items-center">
               {admin && !isEditing && (
                 <p className="mr-auto text-xs text-muted-foreground">
-                  Será registrado como:{' '}
+                  {t('finance.form.registeredAs')}{' '}
                   <span className="font-medium">{admin.name}</span>
                 </p>
               )}

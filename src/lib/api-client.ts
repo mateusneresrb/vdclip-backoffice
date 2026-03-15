@@ -12,7 +12,8 @@ let isRefreshing: Promise<boolean> | null = null
 
 function getAuthHeader(): HeadersInit {
   const token = useAuthStore.getState()._token
-  if (!token) return {}
+  if (!token) 
+return {}
   return { Authorization: `Bearer ${token}` }
 }
 
@@ -23,7 +24,8 @@ async function tryRefresh(): Promise<boolean> {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) return false
+    if (!res.ok) 
+return false
     const data = await res.json()
     useAuthStore.getState().setToken(data.access_token)
     return true

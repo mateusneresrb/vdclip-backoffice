@@ -122,7 +122,7 @@ export function UserDetailHeader({ user }: { user: AdminUser }) {
       </Avatar>
       <div className="flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="truncate text-xl font-bold">{user.name}</h2>
+          <h2 className="truncate text-lg font-bold sm:text-xl">{user.name}</h2>
           <Badge variant="secondary" className={statusVariant[user.status]}>
             {t(`status.${user.status}`)}
           </Badge>

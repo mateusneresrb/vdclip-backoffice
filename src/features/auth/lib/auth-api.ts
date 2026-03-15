@@ -34,7 +34,8 @@ async function authFetch<T>(
 
 function authHeaders(): HeadersInit {
   const token = useAuthStore.getState()._token
-  if (!token) return {}
+  if (!token) 
+return {}
   return { Authorization: `Bearer ${token}` }
 }
 

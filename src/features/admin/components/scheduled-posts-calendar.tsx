@@ -135,12 +135,10 @@ const platformColors: Record<string, string> = {
 }
 
 const MONTH_NAMES = Array.from({ length: 12 }, (_, i) =>
-  new Date(2024, i, 1).toLocaleDateString('pt-BR', { month: 'long' }).replace(/^\w/, (c) => c.toUpperCase()),
-)
+  new Date(2024, i, 1).toLocaleDateString('pt-BR', { month: 'long' }).replace(/^\w/, (c) => c.toUpperCase()),)
 
 const WEEKDAY_SHORT = Array.from({ length: 7 }, (_, i) =>
-  new Date(2024, 0, i).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').replace(/^\w/, (c) => c.toUpperCase()),
-)
+  new Date(2024, 0, i).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').replace(/^\w/, (c) => c.toUpperCase()),)
 
 // ─── Platform dot ─────────────────────────────────────────────────────────────
 

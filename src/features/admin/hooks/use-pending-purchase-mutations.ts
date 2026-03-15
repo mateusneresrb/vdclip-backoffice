@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import i18n from '@/i18n'
+import { i18n } from '@/i18n'
 
 import { apiClient } from '@/lib/api-client'
 import { showErrorToast, showSuccessToast } from '@/lib/toast'

@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { cn } from '@/lib/utils'
+import { useBankAccountMutations } from '../hooks/use-bank-account-mutations'
 import { useBankAccounts } from '../hooks/use-bank-accounts'
 import { BankAccountFormDialog } from './bank-account-form-dialog'
 
@@ -47,6 +48,7 @@ function formatCurrency(amount: number, currency: Currency) {
 export function FinanceBankAccountsTab() {
   const { t } = useTranslation('admin')
   const { data: accounts, isLoading } = useBankAccounts()
+  const { remove } = useBankAccountMutations()
   const [formOpen, setFormOpen] = useState(false)
   const [editAccount, setEditAccount] = useState<BankAccount | undefined>()
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -67,7 +69,7 @@ return accounts
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-44" />
         ))}
@@ -163,7 +165,8 @@ return accounts
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('finance.form.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setDeleteId(null)}>
+            <AlertDialogAction onClick={() => { if (deleteId) 
+remove.mutate(deleteId); setDeleteId(null) }}>
               {t('finance.confirmDelete')}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -44,12 +44,18 @@ export function useAuditLogs(filters: AuditLogFilters = {}) {
         page: 1,
         per_page: 50,
       }
-      if (filters.search) params.search = filters.search
-      if (filters.action && filters.action !== 'all') params.action = filters.action
-      if (filters.resource && filters.resource !== 'all') params.entity_type = filters.resource
-      if (filters.adminId && filters.adminId !== 'all') params.admin_user_id = filters.adminId
-      if (filters.dateFrom) params.date_from = filters.dateFrom
-      if (filters.dateTo) params.date_to = filters.dateTo
+      if (filters.search) 
+params.search = filters.search
+      if (filters.action && filters.action !== 'all') 
+params.action = filters.action
+      if (filters.resource && filters.resource !== 'all') 
+params.entity_type = filters.resource
+      if (filters.adminId && filters.adminId !== 'all') 
+params.admin_user_id = filters.adminId
+      if (filters.dateFrom) 
+params.date_from = filters.dateFrom
+      if (filters.dateTo) 
+params.date_to = filters.dateTo
 
       const data = await apiClient.get<
         Record<string, unknown>[]

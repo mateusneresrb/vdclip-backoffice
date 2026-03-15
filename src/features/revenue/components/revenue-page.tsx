@@ -46,15 +46,15 @@ export function RevenuePage() {
           <div className="-mb-px w-full overflow-x-auto overflow-y-hidden sm:w-auto">
             <TabsList className="w-max sm:w-auto">
               <TabsTrigger value="saas-metrics" className="gap-1.5">
-                <BarChart3 className="h-4 w-4" />
+                <BarChart3 className="hidden h-4 w-4 sm:block" />
                 {t('dashboard.tabs.saasMetrics')}
               </TabsTrigger>
               <TabsTrigger value="revenue" className="gap-1.5">
-                <CreditCard className="h-4 w-4" />
+                <CreditCard className="hidden h-4 w-4 sm:block" />
                 {t('revenue.tabSummary')}
               </TabsTrigger>
               <TabsTrigger value="transactions" className="gap-1.5">
-                <CreditCard className="h-4 w-4" />
+                <CreditCard className="hidden h-4 w-4 sm:block" />
                 {t('revenue.tabTransactions')}
               </TabsTrigger>
               <TabsTrigger value="pending-purchases" className="gap-1.5">

@@ -92,7 +92,7 @@ return null
               <CardTitle className="text-base">{t('templates.title')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <TemplateManager templates={userTemplates} isLoading={userTemplatesLoading} />
+              <TemplateManager templates={userTemplates} isLoading={userTemplatesLoading} userId={userId} />
             </CardContent>
           </Card>
         </TabsContent>

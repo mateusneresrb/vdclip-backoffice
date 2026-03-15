@@ -1,6 +1,6 @@
 import type { AdminMedia, MediaResult } from '../types'
 
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
 
@@ -30,7 +30,28 @@ function mapMedia(m: Record<string, unknown>): AdminMedia {
     errorCode: (m.error_code ?? m.errorCode ?? null) as string | null,
     deletedAt: (m.deleted_at ?? m.deletedAt ?? null) as string | null,
     resultsCount: Number(m.results_count ?? m.resultsCount ?? 0),
+    newVersion: Boolean(m.new_version ?? m.newVersion ?? false),
+    ownerId: String(m.owner_id ?? m.ownerId ?? ''),
+    ownerType: (m.owner_type ?? m.ownerType ?? 'USER') as 'USER' | 'TEAM',
   }
+}
+
+function parseHighlightTags(raw: unknown): string[] | null {
+  if (!raw) 
+return null
+  const arr = Array.isArray(raw) ? raw : [raw]
+  // Tags may come as ["#Tag1 #Tag2 #Tag3"] (single string with all tags)
+  return arr
+    .flatMap((item: unknown) => String(item).split(/\s+/))
+    .map((t: string) => t.replace(/^#+/, '').trim())
+    .filter(Boolean)
+}
+
+function mapRenderingStatus(raw: unknown): MediaResult['renderingStatus'] {
+  const status = String(raw ?? 'pending')
+  if (status === 'error') 
+return 'failed'
+  return status as MediaResult['renderingStatus']
 }
 
 function mapResult(r: Record<string, unknown>): MediaResult {
@@ -38,11 +59,15 @@ function mapResult(r: Record<string, unknown>): MediaResult {
     id: String(r.id ?? ''),
     title: String(r.title ?? ''),
     description: (r.description ?? null) as string | null,
-    highlightTags: (r.highlight_tags ?? r.highlightTags ?? null) as string[] | null,
+    highlightTags: parseHighlightTags(r.highlight_tags ?? r.highlightTags),
     thumbnailUrl: (r.thumbnail_url ?? r.thumbnailUrl ?? null) as string | null,
     viralityScore: r.virality_score != null ? Number(r.virality_score) : (r.viralityScore != null ? Number(r.viralityScore) : null),
     projectVersion: Number(r.project_version ?? r.projectVersion ?? 0),
-    renderingStatus: (r.rendering_status ?? r.renderingStatus ?? 'pending') as MediaResult['renderingStatus'],
+    renderingStatus: mapRenderingStatus(r.rendering_status ?? r.renderingStatus),
+    processId: (r.process_id ?? r.processId) as string | undefined,
+    newVersion: Boolean(r.new_version ?? r.newVersion ?? false),
+    ownerId: (r.owner_id ?? r.ownerId) as string | undefined,
+    ownerType: (r.owner_type ?? r.ownerType) as 'USER' | 'TEAM' | undefined,
   }
 }
 
@@ -68,13 +93,41 @@ export function useAdminTeamMedia(teamId: string, enabled: boolean) {
   })
 }
 
-export function useAdminMediaResults(mediaId: string, enabled: boolean) {
+export function useAdminMediaResults(mediaId: string, enabled: boolean, userId?: string) {
   return useQuery({
     queryKey: adminMediaKeys.results(mediaId),
     queryFn: async () => {
-      const data = await apiClient.get<Record<string, unknown>[]>(`/platform/media/${mediaId}/results`)
+      if (!userId) 
+return []
+      const data = await apiClient.get<Record<string, unknown>[]>(`/platform/users/${userId}/media/${mediaId}/results`)
       return data.map(mapResult)
     },
-    enabled,
+    enabled: enabled && !!userId,
   })
+}
+
+export function useMediaMutations() {
+  const queryClient = useQueryClient()
+
+  const softDelete = useMutation({
+    mutationFn: (mediaId: string) => apiClient.delete(`/platform/media/${mediaId}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminMediaKeys.all }),
+  })
+
+  const restore = useMutation({
+    mutationFn: (mediaId: string) => apiClient.post(`/platform/media/${mediaId}/restore`, {}),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminMediaKeys.all }),
+  })
+
+  const reprocess = useMutation({
+    mutationFn: (mediaId: string) => apiClient.post(`/platform/media/${mediaId}/reprocess`, {}),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminMediaKeys.all }),
+  })
+
+  const renderResult = useMutation({
+    mutationFn: (resultId: string) => apiClient.post(`/platform/results/${resultId}/render`, {}),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminMediaKeys.all }),
+  })
+
+  return { softDelete, restore, reprocess, renderResult }
 }

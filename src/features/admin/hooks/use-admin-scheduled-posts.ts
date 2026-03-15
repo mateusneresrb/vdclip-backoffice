@@ -76,10 +76,14 @@ export function useUpdateScheduledPost(scope: 'user' | 'team', scopeId: string) 
   return useMutation({
     mutationFn: async ({ postId, data }: { postId: string; data: UpdateScheduledPostInput }) => {
       const body: Record<string, unknown> = {}
-      if (data.title !== undefined) body.title = data.title
-      if (data.description !== undefined) body.description = data.description
-      if (data.scheduledAt !== undefined) body.scheduled_at = data.scheduledAt
-      if (data.status !== undefined) body.status = data.status
+      if (data.title !== undefined) 
+body.title = data.title
+      if (data.description !== undefined) 
+body.description = data.description
+      if (data.scheduledAt !== undefined) 
+body.scheduled_at = data.scheduledAt
+      if (data.status !== undefined) 
+body.status = data.status
 
       await apiClient.patch(`/platform/scheduled-posts/${postId}`, body)
       return { postId, data }

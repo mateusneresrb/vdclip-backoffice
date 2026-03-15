@@ -1,14 +1,13 @@
 import type { BankAccount } from '../types'
 
-import { useQuery } from '@tanstack/react-query'
-
 import type { Currency } from '@/features/admin/types'
+
+import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
 
 interface ApiBankAccount {
   id: string
-  external_id: string
   name: string
   type: string
   bank_name: string | null
@@ -18,11 +17,13 @@ interface ApiBankAccount {
   initial_balance: string
   current_balance: string
   is_active: boolean
+  created_at: string
+  updated_at: string
 }
 
 function toFrontend(row: ApiBankAccount): BankAccount {
   return {
-    id: row.external_id ?? row.id,
+    id: row.id,
     name: row.name,
     bank: row.bank_name ?? null,
     accountType: row.type as BankAccount['accountType'],
@@ -44,8 +45,8 @@ export function useBankAccounts() {
   return useQuery({
     queryKey: bankAccountKeys.list(),
     queryFn: async () => {
-      const res = await apiClient.get<{ items: ApiBankAccount[] }>('/bank-accounts')
-      return res.items.map(toFrontend)
+      const res = await apiClient.get<ApiBankAccount[]>('/bank-accounts')
+      return res.map(toFrontend)
     },
   })
 }

@@ -2,31 +2,30 @@ import type { CreateFinancialCategoryInput, FinancialCategory, FinancialCategory
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import i18n from '@/i18n'
+import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showSuccessToast } from '@/lib/toast'
+import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 interface ApiCategory {
   id: string
-  external_id: string
-  name: string
-  slug: string
   parent_id: string | null
-  description: string | null
+  code: string
+  name: string
   type: string
+  cost_group: string | null
+  level: number
+  display_order: number
+  description: string | null
   is_active: boolean
-  level?: number
-  display_order?: number
-  cost_group?: string | null
   created_at: string
   updated_at: string
 }
 
 function toFrontend(row: ApiCategory): FinancialCategory {
   return {
-    id: row.external_id ?? row.id,
+    id: row.id,
     parentId: row.parent_id ?? null,
-    code: row.slug,
+    code: row.code,
     name: row.name,
     type: row.type as FinancialCategoryType,
     costGroup: row.cost_group ?? null,
@@ -39,10 +38,12 @@ function toFrontend(row: ApiCategory): FinancialCategory {
 
 function toCreateBody(data: CreateFinancialCategoryInput) {
   return {
-    slug: data.code,
+    code: data.code,
     name: data.name,
     type: data.type,
     parent_id: data.parentId ?? null,
+    level: data.level,
+    display_order: data.displayOrder,
     description: data.description ?? null,
     cost_group: data.costGroup ?? null,
   }
@@ -50,12 +51,10 @@ function toCreateBody(data: CreateFinancialCategoryInput) {
 
 function toUpdateBody(data: FinancialCategory) {
   return {
-    slug: data.code,
     name: data.name,
-    type: data.type,
-    parent_id: data.parentId ?? null,
     description: data.description ?? null,
-    cost_group: data.costGroup ?? null,
+    is_active: data.isActive,
+    display_order: data.displayOrder,
   }
 }
 
@@ -70,6 +69,9 @@ export function useCategoryMutations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-categories'] })
       showSuccessToast({ title: i18n.t('admin:toast.categoryCreated') })
+    },
+    onError: () => {
+      showErrorToast({ title: i18n.t('admin:toast.categoryCreateError') })
     },
   })
 

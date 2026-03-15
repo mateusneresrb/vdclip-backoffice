@@ -1,11 +1,11 @@
-import type { SessionResponse } from '@/features/auth/types'
 import type { AdminSession } from '../types'
+import type { SessionResponse } from '@/features/auth/types'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { authApi } from '@/features/auth/lib/auth-api'
 import { useAuthStore } from '@/features/auth/stores/auth-store'
-import i18n from '@/i18n'
+import { i18n } from '@/i18n'
 import { showSuccessToast } from '@/lib/toast'
 
 const adminSessionsKeys = {

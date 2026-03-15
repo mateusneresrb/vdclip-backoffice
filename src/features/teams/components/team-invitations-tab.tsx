@@ -80,7 +80,7 @@ return invitations
                       <StatusIcon className="size-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{inv.email}</p>
+                      <p className="truncate text-sm font-medium">{inv.email}</p>
                       <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                         <Badge variant="outline" className="text-[10px]">{t(`teamRole.${inv.role}`)}</Badge>
                         <span>{t('teams.invite.invitedBy')}: {inv.invitedBy}</span>

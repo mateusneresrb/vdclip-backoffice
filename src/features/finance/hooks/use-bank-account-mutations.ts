@@ -1,16 +1,15 @@
 import type { BankAccount, CreateBankAccountInput } from '../types'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
 import type { Currency } from '@/features/admin/types'
 
-import i18n from '@/i18n'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
 import { showSuccessToast } from '@/lib/toast'
 
 interface ApiBankAccount {
   id: string
-  external_id: string
   name: string
   type: string
   bank_name: string | null
@@ -20,11 +19,13 @@ interface ApiBankAccount {
   initial_balance: string
   current_balance: string
   is_active: boolean
+  created_at: string
+  updated_at: string
 }
 
 function toFrontend(row: ApiBankAccount): BankAccount {
   return {
-    id: row.external_id ?? row.id,
+    id: row.id,
     name: row.name,
     bank: row.bank_name ?? null,
     accountType: row.type as BankAccount['accountType'],
@@ -46,19 +47,15 @@ function toCreateBody(data: CreateBankAccountInput) {
     account_number: data.accountNumber ?? null,
     currency: data.currency,
     initial_balance: String(data.initialBalance),
-    is_active: data.isActive,
   }
 }
 
 function toUpdateBody(data: BankAccount) {
   return {
     name: data.name,
-    type: data.accountType,
     bank_name: data.bank ?? null,
     agency: data.agency ?? null,
     account_number: data.accountNumber ?? null,
-    currency: data.currency,
-    initial_balance: String(data.initialBalance),
     is_active: data.isActive,
   }
 }

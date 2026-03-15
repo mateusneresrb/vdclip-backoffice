@@ -26,7 +26,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
   setAdmin: (admin, permissions) =>
     set({
       admin,
-      permissions: new Set(permissions ?? ROLE_PERMISSIONS[admin.role]),
+      permissions: new Set(permissions?.length ? permissions : ROLE_PERMISSIONS[admin.role]),
       status: 'authenticated',
     }),
   setToken: (token) => set({ _token: token }),

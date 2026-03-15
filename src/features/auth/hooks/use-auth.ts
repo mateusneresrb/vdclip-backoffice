@@ -1,9 +1,9 @@
-import type { AdminAccount, AdminProfileResponse } from '@/features/auth/types'
 import type { AdminRole } from '@/features/auth/lib/permissions'
+import type { AdminAccount, AdminProfileResponse } from '@/features/auth/types'
 
 import { useNavigate } from '@tanstack/react-router'
-import { useAuthStore } from '@/features/auth/stores/auth-store'
 import { authApi } from '@/features/auth/lib/auth-api'
+import { useAuthStore } from '@/features/auth/stores/auth-store'
 
 function mapProfileToAccount(profile: AdminProfileResponse): AdminAccount {
   return {
@@ -68,7 +68,8 @@ export function useAuth() {
 
   const verifyMfa = async (code: string) => {
     const mfaToken = useAuthStore.getState()._mfaToken
-    if (!mfaToken) throw new Error('No MFA token')
+    if (!mfaToken) 
+throw new Error('No MFA token')
 
     setStatus('loading')
     try {

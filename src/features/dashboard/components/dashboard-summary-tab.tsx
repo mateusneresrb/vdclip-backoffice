@@ -136,7 +136,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
           <CardTitle className="flex items-center justify-between text-sm font-medium">
             <span>{t('dashboard.summaryHints.mrrMovementsTitle')}</span>
             <span className={cn(
-              'text-base font-bold',
+              'whitespace-nowrap text-sm font-bold sm:text-base',
               netMrrChange >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400',
             )}>
               {netMrrChange >= 0 ? '+' : ''}${netMrrChange.toLocaleString()}
@@ -160,7 +160,7 @@ export function DashboardSummaryTab({ metrics }: { metrics: PlatformMetrics }) {
                   className={cn('flex flex-1 min-w-[140px] flex-col gap-1 rounded-lg border p-3', colorMap[item.color])}
                 >
                   <span className="text-xs font-medium opacity-80">{item.label}</span>
-                  <span className="text-lg font-bold">
+                  <span className="whitespace-nowrap text-lg font-bold">
                     {isPositive ? '+' : ''}${Math.abs(item.value).toLocaleString()}
                   </span>
                 </div>

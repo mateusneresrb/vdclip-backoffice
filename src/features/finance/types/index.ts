@@ -113,7 +113,7 @@ export interface TaxConfig {
   taxType: string
   rate: number
   municipalityCode: string | null
-  taxRegime: string | null
+  taxRegime: string
   effectiveFrom: string
   effectiveTo: string | null
 }
@@ -126,7 +126,7 @@ export interface Receivable {
   sourceType: ReceivableSourceType
   sourceReference: string | null
   description: string
-  customerName: string
+  customerName: string | null
   customerExternalId: string | null
   amount: number
   currency: Currency
@@ -136,7 +136,7 @@ export interface Receivable {
   notes: string | null
   costCenterId: string | null
   costCenterName: string | null
-  categoryId: string | null
+  categoryId: string
   categoryName: string | null
   financialTransactionId: string | null
   createdBy: string | null

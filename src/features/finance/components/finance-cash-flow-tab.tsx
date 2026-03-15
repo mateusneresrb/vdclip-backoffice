@@ -7,6 +7,7 @@ import {
   DollarSign,
   Flame,
   HeartPulse,
+  Loader2,
   Percent,
   Plus,
   ShieldAlert,
@@ -44,11 +45,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAdminCashFlow } from '@/features/admin/hooks/use-admin-cash-flow'
 import { DateRangeFilter } from '@/features/dashboard/components/date-range-filter'
 import { usePagination } from '@/hooks/use-pagination'
 
 import { cn } from '@/lib/utils'
-import { useAdminCashFlow } from '@/features/admin/hooks/use-admin-cash-flow'
+import { useBankAccounts } from '../hooks/use-bank-accounts'
+import { useCashFlowMutations } from '../hooks/use-cash-flow-mutations'
+import { useFinancialCategories } from '../hooks/use-financial-categories'
 
 const categoryColors: Record<CashFlowEntry['category'], string> = {
   revenue: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
@@ -73,30 +77,50 @@ function AddCashFlowForm({
   onClose: () => void
   t: (key: string) => string
 }) {
+  const { create } = useCashFlowMutations()
+  const { data: bankAccounts } = useBankAccounts()
+  const { data: categories } = useFinancialCategories()
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [currency, setCurrency] = useState<Currency>('USD')
   const [type, setType] = useState<'inflow' | 'outflow'>('inflow')
   const [category, setCategory] = useState('revenue')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [bankAccountId, setBankAccountId] = useState('')
+  const [categoryId, setCategoryId] = useState('')
   const [errors, setErrors] = useState<Record<string, boolean>>({})
 
   function handleSave() {
     const newErrors: Record<string, boolean> = {}
-    if (!description.trim()) 
-newErrors.description = true
-    if (!amount || Number(amount) <= 0) 
-newErrors.amount = true
-    if (!date) 
-newErrors.date = true
+    if (!description.trim())
+      newErrors.description = true
+    if (!amount || Number(amount) <= 0)
+      newErrors.amount = true
+    if (!date)
+      newErrors.date = true
+    if (!bankAccountId)
+      newErrors.bankAccountId = true
+    if (!categoryId)
+      newErrors.categoryId = true
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
     }
 
-    // TODO: call mutation
-    onClose()
+    create.mutate(
+      {
+        description: description.trim(),
+        amount: Number(amount),
+        currency,
+        type,
+        category,
+        date,
+        bankAccountId,
+        categoryId,
+      },
+      { onSuccess: () => onClose() },
+    )
   }
 
   return (
@@ -187,6 +211,55 @@ setErrors((prev) => ({ ...prev, amount: false }))
           </Select>
         </div>
       </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label>{t('cashFlow.form.bankAccount')}</Label>
+          <Select value={bankAccountId} onValueChange={(v) => {
+            setBankAccountId(v)
+            if (errors.bankAccountId)
+              setErrors((prev) => ({ ...prev, bankAccountId: false }))
+          }}>
+            <SelectTrigger className={cn(errors.bankAccountId && 'border-destructive')}>
+              <SelectValue placeholder={t('cashFlow.form.selectBankAccount')} />
+            </SelectTrigger>
+            <SelectContent>
+              {bankAccounts?.map((acc) => (
+                <SelectItem key={acc.id} value={acc.id}>
+                  {acc.name} ({acc.currency})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.bankAccountId && (
+            <p className="text-xs text-destructive">{t('cashFlow.form.requiredField')}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label>{t('cashFlow.form.financialCategory')}</Label>
+          <Select value={categoryId} onValueChange={(v) => {
+            setCategoryId(v)
+            if (errors.categoryId)
+              setErrors((prev) => ({ ...prev, categoryId: false }))
+          }}>
+            <SelectTrigger className={cn(errors.categoryId && 'border-destructive')}>
+              <SelectValue placeholder={t('cashFlow.form.selectCategory')} />
+            </SelectTrigger>
+            <SelectContent position="popper">
+              {(!categories || categories.length === 0) && (
+                <div className="px-3 py-2 text-sm text-muted-foreground">{t('finance.noCategories')}</div>
+              )}
+              {categories?.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.code} - {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.categoryId && (
+            <p className="text-xs text-destructive">{t('cashFlow.form.requiredField')}</p>
+          )}
+        </div>
+      </div>
       <div className="space-y-2">
         <Label htmlFor="cf-date">{t('cashFlow.form.date')}</Label>
         <Input
@@ -195,17 +268,18 @@ setErrors((prev) => ({ ...prev, amount: false }))
           value={date}
           onChange={(e) => {
             setDate(e.target.value)
-            if (errors.date) 
-setErrors((prev) => ({ ...prev, date: false }))
+            if (errors.date)
+              setErrors((prev) => ({ ...prev, date: false }))
           }}
           className={cn(errors.date && 'border-destructive')}
         />
       </div>
-      <div className="flex justify-end gap-2 pt-2">
-        <Button variant="outline" onClick={onClose}>
+      <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+        <Button variant="outline" onClick={onClose} disabled={create.isPending} className="w-full sm:w-auto">
           {t('cashFlow.form.cancel')}
         </Button>
-        <Button onClick={handleSave}>
+        <Button onClick={handleSave} disabled={create.isPending} className="w-full sm:w-auto">
+          {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {t('cashFlow.form.save')}
         </Button>
       </div>
@@ -342,7 +416,7 @@ return 0
                 {t('cashFlow.addEntry')}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90svh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{t('cashFlow.addEntryTitle')}</DialogTitle>
                 <DialogDescription>{t('cashFlow.addEntryDescription')}</DialogDescription>
@@ -358,7 +432,7 @@ return 0
 
       {isLoading ? (
         <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-32" />
             ))}
@@ -393,7 +467,7 @@ return 0
           </Card>
 
           {/* KPI Cards - Grouped */}
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="flex items-center gap-1 text-sm font-medium">

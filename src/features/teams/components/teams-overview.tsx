@@ -76,7 +76,7 @@ export function TeamsOverview() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32" />
           ))}
@@ -85,7 +85,7 @@ export function TeamsOverview() {
         <EmptyState icon={UsersRound} title={t('teams.noResults')} />
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
             {pagination.paginatedItems.map((team) => (
               <Link key={team.id} to="/teams/$teamId" params={{ teamId: team.id }}>
                 <Card className="cursor-pointer transition-shadow hover:shadow-md">

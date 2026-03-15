@@ -1,20 +1,17 @@
 import type { CostAllocation, CostEntry, CostEntryStatus, RecurrenceInterval } from '../types'
 
-import { useQuery } from '@tanstack/react-query'
-
 import type { Currency } from '@/features/admin/types'
+
+import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
 
 interface ApiCostEntry {
   id: string
-  external_id: string
   category_id: string
   category_name: string | null
-  category_external_id: string | null
   cost_center_id: string | null
   cost_center_name: string | null
-  cost_center_external_id: string | null
   recurring_parent_id: string | null
   vendor: string
   description: string
@@ -25,9 +22,9 @@ interface ApiCostEntry {
   recurring_since: string | null
   recurring_until: string | null
   status: string
-  billing_date: string | null
+  billing_date: string
   due_date: string | null
-  competence_month: string | null
+  competence_month: string
   cost_allocation: string
   is_variable: boolean
   unit_metric: string | null
@@ -46,13 +43,13 @@ interface ApiCostEntry {
 
 function toFrontend(row: ApiCostEntry): CostEntry {
   return {
-    id: row.external_id ?? row.id,
-    categoryId: row.category_external_id ?? row.category_id,
+    id: row.id,
+    categoryId: row.category_id,
     categoryName: row.category_name ?? '',
-    categoryExternalId: row.category_external_id ?? '',
-    costCenterId: row.cost_center_external_id ?? row.cost_center_id ?? null,
+    categoryExternalId: row.category_id,
+    costCenterId: row.cost_center_id ?? null,
     costCenterName: row.cost_center_name ?? null,
-    costCenterExternalId: row.cost_center_external_id ?? null,
+    costCenterExternalId: row.cost_center_id ?? null,
     recurringParentId: row.recurring_parent_id ?? null,
     vendor: row.vendor,
     description: row.description,

@@ -29,6 +29,7 @@ import { usePagination } from '@/hooks/use-pagination'
 
 import { cn } from '@/lib/utils'
 import { useTaxConfig } from '../hooks/use-tax-config'
+import { useTaxConfigMutations } from '../hooks/use-tax-config-mutations'
 import { TaxConfigFormDialog } from './tax-config-form-dialog'
 
 function isTaxActive(tax: TaxConfig): boolean {
@@ -38,6 +39,7 @@ function isTaxActive(tax: TaxConfig): boolean {
 export function FinanceTaxConfigTab() {
   const { t } = useTranslation('admin')
   const { data: taxes, isLoading } = useTaxConfig()
+  const { remove } = useTaxConfigMutations()
   const [formOpen, setFormOpen] = useState(false)
   const [editTax, setEditTax] = useState<TaxConfig | undefined>()
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -200,7 +202,8 @@ export function FinanceTaxConfigTab() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('finance.form.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setDeleteId(null)}>{t('finance.confirmDelete')}</AlertDialogAction>
+            <AlertDialogAction onClick={() => { if (deleteId) 
+remove.mutate(deleteId); setDeleteId(null) }}>{t('finance.confirmDelete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -101,7 +101,7 @@ return null
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-4 w-16" />
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-28" />
           ))}
@@ -160,7 +160,7 @@ return null
         </a>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         <KpiCard
           label={t('saasMetrics.runway')}
           value={`${latest.runwayMonths}m`}

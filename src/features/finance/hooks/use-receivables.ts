@@ -9,7 +9,7 @@ interface ApiReceivable {
   source_type: string
   source_reference: string | null
   description: string
-  customer_name: string
+  customer_name: string | null
   customer_external_id: string | null
   amount: string
   currency: string
@@ -19,7 +19,7 @@ interface ApiReceivable {
   notes: string | null
   cost_center_id: string | null
   cost_center_name: string | null
-  category_id: string | null
+  category_id: string
   category_name: string | null
   financial_transaction_id: string | null
   created_by: string | null
@@ -34,7 +34,7 @@ function toFrontend(row: ApiReceivable): Receivable {
     sourceType: row.source_type as Receivable['sourceType'],
     sourceReference: row.source_reference,
     description: row.description,
-    customerName: row.customer_name,
+    customerName: row.customer_name ?? null,
     customerExternalId: row.customer_external_id,
     amount: Number.parseFloat(row.amount),
     currency: row.currency as Receivable['currency'],

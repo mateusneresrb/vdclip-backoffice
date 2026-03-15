@@ -2,30 +2,44 @@ import type { BusinessUser } from '../types'
 
 import { useQuery } from '@tanstack/react-query'
 
-const mockBusinessUsers: BusinessUser[] = [
-  { id: '1', externalId: 'bu_001', name: 'Carlos Silva', email: 'carlos@acmecorp.com', companyId: '1', companyName: 'Acme Corp', role: 'admin', status: 'active', createdAt: '2025-06-01T00:00:00Z', lastLogin: '2026-03-05T14:30:00Z' },
-  { id: '2', externalId: 'bu_002', name: 'Ana Oliveira', email: 'ana@techstartup.io', companyId: '2', companyName: 'Tech Startup', role: 'editor', status: 'active', createdAt: '2025-08-15T00:00:00Z', lastLogin: '2026-03-04T10:00:00Z' },
-  { id: '3', externalId: 'bu_003', name: 'Pedro Santos', email: 'pedro@acmecorp.com', companyId: '1', companyName: 'Acme Corp', role: 'viewer', status: 'active', createdAt: '2025-09-10T00:00:00Z', lastLogin: '2026-03-01T09:00:00Z' },
-  { id: '4', externalId: 'bu_004', name: 'Maria Costa', email: 'maria@mediahouse.com.br', companyId: '3', companyName: 'Media House', role: 'admin', status: 'inactive', createdAt: '2025-11-20T00:00:00Z', lastLogin: null },
-  { id: '5', externalId: 'bu_005', name: 'Lucas Ferreira', email: 'lucas@techstartup.io', companyId: '2', companyName: 'Tech Startup', role: 'admin', status: 'active', createdAt: '2025-12-01T00:00:00Z', lastLogin: '2026-03-06T08:00:00Z' },
-]
+import { apiClient } from '@/lib/api-client'
 
 const businessUserKeys = {
   all: ['business-users'] as const,
   list: (search: string) => [...businessUserKeys.all, 'list', search] as const,
 }
 
+function mapUser(u: Record<string, unknown>): BusinessUser {
+  return {
+    id: String(u.id ?? ''),
+    externalId: String(u.external_id ?? u.id ?? ''),
+    name: String(u.name ?? ''),
+    email: String(u.email ?? ''),
+    avatarUrl: u.avatar ? String(u.avatar) : undefined,
+    companyId: String(u.team_id ?? u.companyId ?? ''),
+    companyName: String(u.team_name ?? u.companyName ?? ''),
+    role: String(u.role ?? 'member'),
+    status: (u.status as BusinessUser['status']) ?? 'active',
+    createdAt: String(u.created_at ?? u.createdAt ?? ''),
+    lastLogin: (u.last_login_at ?? u.lastLogin ?? null) as string | null,
+  }
+}
+
 export function useBusinessUsers(search: string = '') {
   return useQuery({
     queryKey: businessUserKeys.list(search),
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      if (!search) 
-return mockBusinessUsers
-      const q = search.toLowerCase()
-      return mockBusinessUsers.filter(
-        (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.companyName.toLowerCase().includes(q),
-      )
+      const params: Record<string, string | number> = {
+        page: 1,
+        per_page: 50,
+      }
+      if (search.trim()) {
+        params.search = search.trim()
+      }
+      const data = await apiClient.get<{ items: Record<string, unknown>[] }>('/platform/users', params)
+      return data.items
+        .filter((u) => u.teams && Array.isArray(u.teams) && (u.teams as unknown[]).length > 0)
+        .map(mapUser)
     },
   })
 }

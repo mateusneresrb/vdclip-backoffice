@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 import { Switch } from '@/components/ui/switch'
+import { useCostCenterMutations } from '../hooks/use-cost-center-mutations'
 
 const costCenterSchema = z.object({
   slug: z.string().min(1, 'Slug obrigatorio'),
@@ -50,6 +51,7 @@ export function CostCenterFormDialog({
   costCenter,
 }: CostCenterFormDialogProps) {
   const { t } = useTranslation('admin')
+  const { create, update } = useCostCenterMutations()
   const isEditing = !!costCenter
 
   const form = useForm<CostCenterFormValues>({
@@ -85,15 +87,25 @@ export function CostCenterFormDialog({
     }
   }, [open, costCenter, form])
 
-  const isPending = false
+  const isPending = create.isPending || update.isPending
 
-  const onSubmit = (_values: CostCenterFormValues) => {
-    onOpenChange(false)
+  const onSubmit = (values: CostCenterFormValues) => {
+    if (isEditing && costCenter) {
+      update.mutate(
+        { id: costCenter.id, name: values.name, slug: values.slug, description: values.description, is_active: values.isActive },
+        { onSuccess: () => onOpenChange(false) },
+      )
+    } else {
+      create.mutate(
+        { name: values.name, slug: values.slug, description: values.description },
+        { onSuccess: () => onOpenChange(false) },
+      )
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {isEditing

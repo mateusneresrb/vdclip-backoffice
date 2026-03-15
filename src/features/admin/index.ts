@@ -26,6 +26,10 @@ export { useAdminTeams } from './hooks/use-admin-teams'
 export {
   useAdminTeamTemplates,
   useAdminUserTemplates,
+  useCreateTemplate,
+  useDeleteTemplate,
+  useSetDefaultTemplate,
+  useUpdateTemplateSettings,
 } from './hooks/use-admin-templates'
 export { useAdminTransactions } from './hooks/use-admin-transactions'
 export {

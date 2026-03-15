@@ -332,7 +332,7 @@ onClose()
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90svh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('adminUsers.createRoleTitle')}</DialogTitle>
           <DialogDescription>{t('adminUsers.createRoleDescription')}</DialogDescription>
@@ -444,7 +444,7 @@ onClose()
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90svh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('adminUsers.editRoleTitle')}</DialogTitle>
           <DialogDescription>{t('adminUsers.editRoleDescription')}</DialogDescription>

@@ -715,6 +715,7 @@ return null
             <TemplateManager
               templates={userTemplates}
               isLoading={userTemplatesLoading}
+              userId={userId}
             />
           </CardContent>
         </Card>
@@ -1002,6 +1003,7 @@ return null
                   <TemplateManager
                     templates={teamTemplates}
                     isLoading={teamTemplatesLoading}
+                    teamId={selectedTeamId ?? undefined}
                   />
                 </div>
               </div>

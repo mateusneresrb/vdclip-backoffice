@@ -65,11 +65,16 @@ function dateRangeToDates(dateRange: string): { date_from: string; date_to: stri
 }
 
 function mapCategory(direction: string, type: string): CashFlowSummary['entries'][number]['category'] {
-  if (type === 'tax') return 'tax'
-  if (type === 'refund') return 'refund'
-  if (type === 'investment') return 'investment'
-  if (direction === 'inflow') return 'revenue'
-  if (direction === 'outflow') return 'expense'
+  if (type === 'tax') 
+return 'tax'
+  if (type === 'refund') 
+return 'refund'
+  if (type === 'investment') 
+return 'investment'
+  if (direction === 'inflow') 
+return 'revenue'
+  if (direction === 'outflow') 
+return 'expense'
   return 'other'
 }
 

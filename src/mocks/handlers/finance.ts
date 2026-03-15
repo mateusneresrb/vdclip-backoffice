@@ -26,9 +26,9 @@ const mockReceivables = [
 ]
 
 const mockBankAccounts = [
-  { id: 'ba-1', name: 'Conta Corrente Principal', bank_name: 'Itaú', account_type: 'checking', agency: '1234', account_number: '56789-0', currency: 'BRL', initial_balance: '100000.00', current_balance: '125430.50', is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2026-03-06T10:30:00Z' },
-  { id: 'ba-2', name: 'Business Account', bank_name: 'Mercury', account_type: 'checking', agency: null, account_number: 'ACT-001', currency: 'USD', initial_balance: '20000.00', current_balance: '48200.00', is_active: true, created_at: '2025-06-01T00:00:00Z', updated_at: '2026-03-06T08:15:00Z' },
-  { id: 'ba-3', name: 'Reserva', bank_name: 'Nubank', account_type: 'savings', agency: null, account_number: null, currency: 'BRL', initial_balance: '200000.00', current_balance: '250000.00', is_active: true, created_at: '2025-03-01T00:00:00Z', updated_at: '2026-03-05T23:59:00Z' },
+  { id: 'ba-1', name: 'Conta Corrente Principal', bank_name: 'Itaú', type: 'checking', agency: '1234', account_number: '56789-0', currency: 'BRL', initial_balance: '100000.00', current_balance: '125430.50', is_active: true, created_at: '2025-01-01T00:00:00Z', updated_at: '2026-03-06T10:30:00Z' },
+  { id: 'ba-2', name: 'Business Account', bank_name: 'Mercury', type: 'checking', agency: null, account_number: 'ACT-001', currency: 'USD', initial_balance: '20000.00', current_balance: '48200.00', is_active: true, created_at: '2025-06-01T00:00:00Z', updated_at: '2026-03-06T08:15:00Z' },
+  { id: 'ba-3', name: 'Reserva', bank_name: 'Nubank', type: 'savings', agency: null, account_number: null, currency: 'BRL', initial_balance: '200000.00', current_balance: '250000.00', is_active: true, created_at: '2025-03-01T00:00:00Z', updated_at: '2026-03-05T23:59:00Z' },
 ]
 
 const mockCashFlowUSD = {
@@ -222,15 +222,9 @@ export const financeHandlers = [
       total_pages: 1,
     }),  ),
 
-  // Bank accounts
+  // Bank accounts (backend returns bare array)
   http.get(`${BASE}/bank-accounts`, () =>
-    HttpResponse.json({
-      items: mockBankAccounts,
-      total: mockBankAccounts.length,
-      page: 1,
-      per_page: 20,
-      total_pages: 1,
-    }),  ),
+    HttpResponse.json(mockBankAccounts),  ),
 
   // Dashboard cash flow
   http.get(`${BASE}/dashboard/cash-flow`, ({ request }) => {
@@ -239,10 +233,31 @@ export const financeHandlers = [
     return HttpResponse.json(currency === 'BRL' ? mockCashFlowBRL : mockCashFlowUSD)
   }),
 
+  // Financial transactions — list (used by cash flow)
+  http.get(`${BASE}/financial-transactions`, () =>
+    HttpResponse.json({
+      items: [],
+      total: 0,
+      page: 1,
+      per_page: 100,
+      total_pages: 0,
+    }),  ),
+
+  // Financial transactions — create (cash flow add entry)
+  http.post(`${BASE}/financial-transactions`, async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>
+    const entry = {
+      id: `ft-${crypto.randomUUID().slice(0, 10)}`,
+      ...body,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    return HttpResponse.json(entry, { status: 201 })
+  }),
+
   // Business metrics (SaaS) — hook expects direct array, not paginated
   http.get(`${BASE}/business-metrics`, () =>
-    HttpResponse.json(mockBusinessMetrics),
-  ),
+    HttpResponse.json(mockBusinessMetrics),  ),
 
   // Financial notes — list
   http.get(`${BASE}/financial-notes`, ({ request }) => {

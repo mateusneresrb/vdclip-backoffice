@@ -258,10 +258,33 @@
         "pending": "Pendente"
       },
       "renderingStatus": {
+        "created": "Não renderizado",
         "completed": "Renderizado",
         "rendering": "Renderizando",
-        "pending": "Pendente",
+        "pending": "Na fila",
         "failed": "Falhou"
+      },
+      "render": "Renderizar",
+      "actions": {
+        "delete": "Excluir mídia",
+        "restore": "Restaurar mídia",
+        "reprocess": "Reprocessar",
+        "deleted": "Excluído",
+        "deleteSuccess": "Mídia excluída com sucesso",
+        "deleteError": "Erro ao excluir mídia",
+        "restoreSuccess": "Mídia restaurada com sucesso",
+        "restoreError": "Erro ao restaurar mídia",
+        "reprocessTitle": "Reprocessar mídia",
+        "reprocessDescription": "Tem certeza que deseja reprocessar \"{{title}}\"? O projeto será processado novamente do início.",
+        "reprocessSuccess": "Reprocessamento iniciado",
+        "reprocessError": "Erro ao reprocessar mídia",
+        "cancel": "Cancelar",
+        "confirmReprocess": "Reprocessar",
+        "renderTitle": "Renderizar resultado",
+        "renderDescription": "Deseja enviar \"{{title}}\" para a fila de renderização?",
+        "confirmRender": "Renderizar",
+        "renderSuccess": "Enviado para renderização",
+        "renderError": "Erro ao enviar para renderização"
       }
     },
     "description": "Gerencie todos os usuários da plataforma VDClip."
@@ -294,6 +317,38 @@
     "noExpiryLabel": "Sem expiração",
     "creditValidDaysHint": "Dias de validade após emissão.",
     "confirmAddCredit": "Confirmar",
+    "creditGranted": "Créditos adicionados com sucesso",
+    "creditGrantError": "Erro ao adicionar créditos",
+    "creditUpdated": "Crédito atualizado com sucesso",
+    "creditUpdateError": "Erro ao atualizar crédito",
+    "editCreditTitle": "Editar Crédito",
+    "editCreditExpiry": "Data de Expiração",
+    "planChanged": "Plano alterado com sucesso",
+    "planChangeError": "Erro ao alterar plano",
+    "planCancelled": "Plano cancelado com sucesso",
+    "planCancelError": "Erro ao cancelar plano",
+    "verificationEmailSent": "Email verificado com sucesso",
+    "verificationEmailError": "Erro ao verificar email",
+    "creditDeducted": "Créditos removidos com sucesso",
+    "creditDeductError": "Erro ao remover créditos",
+    "removeCredit": "Remover",
+    "removeCreditTitle": "Remover Créditos",
+    "removeCreditDescription": "Os créditos serão consumidos dos pacotes mais próximos da expiração (FEFO).",
+    "removeCreditAvailable": "Disponível: {{credits}} créditos",
+    "removeCreditReason": "Motivo",
+    "removeCreditReasonPlaceholder": "Ex: Ajuste manual, correção...",
+    "confirmRemoveCredit": "Remover Créditos",
+    "pixTitle": "Gerar Pix — Woovi",
+    "pixDescription": "Gere uma cobrança Pix para este usuário assinar um plano.",
+    "pixBillingPeriod": "Frequência",
+    "pixQuantity": "Quantidade",
+    "pixPeriod": {
+      "monthly": "Mensal",
+      "annual": "Anual"
+    },
+    "pixGenerate": "Gerar Cobrança Pix",
+    "pixCreated": "Cobrança Pix gerada com sucesso",
+    "pixCreateError": "Erro ao gerar cobrança Pix",
     "creditPackages": "pacotes",
     "expired": "Expirado",
     "mediaStats": "Estatísticas de Mídia",
@@ -476,6 +531,16 @@
     "members": {
       "searchPlaceholder": "Buscar por nome ou email...",
       "noResults": "Nenhum membro encontrado para esta busca."
+    },
+    "toast": {
+      "planChanged": "Plano do time alterado com sucesso",
+      "planChangeError": "Erro ao alterar plano do time",
+      "planCancelled": "Plano do time cancelado com sucesso",
+      "planCancelError": "Erro ao cancelar plano do time",
+      "teamUpdated": "Time atualizado com sucesso",
+      "teamUpdateError": "Erro ao atualizar time",
+      "teamDeleted": "Time excluído com sucesso",
+      "teamDeleteError": "Erro ao excluir time"
     }
   },
   "business": {
@@ -742,7 +807,11 @@
       "cancel": "Cancelar",
       "save": "Salvar",
       "requiredField": "Campo obrigatório",
-      "invalidAmount": "Informe um valor maior que zero"
+      "invalidAmount": "Informe um valor maior que zero",
+      "bankAccount": "Conta Bancária",
+      "selectBankAccount": "Selecione a conta bancária",
+      "financialCategory": "Categoria Financeira",
+      "selectCategory": "Selecione a categoria"
     },
     "addEntryDescription": "Registre uma nova movimentação de entrada ou saída no fluxo de caixa."
   },
@@ -800,6 +869,7 @@
     "accountTypes": {
       "checking": "Corrente",
       "savings": "Poupança",
+      "paymentGateway": "Gateway de Pagamento",
       "investment": "Investimento"
     },
     "categories": {
@@ -813,8 +883,12 @@
     "categoryTypes": {
       "asset": "Ativo",
       "liability": "Passivo",
+      "equity": "Patrimônio Líquido",
       "revenue": "Receita",
-      "expense": "Despesa"
+      "expense": "Despesa",
+      "cogs": "CPV (Custo dos Produtos)",
+      "opex": "OPEX (Despesas Operacionais)",
+      "tax": "Impostos e Taxas"
     },
     "costType": {
       "recurring": "Recorrente",
@@ -874,7 +948,41 @@
       "newTax": "Novo Imposto",
       "editTax": "Editar Imposto",
       "taxDescription": "Preencha os dados do imposto.",
-      "taxType": "Tipo do Imposto"
+      "taxType": "Tipo do Imposto",
+      "vendor": "Fornecedor",
+      "recurring": "Recorrente",
+      "costAllocation": "Alocação de Custo",
+      "competenceMonth": "Mês de Competência",
+      "billingDate": "Data de Vencimento",
+      "recurringUntil": "Recorrente até",
+      "status": "Status",
+      "taxRegime": "Regime Tributário",
+      "municipalityCode": "Código do Município",
+      "effectiveFrom": "Vigência início",
+      "effectiveTo": "Vigência fim",
+      "accountNumber": "Número da Conta",
+      "agency": "Agência",
+      "bankCode": "Código do Banco",
+      "country": "País",
+      "initialBalance": "Saldo Inicial",
+      "registeredAs": "Será registrado como:"
+    },
+    "costAllocations": {
+      "cogs": "CPV (Custo dos Produtos)",
+      "rAndD": "P&D (Pesquisa e Desenvolvimento)",
+      "salesMarketing": "Vendas e Marketing",
+      "generalAdmin": "Administrativo Geral"
+    },
+    "costStatus": {
+      "draft": "Rascunho",
+      "approved": "Aprovado",
+      "paid": "Pago",
+      "cancelled": "Cancelado"
+    },
+    "taxRegimes": {
+      "simples_nacional": "Simples Nacional",
+      "lucro_presumido": "Lucro Presumido",
+      "lucro_real": "Lucro Real"
     },
     "costTypes": {
       "recurring": "Recorrente",
@@ -883,6 +991,7 @@
     "frequencies": {
       "monthly": "Mensal",
       "quarterly": "Trimestral",
+      "annual": "Anual",
       "yearly": "Anual"
     },
     "taxTypes": {
@@ -952,7 +1061,11 @@
       "budgetUsage": "Uso do Orçamento",
       "filterActive": "Filtrar Ativos",
       "allCostCenters": "Todos os Centros",
-      "activeCostCenters": "Apenas Ativos"
+      "activeCostCenters": "Apenas Ativos",
+      "slug": "Identificador (slug)",
+      "inactive": "Inativo",
+      "deleteCostCenterTitle": "Excluir Centro de Custo",
+      "deleteCostCenterDescription": "Tem certeza que deseja excluir este centro de custo? Esta ação não pode ser desfeita."
     },
     "tabDescriptions": {
       "costs": "Custos fixos e variáveis do negócio, com controle de tipo e frequência.",
@@ -1306,6 +1419,8 @@
     "nameLabel": "Nome do Template",
     "namePlaceholder": "Meu Template",
     "confirmCreate": "Criar",
+    "createSuccess": "Template criado com sucesso",
+    "createError": "Erro ao criar template",
     "rename": "Renomear",
     "renameTitle": "Renomear Template",
     "confirmRename": "Renomear",
@@ -1313,6 +1428,10 @@
     "deleteTitle": "Excluir Template",
     "deleteDescription": "Tem certeza que deseja excluir \"{{name}}\"? Essa ação não pode ser desfeita.",
     "confirmDelete": "Excluir",
+    "deleteSuccess": "Template excluído com sucesso",
+    "deleteError": "Erro ao excluir template",
+    "defaultSuccess": "Template definido como padrão",
+    "defaultError": "Erro ao definir template como padrão",
     "viewSettings": "Ver Configurações",
     "default": "Padrão",
     "setDefault": "Definir como padrão",
@@ -1320,6 +1439,8 @@
     "edit": "Editar",
     "done": "Pronto",
     "save": "Salvar",
+    "saveSuccess": "Template salvo com sucesso",
+    "saveError": "Erro ao salvar template",
     "updated": "Atualizado",
     "tabs": {
       "layout": "Layout",
@@ -1684,15 +1805,26 @@
     "bankAccountCreated": "Conta bancária criada com sucesso",
     "bankAccountUpdated": "Conta bancária atualizada com sucesso",
     "bankAccountDeleted": "Conta bancária removida com sucesso",
+    "costCenterCreated": "Centro de custo criado com sucesso",
+    "costCenterCreateError": "Erro ao criar centro de custo",
+    "costCenterUpdated": "Centro de custo atualizado com sucesso",
+    "costCenterUpdateError": "Erro ao atualizar centro de custo",
+    "costCenterDeleted": "Centro de custo removido com sucesso",
+    "costCenterDeleteError": "Erro ao remover centro de custo",
     "categoryCreated": "Categoria criada com sucesso",
+    "categoryCreateError": "Erro ao criar categoria",
     "categoryUpdated": "Categoria atualizada com sucesso",
     "categoryDeleted": "Categoria removida com sucesso",
     "taxConfigCreated": "Configuração de imposto criada com sucesso",
+    "taxConfigCreateError": "Erro ao criar configuração de imposto",
     "taxConfigUpdated": "Configuração de imposto atualizada com sucesso",
     "taxConfigDeleted": "Configuração de imposto removida com sucesso",
     "costEntryCreated": "Lançamento de custo criado com sucesso",
     "costEntryUpdated": "Lançamento de custo atualizado com sucesso",
     "costEntryDeleted": "Lançamento de custo removido com sucesso",
+    "costEntryApproved": "Lançamento de custo aprovado com sucesso",
+    "costEntryPaid": "Lançamento de custo pago com sucesso",
+    "cashFlowEntryCreated": "Lançamento de fluxo de caixa criado com sucesso",
     "userStatusUpdated": "Status atualizado com sucesso",
     "userDeleted": "Usuário excluído com sucesso",
     "adminActivated": "Administrador ativado com sucesso",

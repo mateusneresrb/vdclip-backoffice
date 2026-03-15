@@ -1,22 +1,19 @@
 import type { CostAllocation, CostEntry, CostEntryStatus, CreateCostEntryInput, RecurrenceInterval } from '../types'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
 import type { Currency } from '@/features/admin/types'
 
-import i18n from '@/i18n'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
 import { showSuccessToast } from '@/lib/toast'
 
 interface ApiCostEntry {
   id: string
-  external_id: string
   category_id: string
   category_name: string | null
-  category_external_id: string | null
   cost_center_id: string | null
   cost_center_name: string | null
-  cost_center_external_id: string | null
   recurring_parent_id: string | null
   vendor: string
   description: string
@@ -27,9 +24,9 @@ interface ApiCostEntry {
   recurring_since: string | null
   recurring_until: string | null
   status: string
-  billing_date: string | null
+  billing_date: string
   due_date: string | null
-  competence_month: string | null
+  competence_month: string
   cost_allocation: string
   is_variable: boolean
   unit_metric: string | null
@@ -48,13 +45,13 @@ interface ApiCostEntry {
 
 function toFrontend(row: ApiCostEntry): CostEntry {
   return {
-    id: row.external_id ?? row.id,
-    categoryId: row.category_external_id ?? row.category_id,
+    id: row.id,
+    categoryId: row.category_id,
     categoryName: row.category_name ?? '',
-    categoryExternalId: row.category_external_id ?? '',
-    costCenterId: row.cost_center_external_id ?? row.cost_center_id ?? null,
+    categoryExternalId: row.category_id,
+    costCenterId: row.cost_center_id ?? null,
     costCenterName: row.cost_center_name ?? null,
-    costCenterExternalId: row.cost_center_external_id ?? null,
+    costCenterExternalId: row.cost_center_id ?? null,
     recurringParentId: row.recurring_parent_id ?? null,
     vendor: row.vendor,
     description: row.description,
@@ -85,6 +82,14 @@ function toFrontend(row: ApiCostEntry): CostEntry {
   }
 }
 
+function normalizeCompetenceMonth(value: string): string {
+  // HTML month input returns "YYYY-MM", backend expects "YYYY-MM-DD"
+  if (value && !value.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return `${value}-01`
+  }
+  return value
+}
+
 function toCreateBody(data: CreateCostEntryInput) {
   return {
     category_id: data.categoryId,
@@ -99,7 +104,7 @@ function toCreateBody(data: CreateCostEntryInput) {
     recurring_until: data.recurringUntil ?? null,
     billing_date: data.billingDate,
     due_date: data.dueDate ?? null,
-    competence_month: data.competenceMonth,
+    competence_month: normalizeCompetenceMonth(data.competenceMonth),
     cost_allocation: data.costAllocation,
     is_variable: data.isVariable ?? false,
     unit_metric: data.unitMetric ?? null,
@@ -112,24 +117,10 @@ function toCreateBody(data: CreateCostEntryInput) {
 
 function toUpdateBody(data: CostEntry) {
   return {
-    category_id: data.categoryId,
-    cost_center_id: data.costCenterId ?? null,
     vendor: data.vendor,
     description: data.description,
     amount: String(data.amount),
-    currency: data.currency,
-    is_recurring: data.isRecurring,
-    recurrence_interval: data.recurrenceInterval ?? null,
-    recurring_since: data.recurringSince ?? null,
-    recurring_until: data.recurringUntil ?? null,
-    billing_date: data.billingDate,
     due_date: data.dueDate ?? null,
-    competence_month: data.competenceMonth,
-    cost_allocation: data.costAllocation,
-    is_variable: data.isVariable,
-    unit_metric: data.unitMetric ?? null,
-    unit_quantity: data.unitQuantity != null ? String(data.unitQuantity) : null,
-    unit_cost: data.unitCost != null ? String(data.unitCost) : null,
     receipt_url: data.receiptUrl ?? null,
     notes: data.notes ?? null,
   }
@@ -173,21 +164,28 @@ export function useCostEntryMutations() {
 
   const approve = useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiClient.post<ApiCostEntry>(`/cost-entries/${id}/approve`, {})
-      return toFrontend(res)
+      await apiClient.post(`/cost-entries/${id}/approve`, {})
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
+      showSuccessToast({ title: i18n.t('admin:toast.costEntryApproved') })
     },
   })
 
   const pay = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await apiClient.post<ApiCostEntry>(`/cost-entries/${id}/pay`, {})
-      return toFrontend(res)
+    mutationFn: async (data: { id: string; paymentMethod: string; bankAccountId: string; transactionDate: string; notes?: string | null }) => {
+      await apiClient.post(`/cost-entries/${data.id}/pay`, {
+        payment_method: data.paymentMethod,
+        bank_account_id: data.bankAccountId,
+        transaction_date: data.transactionDate,
+        notes: data.notes ?? null,
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-cash-flow'] })
+      showSuccessToast({ title: i18n.t('admin:toast.costEntryPaid') })
     },
   })
 

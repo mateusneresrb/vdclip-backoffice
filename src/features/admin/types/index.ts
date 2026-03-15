@@ -176,6 +176,7 @@ export interface TemplateCaptionSettings {
   removePunctuation: boolean
   removeProfanity: boolean
   uppercaseAll: boolean
+  format?: string
 }
 
 export interface TemplateHookSettings {
@@ -225,7 +226,7 @@ export interface SupportedProvider {
 
 export type MediaStatus = 'completed' | 'processing' | 'failed' | 'pending'
 export type AiType = 'clips' | 'highlights' | 'shorts'
-export type RenderingStatus = 'pending' | 'rendering' | 'completed' | 'failed'
+export type RenderingStatus = 'created' | 'pending' | 'rendering' | 'completed' | 'failed'
 
 export interface AdminMedia {
   id: string
@@ -244,6 +245,9 @@ export interface AdminMedia {
   errorCode: string | null
   deletedAt: string | null
   resultsCount: number
+  newVersion: boolean
+  ownerId: string
+  ownerType: 'USER' | 'TEAM'
 }
 
 export interface MediaResult {
@@ -255,6 +259,10 @@ export interface MediaResult {
   viralityScore: number | null
   projectVersion: number
   renderingStatus: RenderingStatus
+  processId?: string
+  newVersion?: boolean
+  ownerId?: string
+  ownerType?: 'USER' | 'TEAM'
 }
 
 // Financial types
