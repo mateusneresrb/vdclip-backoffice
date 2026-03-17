@@ -16,7 +16,6 @@ import {
 import { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
-import { useTeamMutations } from '../hooks/use-team-mutations'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,8 +37,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
 import { Separator } from '@/components/ui/separator'
+
+import { useTeamMutations } from '../hooks/use-team-mutations'
 
 const planBadgeVariants: Record<UserPlan, string> = {
   free: 'bg-muted text-muted-foreground',

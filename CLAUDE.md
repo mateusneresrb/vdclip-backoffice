@@ -4,20 +4,22 @@ SPA backoffice para gestão interna do VDClip.
 
 ## Tech Stack
 
-- **Runtime**: Bun | **Build**: Vite 7 | **Framework**: React 19 + TypeScript (strict)
+- **Runtime**: Bun | **Build**: Vite 7 + SWC | **Framework**: React 19 + TypeScript (strict)
 - **Styling**: Tailwind CSS 4 + shadcn/ui (New York) | **Icons**: lucide-react
-- **Routing**: TanStack Router (file-based) | **Data**: TanStack Query | **State**: Zustand (persist)
+- **Routing**: TanStack Router (file-based, autoCodeSplitting) | **Data**: TanStack Query | **State**: Zustand (persist)
 - **i18n**: react-i18next — **apenas PT-BR** | **Forms**: react-hook-form + zod
 - **Lint**: @antfu/eslint-config + Prettier (no semicolons, single quotes, trailing commas)
 
 ## Commands
 
 ```bash
-bun dev          # Dev server + gera routeTree.gen.ts
-bun run build    # tsc + vite build
-bun run lint     # ESLint
-bun run lint:fix # ESLint --fix
-bun run format   # Prettier
+bun dev            # Dev server + gera routeTree.gen.ts
+bun run build      # tsc + vite build
+bun run lint       # ESLint
+bun run lint:fix   # ESLint --fix
+bun run format     # Prettier write
+bun run format:check  # Prettier check (CI)
+bun run typecheck  # tsc -b (type check only)
 ```
 
 ## Architecture
@@ -136,6 +138,14 @@ Sempre que uma mudança for feita no código, atualizar os CLAUDE.md relevantes 
 | Novo componente shared | `src/components/shared/CLAUDE.md` |
 
 **Regra geral**: se você leu um CLAUDE.md para fazer a tarefa e a tarefa mudou o que ele documenta, atualize-o antes de encerrar.
+
+## DX Configuration
+
+- `.editorconfig` — 2-space indent, LF line endings, UTF-8, 100-char max (alinhado com Prettier)
+- `.prettierrc` — no semicolons, single quotes, trailing commas, 100 char width
+- `eslint.config.mjs` — @antfu/eslint-config + prettier (ignora `src/components/ui/`, `routeTree.gen.ts`)
+- `tsconfig.app.json` — strict mode, noUnusedLocals, noUnusedParameters, verbatimModuleSyntax
+- `vite.config.ts` — autoCodeSplitting, optimizeDeps, manualChunks (charts, day-picker), WSL polling
 
 ## Future Enhancements (NOT implemented)
 

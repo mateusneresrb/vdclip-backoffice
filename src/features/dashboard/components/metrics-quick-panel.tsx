@@ -8,9 +8,9 @@ import {
   Wallet,
   Zap,
 } from 'lucide-react'
-import { InfoTooltip } from '@/components/info-tooltip'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { InfoTooltip } from '@/components/info-tooltip'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'

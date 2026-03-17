@@ -226,7 +226,8 @@ function CategoryGroup({
   const config = typeConfig[type]
   const Icon = config.icon
 
-  if (categories.length === 0) return null
+  if (categories.length === 0) 
+return null
 
   return (
     <div className={cn('overflow-hidden rounded-xl border border-l-[3px]', config.border)}>
@@ -274,7 +275,8 @@ export function FinanceChartOfAccountsTab() {
   const filteredCategories = useMemo(() => {
     const all = categories ?? []
     const q = search.trim().toLowerCase()
-    if (!q) return all
+    if (!q) 
+return all
     return all.filter(
       (c) =>
         c.name?.toLowerCase().includes(q) ||

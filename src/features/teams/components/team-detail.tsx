@@ -4,7 +4,6 @@ import { MoreHorizontal, Pencil, Save, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
-import { useTeamMutations } from '../hooks/use-team-mutations'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,9 +43,10 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TemplateManager } from '@/features/admin/components/TemplateManager'
-
 import { useAdminTeamTemplates } from '@/features/admin/hooks/use-admin-templates'
+
 import { useTeamDetail } from '../hooks/use-team-detail'
+import { useTeamMutations } from '../hooks/use-team-mutations'
 import { TeamActivityTab } from './team-activity-tab'
 import { TeamConnectionsTab } from './team-connections-tab'
 import { TeamInvitationsTab } from './team-invitations-tab'

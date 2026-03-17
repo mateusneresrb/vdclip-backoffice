@@ -21,5 +21,11 @@ export default antfu(
       'react/no-implicit-key': 'off',
     },
   },
+  {
+    files: ['src/routes/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
   prettier,
 )

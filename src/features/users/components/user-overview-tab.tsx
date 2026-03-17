@@ -14,8 +14,8 @@ import {
   Link2,
   Mail,
   MailCheck,
-  Package,
   Minus,
+  Package,
   Plus,
   QrCode,
   Save,
@@ -149,7 +149,8 @@ return
 
   const handleDeductCredits = () => {
     const amount = Number(removeCreditAmount)
-    if (!amount || amount <= 0) return
+    if (!amount || amount <= 0) 
+return
     deductCredits.mutate(
       { userId: user.id, amount, reason: removeCreditReason || 'Admin deduction' },
       {

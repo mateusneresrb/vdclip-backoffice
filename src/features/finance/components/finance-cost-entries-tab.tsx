@@ -153,7 +153,7 @@ return entries
                       )}
                       {entry.competenceMonth && (
                         <span className="text-[10px] text-muted-foreground">
-                          {new Date(entry.competenceMonth + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+                          {new Date(`${entry.competenceMonth  }T00:00:00`).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
                         </span>
                       )}
                     </div>
