@@ -23,40 +23,18 @@ interface ApiBankAccount {
   updated_at: string
 }
 
-function toFrontend(row: ApiBankAccount): BankAccount {
+function toBankAccount(row: Record<string, unknown>): BankAccount {
   return {
-    id: row.id,
-    name: row.name,
-    bank: row.bank_name ?? null,
+    id: row.id as string,
+    name: row.name as string,
+    bank: (row.bankName as string) ?? null,
     accountType: row.type as BankAccount['accountType'],
-    agency: row.agency ?? null,
-    accountNumber: row.account_number ?? null,
+    agency: (row.agency as string) ?? null,
+    accountNumber: (row.accountNumber as string) ?? null,
     currency: row.currency as Currency,
-    initialBalance: Number.parseFloat(row.initial_balance),
-    balance: Number.parseFloat(row.current_balance),
-    isActive: row.is_active,
-  }
-}
-
-function toCreateBody(data: CreateBankAccountInput) {
-  return {
-    name: data.name,
-    type: data.accountType,
-    bank_name: data.bank ?? null,
-    agency: data.agency ?? null,
-    account_number: data.accountNumber ?? null,
-    currency: data.currency,
-    initial_balance: String(data.initialBalance),
-  }
-}
-
-function toUpdateBody(data: BankAccount) {
-  return {
-    name: data.name,
-    bank_name: data.bank ?? null,
-    agency: data.agency ?? null,
-    account_number: data.accountNumber ?? null,
-    is_active: data.isActive,
+    initialBalance: Number.parseFloat(String(row.initialBalance)),
+    balance: Number.parseFloat(String(row.currentBalance)),
+    isActive: row.isActive as boolean,
   }
 }
 
@@ -65,8 +43,16 @@ export function useBankAccountMutations() {
 
   const create = useMutation({
     mutationFn: async (data: CreateBankAccountInput) => {
-      const res = await apiClient.post<ApiBankAccount>('/bank-accounts', toCreateBody(data))
-      return toFrontend(res)
+      const res = await apiClient.post<ApiBankAccount>('/bank-accounts', {
+        name: data.name,
+        type: data.accountType,
+        bankName: data.bank ?? null,
+        agency: data.agency ?? null,
+        accountNumber: data.accountNumber ?? null,
+        currency: data.currency,
+        initialBalance: String(data.initialBalance),
+      })
+      return toBankAccount(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
@@ -76,8 +62,14 @@ export function useBankAccountMutations() {
 
   const update = useMutation({
     mutationFn: async (data: BankAccount) => {
-      const res = await apiClient.patch<ApiBankAccount>(`/bank-accounts/${data.id}`, toUpdateBody(data))
-      return toFrontend(res)
+      const res = await apiClient.patch<ApiBankAccount>(`/bank-accounts/${data.id}`, {
+        name: data.name,
+        bankName: data.bank ?? null,
+        agency: data.agency ?? null,
+        accountNumber: data.accountNumber ?? null,
+        isActive: data.isActive,
+      })
+      return toBankAccount(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })

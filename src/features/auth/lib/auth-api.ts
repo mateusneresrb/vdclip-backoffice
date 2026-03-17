@@ -5,15 +5,16 @@ import type {
   SessionResponse,
   TokenResponse,
 } from '@/features/auth/types'
-
+import type {CamelizeKeys} from '@/lib/case-transform';
 import { useAuthStore } from '@/features/auth/stores/auth-store'
+import {  camelizeKeys, snakeizeKeys } from '@/lib/case-transform'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
-async function authFetch<T>(
+async function authFetch<TApi>(
   path: string,
   options: RequestInit = {},
-): Promise<T> {
+): Promise<CamelizeKeys<TApi>> {
   const res = await fetch(`${BASE_URL}/api/auth${path}`, {
     ...options,
     credentials: 'include',
@@ -29,7 +30,10 @@ async function authFetch<T>(
   }
 
   const text = await res.text()
-  return text ? (JSON.parse(text) as T) : ({} as T)
+  if (!text) 
+return {} as CamelizeKeys<TApi>
+  const json: TApi = JSON.parse(text)
+  return camelizeKeys(json)
 }
 
 function authHeaders(): HeadersInit {
@@ -39,85 +43,67 @@ return {}
   return { Authorization: `Bearer ${token}` }
 }
 
+function jsonBody(data: unknown): string {
+  return JSON.stringify(snakeizeKeys(data))
+}
+
 export const authApi = {
-  login(email: string, password: string): Promise<LoginResponse> {
-    return authFetch('/login', {
+  login(email: string, password: string): Promise<CamelizeKeys<LoginResponse>> {
+    return authFetch<LoginResponse>('/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: jsonBody({ email, password }),
     })
   },
 
-  verifyMfa(mfaToken: string, code: string): Promise<TokenResponse> {
-    return authFetch('/mfa/verify', {
+  verifyMfa(mfaToken: string, code: string): Promise<CamelizeKeys<TokenResponse>> {
+    return authFetch<TokenResponse>('/mfa/verify', {
       method: 'POST',
-      body: JSON.stringify({ mfa_token: mfaToken, code }),
+      body: jsonBody({ mfaToken, code }),
     })
   },
 
-  refresh(): Promise<TokenResponse> {
-    return authFetch('/refresh', { method: 'POST' })
+  refresh(): Promise<CamelizeKeys<TokenResponse>> {
+    return authFetch<TokenResponse>('/refresh', { method: 'POST' })
   },
 
-  logout(): Promise<void> {
-    return authFetch('/logout', {
-      method: 'POST',
-      headers: authHeaders(),
-    })
+  logout(): Promise<CamelizeKeys<void>> {
+    return authFetch<void>('/logout', { method: 'POST', headers: authHeaders() })
   },
 
-  getProfile(token?: string): Promise<AdminProfileResponse> {
-    const headers = token
-      ? { Authorization: `Bearer ${token}` }
-      : authHeaders()
-    return authFetch('/me', { headers })
+  getProfile(token?: string): Promise<CamelizeKeys<AdminProfileResponse>> {
+    const headers = token ? { Authorization: `Bearer ${token}` } : authHeaders()
+    return authFetch<AdminProfileResponse>('/me', { headers })
   },
 
-  changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    return authFetch('/change-password', {
+  changePassword(currentPassword: string, newPassword: string): Promise<CamelizeKeys<void>> {
+    return authFetch<void>('/change-password', {
       method: 'PUT',
       headers: authHeaders(),
-      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      body: jsonBody({ currentPassword, newPassword }),
     })
   },
 
-  getSessions(): Promise<{ sessions: SessionResponse[] }> {
-    return authFetch('/sessions', { headers: authHeaders() })
+  getSessions(): Promise<CamelizeKeys<{ sessions: SessionResponse[] }>> {
+    return authFetch<{ sessions: SessionResponse[] }>('/sessions', { headers: authHeaders() })
   },
 
-  revokeSession(sessionId: string): Promise<void> {
-    return authFetch(`/sessions/${sessionId}`, {
-      method: 'DELETE',
-      headers: authHeaders(),
-    })
+  revokeSession(sessionId: string): Promise<CamelizeKeys<void>> {
+    return authFetch<void>(`/sessions/${sessionId}`, { method: 'DELETE', headers: authHeaders() })
   },
 
-  setupMfa(): Promise<MfaSetupResponse> {
-    return authFetch('/mfa/setup', {
-      method: 'POST',
-      headers: authHeaders(),
-    })
+  setupMfa(): Promise<CamelizeKeys<MfaSetupResponse>> {
+    return authFetch<MfaSetupResponse>('/mfa/setup', { method: 'POST', headers: authHeaders() })
   },
 
-  enableMfa(code: string): Promise<void> {
-    return authFetch('/mfa/enable', {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify({ code }),
-    })
+  enableMfa(code: string): Promise<CamelizeKeys<void>> {
+    return authFetch<void>('/mfa/enable', { method: 'POST', headers: authHeaders(), body: jsonBody({ code }) })
   },
 
-  disableMfa(code: string): Promise<void> {
-    return authFetch('/mfa/disable', {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify({ code }),
-    })
+  disableMfa(code: string): Promise<CamelizeKeys<void>> {
+    return authFetch<void>('/mfa/disable', { method: 'POST', headers: authHeaders(), body: jsonBody({ code }) })
   },
 
-  logoutAll(): Promise<void> {
-    return authFetch('/logout-all', {
-      method: 'POST',
-      headers: authHeaders(),
-    })
+  logoutAll(): Promise<CamelizeKeys<void>> {
+    return authFetch<void>('/logout-all', { method: 'POST', headers: authHeaders() })
   },
 }

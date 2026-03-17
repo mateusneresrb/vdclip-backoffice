@@ -18,26 +18,15 @@ interface ApiTaxConfig {
   updated_at: string
 }
 
-function toFrontend(row: ApiTaxConfig): TaxConfig {
+function toTaxConfig(row: Record<string, unknown>): TaxConfig {
   return {
-    id: row.id,
-    taxType: row.tax_type,
-    rate: Number.parseFloat(row.rate),
-    municipalityCode: row.municipality_code ?? null,
-    taxRegime: row.tax_regime,
-    effectiveFrom: row.effective_from,
-    effectiveTo: row.effective_to ?? null,
-  }
-}
-
-function toBody(data: Omit<TaxConfig, 'id'>) {
-  return {
-    tax_type: data.taxType,
-    rate: String(data.rate),
-    municipality_code: data.municipalityCode ?? null,
-    tax_regime: data.taxRegime,
-    effective_from: data.effectiveFrom,
-    effective_to: data.effectiveTo ?? null,
+    id: row.id as string,
+    taxType: row.taxType as string,
+    rate: Number.parseFloat(String(row.rate)),
+    municipalityCode: (row.municipalityCode as string) ?? null,
+    taxRegime: row.taxRegime as string,
+    effectiveFrom: row.effectiveFrom as string,
+    effectiveTo: (row.effectiveTo as string) ?? null,
   }
 }
 
@@ -46,8 +35,15 @@ export function useTaxConfigMutations() {
 
   const create = useMutation({
     mutationFn: async (data: Omit<TaxConfig, 'id'>) => {
-      const res = await apiClient.post<ApiTaxConfig>('/tax-configurations', toBody(data))
-      return toFrontend(res)
+      const res = await apiClient.post<ApiTaxConfig>('/tax-configurations', {
+        taxType: data.taxType,
+        rate: String(data.rate),
+        municipalityCode: data.municipalityCode ?? null,
+        taxRegime: data.taxRegime,
+        effectiveFrom: data.effectiveFrom,
+        effectiveTo: data.effectiveTo ?? null,
+      })
+      return toTaxConfig(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tax-config'] })
@@ -62,9 +58,9 @@ export function useTaxConfigMutations() {
     mutationFn: async (data: TaxConfig) => {
       const res = await apiClient.patch<ApiTaxConfig>(`/tax-configurations/${data.id}`, {
         rate: String(data.rate),
-        effective_to: data.effectiveTo ?? null,
+        effectiveTo: data.effectiveTo ?? null,
       })
-      return toFrontend(res)
+      return toTaxConfig(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tax-config'] })

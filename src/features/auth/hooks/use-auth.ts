@@ -1,18 +1,19 @@
 import type { AdminRole } from '@/features/auth/lib/permissions'
 import type { AdminAccount, AdminProfileResponse } from '@/features/auth/types'
+import type { CamelizeKeys } from '@/lib/case-transform'
 
 import { useNavigate } from '@tanstack/react-router'
 import { authApi } from '@/features/auth/lib/auth-api'
 import { useAuthStore } from '@/features/auth/stores/auth-store'
 
-function mapProfileToAccount(profile: AdminProfileResponse): AdminAccount {
+function mapProfileToAccount(profile: CamelizeKeys<AdminProfileResponse>): AdminAccount {
   return {
     id: profile.id,
-    name: `${profile.first_name} ${profile.last_name ?? ''}`.trim(),
+    name: `${profile.firstName} ${profile.lastName ?? ''}`.trim(),
     email: profile.email,
     role: (profile.roles[0] ?? 'viewer') as AdminRole,
-    avatar: profile.picture_url ?? undefined,
-    mfaEnabled: profile.has_mfa_enabled,
+    avatar: profile.pictureUrl ?? undefined,
+    mfaEnabled: profile.hasMfaEnabled,
   }
 }
 
@@ -29,7 +30,7 @@ export async function restoreSession(): Promise<boolean> {
   try {
     store.setStatus('loading')
     const tokenRes = await authApi.refresh()
-    await fetchAndSetAdmin(tokenRes.access_token)
+    await fetchAndSetAdmin(tokenRes.accessToken)
     return true
   } catch {
     store.setStatus('unauthenticated')
@@ -50,14 +51,14 @@ export function useAuth() {
     try {
       const response = await authApi.login(email, password)
 
-      if ('mfa_required' in response) {
-        setMfaToken(response.mfa_token)
+      if ('mfaRequired' in response) {
+        setMfaToken(response.mfaToken)
         setStatus('mfa_required')
         return { mfaRequired: true }
       }
 
-      const tokenResponse = response as { access_token: string }
-      await fetchAndSetAdmin(tokenResponse.access_token)
+      const tokenResponse = response as { accessToken: string }
+      await fetchAndSetAdmin(tokenResponse.accessToken)
       navigate({ to: '/dashboard' })
       return { mfaRequired: false }
     } catch (err) {
@@ -75,7 +76,7 @@ throw new Error('No MFA token')
     try {
       const response = await authApi.verifyMfa(mfaToken, code)
       setMfaToken(null)
-      await fetchAndSetAdmin(response.access_token)
+      await fetchAndSetAdmin(response.accessToken)
       navigate({ to: '/dashboard' })
     } catch (err) {
       setStatus('mfa_required')

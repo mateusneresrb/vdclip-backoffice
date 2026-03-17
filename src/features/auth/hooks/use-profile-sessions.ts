@@ -23,11 +23,11 @@ export function useProfileSessions() {
       const { sessions } = await authApi.getSessions()
       return sessions.map((s, index): ProfileSession => ({
         id: s.id,
-        device: s.user_agent,
-        ip: s.ip_address,
+        device: s.userAgent,
+        ip: s.ipAddress,
         city: s.city ?? undefined,
         country: s.country ?? undefined,
-        lastActiveAt: s.last_activity_at,
+        lastActiveAt: s.lastActivityAt,
         isCurrent: index === 0,
       }))
     },

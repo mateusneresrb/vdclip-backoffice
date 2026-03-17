@@ -21,21 +21,6 @@ interface ApiBankAccount {
   updated_at: string
 }
 
-function toFrontend(row: ApiBankAccount): BankAccount {
-  return {
-    id: row.id,
-    name: row.name,
-    bank: row.bank_name ?? null,
-    accountType: row.type as BankAccount['accountType'],
-    agency: row.agency ?? null,
-    accountNumber: row.account_number ?? null,
-    currency: row.currency as Currency,
-    initialBalance: Number.parseFloat(row.initial_balance),
-    balance: Number.parseFloat(row.current_balance),
-    isActive: row.is_active,
-  }
-}
-
 const bankAccountKeys = {
   all: ['bank-accounts'] as const,
   list: () => [...bankAccountKeys.all, 'list'] as const,
@@ -46,7 +31,18 @@ export function useBankAccounts() {
     queryKey: bankAccountKeys.list(),
     queryFn: async () => {
       const res = await apiClient.get<ApiBankAccount[]>('/bank-accounts')
-      return res.map(toFrontend)
+      return res.map((row): BankAccount => ({
+        id: row.id,
+        name: row.name,
+        bank: row.bankName ?? null,
+        accountType: row.type as BankAccount['accountType'],
+        agency: row.agency ?? null,
+        accountNumber: row.accountNumber ?? null,
+        currency: row.currency as Currency,
+        initialBalance: Number.parseFloat(String(row.initialBalance)),
+        balance: Number.parseFloat(String(row.currentBalance)),
+        isActive: row.isActive,
+      }))
     },
   })
 }

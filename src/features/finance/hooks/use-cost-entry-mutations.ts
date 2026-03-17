@@ -43,43 +43,22 @@ interface ApiCostEntry {
   updated_at: string
 }
 
-function toFrontend(row: ApiCostEntry): CostEntry {
+function toCostEntry(row: ReturnType<typeof Object> & Record<string, unknown>): CostEntry {
   return {
-    id: row.id,
-    categoryId: row.category_id,
-    categoryName: row.category_name ?? '',
-    categoryExternalId: row.category_id,
-    costCenterId: row.cost_center_id ?? null,
-    costCenterName: row.cost_center_name ?? null,
-    costCenterExternalId: row.cost_center_id ?? null,
-    recurringParentId: row.recurring_parent_id ?? null,
-    vendor: row.vendor,
-    description: row.description,
-    amount: Number.parseFloat(row.amount),
+    ...row,
+    categoryName: (row.categoryName as string) ?? '',
+    categoryExternalId: row.categoryId as string,
+    costCenterExternalId: (row.costCenterId as string) ?? null,
+    amount: Number.parseFloat(String(row.amount)),
     currency: row.currency as Currency,
-    isRecurring: row.is_recurring,
-    recurrenceInterval: (row.recurrence_interval as RecurrenceInterval) ?? null,
-    recurringSince: row.recurring_since ?? null,
-    recurringUntil: row.recurring_until ?? null,
+    recurrenceInterval: (row.recurrenceInterval as RecurrenceInterval) ?? null,
     status: row.status as CostEntryStatus,
-    billingDate: row.billing_date ?? '',
-    dueDate: row.due_date ?? null,
-    competenceMonth: row.competence_month ?? '',
-    costAllocation: row.cost_allocation as CostAllocation,
-    isVariable: row.is_variable,
-    unitMetric: row.unit_metric ?? null,
-    unitQuantity: row.unit_quantity ? Number.parseFloat(row.unit_quantity) : null,
-    unitCost: row.unit_cost ? Number.parseFloat(row.unit_cost) : null,
-    paidAt: row.paid_at ?? null,
-    paymentMethod: row.payment_method ?? null,
-    financialTransactionId: row.financial_transaction_id ?? null,
-    receiptUrl: row.receipt_url ?? null,
-    notes: row.notes ?? null,
-    createdBy: row.created_by ?? null,
-    createdByEmail: row.created_by_email ?? null,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  }
+    billingDate: (row.billingDate as string) ?? '',
+    competenceMonth: (row.competenceMonth as string) ?? '',
+    costAllocation: row.costAllocation as CostAllocation,
+    unitQuantity: row.unitQuantity ? Number.parseFloat(String(row.unitQuantity)) : null,
+    unitCost: row.unitCost ? Number.parseFloat(String(row.unitCost)) : null,
+  } as CostEntry
 }
 
 function normalizeCompetenceMonth(value: string): string {
@@ -90,49 +69,34 @@ function normalizeCompetenceMonth(value: string): string {
   return value
 }
 
-function toCreateBody(data: CreateCostEntryInput) {
-  return {
-    category_id: data.categoryId,
-    cost_center_id: data.costCenterId ?? null,
-    vendor: data.vendor,
-    description: data.description,
-    amount: String(data.amount),
-    currency: data.currency,
-    is_recurring: data.isRecurring,
-    recurrence_interval: data.recurrenceInterval ?? null,
-    recurring_since: data.recurringSince ?? null,
-    recurring_until: data.recurringUntil ?? null,
-    billing_date: data.billingDate,
-    due_date: data.dueDate ?? null,
-    competence_month: normalizeCompetenceMonth(data.competenceMonth),
-    cost_allocation: data.costAllocation,
-    is_variable: data.isVariable ?? false,
-    unit_metric: data.unitMetric ?? null,
-    unit_quantity: data.unitQuantity != null ? String(data.unitQuantity) : null,
-    unit_cost: data.unitCost != null ? String(data.unitCost) : null,
-    receipt_url: data.receiptUrl ?? null,
-    notes: data.notes ?? null,
-  }
-}
-
-function toUpdateBody(data: CostEntry) {
-  return {
-    vendor: data.vendor,
-    description: data.description,
-    amount: String(data.amount),
-    due_date: data.dueDate ?? null,
-    receipt_url: data.receiptUrl ?? null,
-    notes: data.notes ?? null,
-  }
-}
-
 export function useCostEntryMutations() {
   const queryClient = useQueryClient()
 
   const create = useMutation({
     mutationFn: async (data: CreateCostEntryInput) => {
-      const res = await apiClient.post<ApiCostEntry>('/cost-entries', toCreateBody(data))
-      return toFrontend(res)
+      const res = await apiClient.post<ApiCostEntry>('/cost-entries', {
+        categoryId: data.categoryId,
+        costCenterId: data.costCenterId ?? null,
+        vendor: data.vendor,
+        description: data.description,
+        amount: String(data.amount),
+        currency: data.currency,
+        isRecurring: data.isRecurring,
+        recurrenceInterval: data.recurrenceInterval ?? null,
+        recurringSince: data.recurringSince ?? null,
+        recurringUntil: data.recurringUntil ?? null,
+        billingDate: data.billingDate,
+        dueDate: data.dueDate ?? null,
+        competenceMonth: normalizeCompetenceMonth(data.competenceMonth),
+        costAllocation: data.costAllocation,
+        isVariable: data.isVariable ?? false,
+        unitMetric: data.unitMetric ?? null,
+        unitQuantity: data.unitQuantity != null ? String(data.unitQuantity) : null,
+        unitCost: data.unitCost != null ? String(data.unitCost) : null,
+        receiptUrl: data.receiptUrl ?? null,
+        notes: data.notes ?? null,
+      })
+      return toCostEntry(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
@@ -142,8 +106,15 @@ export function useCostEntryMutations() {
 
   const update = useMutation({
     mutationFn: async (data: CostEntry) => {
-      const res = await apiClient.patch<ApiCostEntry>(`/cost-entries/${data.id}`, toUpdateBody(data))
-      return toFrontend(res)
+      const res = await apiClient.patch<ApiCostEntry>(`/cost-entries/${data.id}`, {
+        vendor: data.vendor,
+        description: data.description,
+        amount: String(data.amount),
+        dueDate: data.dueDate ?? null,
+        receiptUrl: data.receiptUrl ?? null,
+        notes: data.notes ?? null,
+      })
+      return toCostEntry(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
@@ -175,9 +146,9 @@ export function useCostEntryMutations() {
   const pay = useMutation({
     mutationFn: async (data: { id: string; paymentMethod: string; bankAccountId: string; transactionDate: string; notes?: string | null }) => {
       await apiClient.post(`/cost-entries/${data.id}/pay`, {
-        payment_method: data.paymentMethod,
-        bank_account_id: data.bankAccountId,
-        transaction_date: data.transactionDate,
+        paymentMethod: data.paymentMethod,
+        bankAccountId: data.bankAccountId,
+        transactionDate: data.transactionDate,
         notes: data.notes ?? null,
       })
     },

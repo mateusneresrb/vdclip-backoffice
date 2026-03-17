@@ -13,17 +13,17 @@ const adminTransactionsKeys = {
 function mapTransaction(t: Record<string, unknown>): AdminTransaction {
   return {
     id: String(t.id ?? ''),
-    userId: (t.user_id ?? t.userId ?? null) as string | null,
-    userName: (t.user_name ?? t.userName ?? null) as string | null,
-    teamId: (t.team_id ?? t.teamId ?? null) as string | null,
-    teamName: (t.team_name ?? t.teamName ?? null) as string | null,
+    userId: (t.userId ?? null) as string | null,
+    userName: (t.userName ?? null) as string | null,
+    teamId: (t.teamId ?? null) as string | null,
+    teamName: (t.teamName ?? null) as string | null,
     provider: (t.provider as AdminTransaction['provider']) ?? 'paddle',
-    transactionType: (t.transaction_type ?? t.transactionType) as AdminTransaction['transactionType'],
+    transactionType: t.transactionType as AdminTransaction['transactionType'],
     status: (t.status as AdminTransaction['status']) ?? 'pending',
     currency: (t.currency as AdminTransaction['currency']) ?? 'USD',
     amount: Number(t.amount ?? 0),
-    completedAt: (t.completed_at ?? t.completedAt ?? null) as string | null,
-    createdAt: String(t.created_at ?? t.createdAt ?? ''),
+    completedAt: (t.completedAt ?? null) as string | null,
+    createdAt: String(t.createdAt ?? ''),
   }
 }
 

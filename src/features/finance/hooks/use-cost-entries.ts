@@ -41,45 +41,6 @@ interface ApiCostEntry {
   updated_at: string
 }
 
-function toFrontend(row: ApiCostEntry): CostEntry {
-  return {
-    id: row.id,
-    categoryId: row.category_id,
-    categoryName: row.category_name ?? '',
-    categoryExternalId: row.category_id,
-    costCenterId: row.cost_center_id ?? null,
-    costCenterName: row.cost_center_name ?? null,
-    costCenterExternalId: row.cost_center_id ?? null,
-    recurringParentId: row.recurring_parent_id ?? null,
-    vendor: row.vendor,
-    description: row.description,
-    amount: Number.parseFloat(row.amount),
-    currency: row.currency as Currency,
-    isRecurring: row.is_recurring,
-    recurrenceInterval: (row.recurrence_interval as RecurrenceInterval) ?? null,
-    recurringSince: row.recurring_since ?? null,
-    recurringUntil: row.recurring_until ?? null,
-    status: row.status as CostEntryStatus,
-    billingDate: row.billing_date ?? '',
-    dueDate: row.due_date ?? null,
-    competenceMonth: row.competence_month ?? '',
-    costAllocation: row.cost_allocation as CostAllocation,
-    isVariable: row.is_variable,
-    unitMetric: row.unit_metric ?? null,
-    unitQuantity: row.unit_quantity ? Number.parseFloat(row.unit_quantity) : null,
-    unitCost: row.unit_cost ? Number.parseFloat(row.unit_cost) : null,
-    paidAt: row.paid_at ?? null,
-    paymentMethod: row.payment_method ?? null,
-    financialTransactionId: row.financial_transaction_id ?? null,
-    receiptUrl: row.receipt_url ?? null,
-    notes: row.notes ?? null,
-    createdBy: row.created_by ?? null,
-    createdByEmail: row.created_by_email ?? null,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  }
-}
-
 const costEntryKeys = {
   all: ['cost-entries'] as const,
   list: (costCenter?: string) =>
@@ -93,7 +54,21 @@ export function useCostEntries(costCenter?: string) {
       const res = await apiClient.get<{ items: ApiCostEntry[] }>('/cost-entries', {
         per_page: 100,
       })
-      const items = res.items.map(toFrontend)
+      const items: CostEntry[] = res.items.map(row => ({
+        ...row,
+        categoryName: row.categoryName ?? '',
+        categoryExternalId: row.categoryId,
+        costCenterExternalId: row.costCenterId ?? null,
+        amount: Number.parseFloat(String(row.amount)),
+        currency: row.currency as Currency,
+        recurrenceInterval: (row.recurrenceInterval as RecurrenceInterval) ?? null,
+        status: row.status as CostEntryStatus,
+        billingDate: row.billingDate ?? '',
+        competenceMonth: row.competenceMonth ?? '',
+        costAllocation: row.costAllocation as CostAllocation,
+        unitQuantity: row.unitQuantity ? Number.parseFloat(String(row.unitQuantity)) : null,
+        unitCost: row.unitCost ? Number.parseFloat(String(row.unitCost)) : null,
+      }))
       if (costCenter) {
         return items.filter((e) => e.costCenterExternalId === costCenter)
       }

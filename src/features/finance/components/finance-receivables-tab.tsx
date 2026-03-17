@@ -150,8 +150,8 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
     setIsSubmitting(true)
     try {
       await apiClient.post(`/receivables/${confirmEntry.id}/receive`, {
-        bank_account_id: bankAccountId,
-        transaction_date: receivedDate,
+        bankAccountId,
+        transactionDate: receivedDate,
       })
       await queryClient.invalidateQueries({ queryKey: ['receivables'] })
       await queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })

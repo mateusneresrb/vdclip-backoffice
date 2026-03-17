@@ -1,5 +1,4 @@
 import type { AdminSession } from '../types'
-import type { SessionResponse } from '@/features/auth/types'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -13,7 +12,7 @@ const adminSessionsKeys = {
 }
 
 function mapSession(
-  s: SessionResponse,
+  s: { id: string; ipAddress: string; userAgent: string; city: string | null; region: string | null; country: string | null; lastActivityAt: string; createdAt: string },
   admin: { id: string, name: string },
   isCurrent: boolean,
 ): AdminSession {
@@ -21,13 +20,13 @@ function mapSession(
     id: s.id,
     adminId: admin.id,
     adminName: admin.name,
-    ipAddress: s.ip_address,
-    userAgent: s.user_agent,
+    ipAddress: s.ipAddress,
+    userAgent: s.userAgent,
     city: s.city ?? undefined,
     region: s.region ?? undefined,
     country: s.country ?? undefined,
-    lastActivityAt: s.last_activity_at,
-    createdAt: s.created_at,
+    lastActivityAt: s.lastActivityAt,
+    createdAt: s.createdAt,
     isCurrent,
   }
 }

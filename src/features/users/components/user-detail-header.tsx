@@ -88,7 +88,7 @@ export function UserDetailHeader({ user }: { user: AdminUser }) {
 
   const handleCopyExternalId = async () => {
     try {
-      await navigator.clipboard.writeText(user.external_id)
+      await navigator.clipboard.writeText(user.externalId)
       setCopiedId(true)
       showSuccessToast({ title: t('userDetail.externalIdCopied') })
       setTimeout(() => setCopiedId(false), 2000)
@@ -146,7 +146,7 @@ export function UserDetailHeader({ user }: { user: AdminUser }) {
 
         {/* External ID with copy button */}
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="truncate text-xs text-muted-foreground font-mono">{user.external_id}</span>
+          <span className="truncate text-xs text-muted-foreground font-mono">{user.externalId}</span>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

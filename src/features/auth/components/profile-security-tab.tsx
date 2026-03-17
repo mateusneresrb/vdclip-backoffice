@@ -95,7 +95,7 @@ return null
     setMfaLoading(true)
     try {
       const data = await authApi.setupMfa()
-      setMfaSetupData({ secret: data.secret, provisioningUri: data.provisioning_uri })
+      setMfaSetupData({ secret: data.secret, provisioningUri: data.provisioningUri })
     } catch (err) {
       showErrorToast({ title: err instanceof Error ? err.message : i18n.t('admin:toast.error') })
       setSetupDialogOpen(false)

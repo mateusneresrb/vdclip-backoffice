@@ -32,7 +32,7 @@ export function MfaSetupWall() {
     authApi.setupMfa()
       .then((res) => {
         setSecret(res.secret)
-        setProvisioningUri(res.provisioning_uri)
+        setProvisioningUri(res.provisioningUri)
       })
       .catch(() => {
         setError(t('profile.mfaSetupError'))

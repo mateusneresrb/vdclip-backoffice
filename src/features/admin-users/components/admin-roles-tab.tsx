@@ -304,7 +304,7 @@ function CreateRoleDialog({
       })
       if (role?.id && selectedPermissions.size > 0) {
         await apiClient.put(`/admin-roles/${role.id}/permissions`, {
-          permission_ids: Array.from(selectedPermissions),
+          permissionIds: Array.from(selectedPermissions),
         })
       }
       await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
@@ -422,7 +422,7 @@ return new Set<string>()
         description: description || undefined,
       })
       await apiClient.put(`/admin-roles/${role.id}/permissions`, {
-        permission_ids: Array.from(selectedPermissions),
+        permissionIds: Array.from(selectedPermissions),
       })
       await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t('toast.roleUpdated') })

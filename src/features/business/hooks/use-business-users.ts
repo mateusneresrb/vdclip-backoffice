@@ -12,16 +12,16 @@ const businessUserKeys = {
 function mapUser(u: Record<string, unknown>): BusinessUser {
   return {
     id: String(u.id ?? ''),
-    externalId: String(u.external_id ?? u.id ?? ''),
+    externalId: String(u.externalId ?? u.id ?? ''),
     name: String(u.name ?? ''),
     email: String(u.email ?? ''),
     avatarUrl: u.avatar ? String(u.avatar) : undefined,
-    companyId: String(u.team_id ?? u.companyId ?? ''),
-    companyName: String(u.team_name ?? u.companyName ?? ''),
+    companyId: String(u.teamId ?? u.companyId ?? ''),
+    companyName: String(u.teamName ?? u.companyName ?? ''),
     role: String(u.role ?? 'member'),
     status: (u.status as BusinessUser['status']) ?? 'active',
-    createdAt: String(u.created_at ?? u.createdAt ?? ''),
-    lastLogin: (u.last_login_at ?? u.lastLogin ?? null) as string | null,
+    createdAt: String(u.createdAt ?? ''),
+    lastLogin: (u.lastLoginAt ?? u.lastLogin ?? null) as string | null,
   }
 }
 

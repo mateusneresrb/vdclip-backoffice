@@ -21,43 +21,43 @@ const adminUserKeys = {
 function mapUser(u: Record<string, unknown>): AdminUser {
   return {
     id: String(u.id ?? ''),
-    external_id: String(u.external_id ?? ''),
+    externalId: String(u.externalId ?? ''),
     name: String(u.name ?? ''),
     email: String(u.email ?? ''),
     avatar: u.avatar ? String(u.avatar) : undefined,
     status: (u.status as AdminUser['status']) ?? 'active',
     plan: (u.plan as AdminUser['plan']) ?? 'free',
-    planProvider: ((u.plan_provider ?? u.planProvider) as AdminUser['planProvider']) ?? 'internal',
-    planExpiresAt: (u.plan_expires_at ?? u.planExpiresAt ?? null) as string | null,
-    subscriptionId: (u.subscription_id ?? u.subscriptionId ?? null) as string | null,
+    planProvider: (u.planProvider as AdminUser['planProvider']) ?? 'internal',
+    planExpiresAt: (u.planExpiresAt ?? null) as string | null,
+    subscriptionId: (u.subscriptionId ?? null) as string | null,
     credits: Number(u.credits ?? 0),
-    creditPackages: Array.isArray(u.credit_packages ?? u.creditPackages)
-      ? ((u.credit_packages ?? u.creditPackages) as Record<string, unknown>[]).map((cp) => ({
+    creditPackages: Array.isArray(u.creditPackages)
+      ? (u.creditPackages as Record<string, unknown>[]).map((cp) => ({
           id: String(cp.id ?? ''),
           type: (cp.type as AdminUser['creditPackages'][number]['type']) ?? 'plan_cycle',
           amount: Number(cp.amount ?? 0),
           used: Number(cp.used ?? 0),
-          startDate: String(cp.start_date ?? cp.startDate ?? ''),
-          expiresAt: String(cp.expires_at ?? cp.expiresAt ?? ''),
+          startDate: String(cp.startDate ?? ''),
+          expiresAt: String(cp.expiresAt ?? ''),
         }))
       : [],
-    mediaCreated: Number(u.media_created ?? u.mediaCreated ?? 0),
-    mediaPosted: Number(u.media_posted ?? u.mediaPosted ?? 0),
-    socialLogins: (Array.isArray(u.social_logins ?? u.socialLogins) ? (u.social_logins ?? u.socialLogins) : []) as AdminUser['socialLogins'],
-    emailVerified: Boolean(u.email_verified ?? u.emailVerified ?? false),
-    isSocialAccount: Boolean(u.is_social_account ?? u.isSocialAccount ?? false),
-    createdAt: String(u.created_at ?? u.createdAt ?? ''),
-    lastLoginAt: String(u.last_login_at ?? u.lastLoginAt ?? ''),
+    mediaCreated: Number(u.mediaCreated ?? 0),
+    mediaPosted: Number(u.mediaPosted ?? 0),
+    socialLogins: (Array.isArray(u.socialLogins) ? u.socialLogins : []) as AdminUser['socialLogins'],
+    emailVerified: Boolean(u.emailVerified ?? false),
+    isSocialAccount: Boolean(u.isSocialAccount ?? false),
+    createdAt: String(u.createdAt ?? ''),
+    lastLoginAt: String(u.lastLoginAt ?? ''),
     teams: Array.isArray(u.teams)
       ? (u.teams as Record<string, unknown>[]).map(t => ({
           id: String(t.id ?? ''),
           name: String(t.name ?? ''),
           role: (t.role as AdminUser['teams'][number]['role']) ?? 'member',
-          members: Number(t.members ?? t.member_count ?? 0),
+          members: Number(t.members ?? t.memberCount ?? 0),
         }))
       : [],
-    companyId: (u.company_id ?? u.companyId ?? null) as string | null,
-    companyName: (u.company_name ?? u.companyName ?? null) as string | null,
+    companyId: (u.companyId ?? null) as string | null,
+    companyName: (u.companyName ?? null) as string | null,
   }
 }
 
@@ -66,9 +66,9 @@ function mapTeamSettings(t: Record<string, unknown>): TeamSettings {
     id: String(t.id ?? ''),
     name: String(t.name ?? ''),
     plan: (t.plan as TeamSettings['plan']) ?? 'free',
-    maxMembers: Number(t.max_members ?? t.maxMembers ?? 0),
-    storageUsed: Number(t.storage_used ?? t.storageUsed ?? 0),
-    storageLimit: Number(t.storage_limit ?? t.storageLimit ?? 0),
+    maxMembers: Number(t.maxMembers ?? 0),
+    storageUsed: Number(t.storageUsed ?? 0),
+    storageLimit: Number(t.storageLimit ?? 0),
     members: Array.isArray(t.members)
       ? (t.members as Record<string, unknown>[]).map(m => ({
           id: String(m.id ?? ''),

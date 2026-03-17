@@ -16,18 +16,18 @@ function mapPost(p: Record<string, unknown>): ScheduledPost {
     platform: String(p.platform ?? ''),
     title: String(p.title ?? ''),
     description: (p.description ?? null) as string | null,
-    thumbnailUrl: (p.thumbnail_url ?? p.thumbnailUrl ?? null) as string | null,
+    thumbnailUrl: (p.thumbnailUrl ?? null) as string | null,
     status: (p.status as ScheduledPostStatus) ?? 'pending',
-    scheduledAt: (p.scheduled_at ?? p.scheduledAt ?? null) as string | null,
-    publishedAt: (p.published_at ?? p.publishedAt ?? null) as string | null,
-    lastAttemptedAt: (p.last_attempted_at ?? p.lastAttemptedAt ?? null) as string | null,
-    socialPublishId: (p.social_publish_id ?? p.socialPublishId ?? null) as string | null,
-    retryCount: Number(p.retry_count ?? p.retryCount ?? 0),
-    errorMessage: (p.error_message ?? p.errorMessage ?? null) as string | null,
-    projectResultId: (p.project_result_id ?? p.projectResultId ?? null) as string | null,
-    socialConnectionId: String(p.social_connection_id ?? p.socialConnectionId ?? ''),
-    createdAt: String(p.created_at ?? p.createdAt ?? ''),
-    updatedAt: String(p.updated_at ?? p.updatedAt ?? ''),
+    scheduledAt: (p.scheduledAt ?? null) as string | null,
+    publishedAt: (p.publishedAt ?? null) as string | null,
+    lastAttemptedAt: (p.lastAttemptedAt ?? null) as string | null,
+    socialPublishId: (p.socialPublishId ?? null) as string | null,
+    retryCount: Number(p.retryCount ?? 0),
+    errorMessage: (p.errorMessage ?? null) as string | null,
+    projectResultId: (p.projectResultId ?? null) as string | null,
+    socialConnectionId: String(p.socialConnectionId ?? ''),
+    createdAt: String(p.createdAt ?? ''),
+    updatedAt: String(p.updatedAt ?? ''),
   }
 }
 
@@ -76,13 +76,13 @@ export function useUpdateScheduledPost(scope: 'user' | 'team', scopeId: string) 
   return useMutation({
     mutationFn: async ({ postId, data }: { postId: string; data: UpdateScheduledPostInput }) => {
       const body: Record<string, unknown> = {}
-      if (data.title !== undefined) 
+      if (data.title !== undefined)
 body.title = data.title
-      if (data.description !== undefined) 
+      if (data.description !== undefined)
 body.description = data.description
-      if (data.scheduledAt !== undefined) 
-body.scheduled_at = data.scheduledAt
-      if (data.status !== undefined) 
+      if (data.scheduledAt !== undefined)
+body.scheduledAt = data.scheduledAt
+      if (data.status !== undefined)
 body.status = data.status
 
       await apiClient.patch(`/platform/scheduled-posts/${postId}`, body)

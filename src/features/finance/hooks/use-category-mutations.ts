@@ -21,40 +21,18 @@ interface ApiCategory {
   updated_at: string
 }
 
-function toFrontend(row: ApiCategory): FinancialCategory {
+function toCategory(row: Record<string, unknown>): FinancialCategory {
   return {
-    id: row.id,
-    parentId: row.parent_id ?? null,
-    code: row.code,
-    name: row.name,
+    id: row.id as string,
+    parentId: (row.parentId as string) ?? null,
+    code: row.code as string,
+    name: row.name as string,
     type: row.type as FinancialCategoryType,
-    costGroup: row.cost_group ?? null,
-    level: row.level ?? 0,
-    displayOrder: row.display_order ?? 0,
-    description: row.description ?? null,
-    isActive: row.is_active,
-  }
-}
-
-function toCreateBody(data: CreateFinancialCategoryInput) {
-  return {
-    code: data.code,
-    name: data.name,
-    type: data.type,
-    parent_id: data.parentId ?? null,
-    level: data.level,
-    display_order: data.displayOrder,
-    description: data.description ?? null,
-    cost_group: data.costGroup ?? null,
-  }
-}
-
-function toUpdateBody(data: FinancialCategory) {
-  return {
-    name: data.name,
-    description: data.description ?? null,
-    is_active: data.isActive,
-    display_order: data.displayOrder,
+    costGroup: (row.costGroup as string) ?? null,
+    level: (row.level as number) ?? 0,
+    displayOrder: (row.displayOrder as number) ?? 0,
+    description: (row.description as string) ?? null,
+    isActive: row.isActive as boolean,
   }
 }
 
@@ -63,8 +41,17 @@ export function useCategoryMutations() {
 
   const create = useMutation({
     mutationFn: async (data: CreateFinancialCategoryInput) => {
-      const res = await apiClient.post<ApiCategory>('/financial-categories', toCreateBody(data))
-      return toFrontend(res)
+      const res = await apiClient.post<ApiCategory>('/financial-categories', {
+        code: data.code,
+        name: data.name,
+        type: data.type,
+        parentId: data.parentId ?? null,
+        level: data.level,
+        displayOrder: data.displayOrder,
+        description: data.description ?? null,
+        costGroup: data.costGroup ?? null,
+      })
+      return toCategory(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-categories'] })
@@ -77,8 +64,13 @@ export function useCategoryMutations() {
 
   const update = useMutation({
     mutationFn: async (data: FinancialCategory) => {
-      const res = await apiClient.patch<ApiCategory>(`/financial-categories/${data.id}`, toUpdateBody(data))
-      return toFrontend(res)
+      const res = await apiClient.patch<ApiCategory>(`/financial-categories/${data.id}`, {
+        name: data.name,
+        description: data.description ?? null,
+        isActive: data.isActive,
+        displayOrder: data.displayOrder,
+      })
+      return toCategory(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-categories'] })

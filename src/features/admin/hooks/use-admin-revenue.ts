@@ -62,18 +62,18 @@ function getDateParams(range: MetricsDateRange): Record<string, string> {
 
 function mapSnapshot(s: Record<string, unknown>): RevenueDailySnapshot {
   return {
-    snapshotDate: String(s.snapshot_date ?? s.snapshotDate ?? ''),
+    snapshotDate: String(s.snapshotDate ?? ''),
     currency: (s.currency as RevenueDailySnapshot['currency']) ?? 'USD',
     mrr: Number(s.mrr ?? 0),
-    newMrr: Number(s.new_mrr ?? s.newMrr ?? 0),
-    expansionMrr: Number(s.expansion_mrr ?? s.expansionMrr ?? 0),
-    contractionMrr: Number(s.contraction_mrr ?? s.contractionMrr ?? 0),
-    churnedMrr: Number(s.churned_mrr ?? s.churnedMrr ?? 0),
-    reactivationMrr: Number(s.reactivation_mrr ?? s.reactivationMrr ?? 0),
-    activeSubscriptionsCount: Number(s.active_subscriptions_count ?? s.activeSubscriptionsCount ?? 0),
-    newSubscriptionsCount: Number(s.new_subscriptions_count ?? s.newSubscriptionsCount ?? 0),
-    churnedSubscriptionsCount: Number(s.churned_subscriptions_count ?? s.churnedSubscriptionsCount ?? 0),
-    creditRevenue: Number(s.credit_revenue ?? s.creditRevenue ?? 0),
+    newMrr: Number(s.newMrr ?? 0),
+    expansionMrr: Number(s.expansionMrr ?? 0),
+    contractionMrr: Number(s.contractionMrr ?? 0),
+    churnedMrr: Number(s.churnedMrr ?? 0),
+    reactivationMrr: Number(s.reactivationMrr ?? 0),
+    activeSubscriptionsCount: Number(s.activeSubscriptionsCount ?? 0),
+    newSubscriptionsCount: Number(s.newSubscriptionsCount ?? 0),
+    churnedSubscriptionsCount: Number(s.churnedSubscriptionsCount ?? 0),
+    creditRevenue: Number(s.creditRevenue ?? 0),
   }
 }
 

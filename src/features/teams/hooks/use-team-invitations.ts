@@ -15,9 +15,9 @@ function mapInvitation(data: Record<string, unknown>): TeamInvitation {
     email: String(data.email ?? ''),
     role: (data.role as TeamInvitation['role']) ?? 'member',
     status: (data.status as TeamInvitation['status']) ?? 'pending',
-    invitedBy: String(data.invited_by ?? data.invitedBy ?? ''),
-    createdAt: String(data.created_at ?? data.createdAt ?? ''),
-    expiresAt: String(data.expires_at ?? data.expiresAt ?? ''),
+    invitedBy: String(data.invitedBy ?? ''),
+    createdAt: String(data.createdAt ?? ''),
+    expiresAt: String(data.expiresAt ?? ''),
   }
 }
 

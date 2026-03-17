@@ -34,7 +34,7 @@ src/
   routes/             → TanStack Router file-based (ver routes/CLAUDE.md)
   stores/             → Zustand stores (ver stores/CLAUDE.md)
   hooks/              → hooks compartilhados (ver hooks/CLAUDE.md)
-  lib/                → utils.ts (ver lib/CLAUDE.md)
+  lib/                → api-client, case-transform, utils (ver lib/CLAUDE.md)
   providers/          → QueryProvider (ver providers/CLAUDE.md)
   i18n.ts             → config react-i18next (pt-BR)
   router.tsx          → instância do router
@@ -49,6 +49,8 @@ src/
 - Dados estáticos fora do componente com `as const`
 - Use `cn()` de `@/lib/utils` para classes condicionais
 - Prefira composição (children/slots) em vez de configuração (muitos props)
+- API types usam prefixo `Api*` com campos snake_case. Tipos runtime são `CamelizeKeys<Api*>`. Conversão é automática pelo `api-client`.
+- Query params sempre em snake_case (`{ per_page: 100 }`). Request body em camelCase (auto-convertido).
 
 ## Critical Rules (DON'T)
 

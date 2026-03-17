@@ -16,18 +16,6 @@ interface ApiTaxConfig {
   updated_at: string
 }
 
-function toFrontend(row: ApiTaxConfig): TaxConfig {
-  return {
-    id: row.id,
-    taxType: row.tax_type,
-    rate: Number.parseFloat(row.rate),
-    municipalityCode: row.municipality_code ?? null,
-    taxRegime: row.tax_regime,
-    effectiveFrom: row.effective_from,
-    effectiveTo: row.effective_to ?? null,
-  }
-}
-
 const taxConfigKeys = {
   all: ['tax-config'] as const,
   list: () => [...taxConfigKeys.all, 'list'] as const,
@@ -38,7 +26,15 @@ export function useTaxConfig() {
     queryKey: taxConfigKeys.list(),
     queryFn: async () => {
       const res = await apiClient.get<ApiTaxConfig[]>('/tax-configurations')
-      return res.map(toFrontend)
+      return res.map((row): TaxConfig => ({
+        id: row.id,
+        taxType: row.taxType,
+        rate: Number.parseFloat(String(row.rate)),
+        municipalityCode: row.municipalityCode ?? null,
+        taxRegime: row.taxRegime,
+        effectiveFrom: row.effectiveFrom,
+        effectiveTo: row.effectiveTo ?? null,
+      }))
     },
   })
 }

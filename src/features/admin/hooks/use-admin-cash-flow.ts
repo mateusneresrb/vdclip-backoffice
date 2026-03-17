@@ -4,31 +4,18 @@ import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
 
-interface ApiCashFlowResponse {
-  currency: string
-  total_inflow: string
-  total_outflow: string
-  total_net: string
-  entries: Array<{
-    period: string
-    inflow: string
-    outflow: string
-    net: string
-    currency: string
-  }>
-}
-
-interface ApiTransactionItem {
-  id: string
-  type: string
-  direction: string
-  category_name: string
-  amount: string
-  currency: string
-  description: string
-  transaction_date: string
-  created_at?: string
-}
+/**
+ * Backend JSON shape (snake_case) — kept for documentation.
+ * After auto case-transform, keys arrive as camelCase.
+ *
+ * ApiCashFlowResponse:
+ *   currency, total_inflow, total_outflow, total_net,
+ *   entries: [{ period, inflow, outflow, net, currency }]
+ *
+ * ApiTransactionItem:
+ *   id, type, direction, category_name, amount, currency,
+ *   description, transaction_date, created_at?
+ */
 
 function dateRangeToDates(dateRange: string): { date_from: string; date_to: string } {
   const to = new Date()
@@ -79,29 +66,30 @@ return 'expense'
 }
 
 function toFrontend(
-  summary: ApiCashFlowResponse,
-  transactions: ApiTransactionItem[],
+  summary: Record<string, unknown>,
+  transactions: Record<string, unknown>[],
   currency: Currency,
 ): CashFlowSummary {
+  const entries = (summary.entries ?? []) as Record<string, unknown>[]
   return {
     currency,
-    totalInflow: Number.parseFloat(summary.total_inflow),
-    totalOutflow: Number.parseFloat(summary.total_outflow),
-    netFlow: Number.parseFloat(summary.total_net),
+    totalInflow: Number.parseFloat(String(summary.totalInflow ?? '0')),
+    totalOutflow: Number.parseFloat(String(summary.totalOutflow ?? '0')),
+    netFlow: Number.parseFloat(String(summary.totalNet ?? '0')),
     entries: transactions.map((t) => ({
-      id: t.id,
-      date: t.transaction_date,
-      description: t.description,
-      category: mapCategory(t.direction, t.type),
-      type: t.direction as 'inflow' | 'outflow',
-      currency: t.currency as Currency,
-      amount: Number.parseFloat(t.amount),
-      createdAt: t.created_at ?? t.transaction_date,
+      id: String(t.id ?? ''),
+      date: String(t.transactionDate ?? ''),
+      description: String(t.description ?? ''),
+      category: mapCategory(String(t.direction ?? ''), String(t.type ?? '')),
+      type: String(t.direction ?? '') as 'inflow' | 'outflow',
+      currency: String(t.currency ?? '') as Currency,
+      amount: Number.parseFloat(String(t.amount ?? '0')),
+      createdAt: String(t.createdAt ?? t.transactionDate ?? ''),
     })),
-    monthlyBreakdown: summary.entries.map((e) => ({
-      month: e.period,
-      inflow: Number.parseFloat(e.inflow),
-      outflow: Number.parseFloat(e.outflow),
+    monthlyBreakdown: entries.map((e) => ({
+      month: String(e.period ?? ''),
+      inflow: Number.parseFloat(String(e.inflow ?? '0')),
+      outflow: Number.parseFloat(String(e.outflow ?? '0')),
     })),
   }
 }
@@ -118,11 +106,11 @@ export function useAdminCashFlow(currency: Currency = 'USD', dateRange: string =
     queryFn: async () => {
       const dates = dateRangeToDates(dateRange)
       const [summary, txPage] = await Promise.all([
-        apiClient.get<ApiCashFlowResponse>('/dashboard/cash-flow', {
+        apiClient.get<Record<string, unknown>>('/dashboard/cash-flow', {
           currency,
           ...dates,
         }),
-        apiClient.get<{ items: ApiTransactionItem[] }>('/financial-transactions', {
+        apiClient.get<{ items: Record<string, unknown>[] }>('/financial-transactions', {
           currency,
           per_page: 100,
           ...dates,

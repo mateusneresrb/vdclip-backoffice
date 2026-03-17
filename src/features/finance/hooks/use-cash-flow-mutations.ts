@@ -28,10 +28,10 @@ export function useCashFlowMutations() {
         currency: data.currency,
         direction: data.type,
         type: data.category,
-        transaction_date: data.date,
-        competence_date: data.date,
-        bank_account_id: data.bankAccountId,
-        category_id: data.categoryId,
+        transactionDate: data.date,
+        competenceDate: data.date,
+        bankAccountId: data.bankAccountId,
+        categoryId: data.categoryId,
       })
     },
     onSuccess: () => {

@@ -45,9 +45,9 @@ export function useUserMutations() {
     }) => {
       await apiClient.post(`/platform/users/${userId}/credits`, {
         amount,
-        credit_type: creditType,
+        creditType,
         description,
-        expires_at: expiresAt ?? null,
+        expiresAt: expiresAt ?? null,
       })
       return { userId }
     },
@@ -135,7 +135,7 @@ export function useUserMutations() {
     }) => {
       const data = await apiClient.post<{ qr_code_text: string; qr_code_base64: string; amount: number; expires_at: string }>(`/platform/users/${userId}/pix-subscription`, {
         plan,
-        billing_period: billingPeriod,
+        billingPeriod,
         quantity,
       })
       return data

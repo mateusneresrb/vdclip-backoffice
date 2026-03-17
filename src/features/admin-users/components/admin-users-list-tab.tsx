@@ -379,7 +379,7 @@ onClose()
         name,
         email,
         role,
-        temp_password: tempPassword,
+        tempPassword,
       })
       await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
       showSuccessToast({ title: t('toast.adminInvited') })

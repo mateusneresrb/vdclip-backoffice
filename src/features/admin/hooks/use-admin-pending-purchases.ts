@@ -4,59 +4,44 @@ import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
 
-interface ApiPendingPurchase {
-  id: string
-  email: string
-  plan_tier: string
-  billing_period: string
-  provider: string
-  provider_subscription_id: string | null
-  provider_transaction_id: string | null
-  provider_customer_id: string | null
-  currency: string
-  amount: string
-  credits_amount: number
-  period_start: string | null
-  period_end: string | null
-  is_trial: boolean
-  status: 'pending' | 'claimed' | 'expired'
-  claimed_by_user_id: string | null
-  claimed_by_user_email: string | null
-  claimed_at: string | null
-  created_at: string
-  updated_at: string
-}
+/**
+ * Backend JSON shape (snake_case) — kept for documentation.
+ * After auto case-transform, keys arrive as camelCase.
+ *
+ * ApiPendingPurchase:
+ *   id, email, plan_tier, billing_period, provider,
+ *   provider_subscription_id, provider_transaction_id, provider_customer_id,
+ *   currency, amount, credits_amount, period_start, period_end, is_trial,
+ *   status ('pending' | 'claimed' | 'expired'),
+ *   claimed_by_user_id, claimed_by_user_email, claimed_at,
+ *   created_at, updated_at
+ *
+ * ApiPendingPurchasesResponse:
+ *   items: ApiPendingPurchase[], total, page, per_page, total_pages
+ */
 
-interface ApiPendingPurchasesResponse {
-  items: ApiPendingPurchase[]
-  total: number
-  page: number
-  per_page: number
-  total_pages: number
-}
-
-function toFrontend(item: ApiPendingPurchase): PendingPurchase {
+function toFrontend(item: Record<string, unknown>): PendingPurchase {
   return {
-    id: item.id,
-    email: item.email,
-    planTier: item.plan_tier,
-    billingPeriod: item.billing_period,
-    provider: item.provider,
-    providerSubscriptionId: item.provider_subscription_id,
-    providerTransactionId: item.provider_transaction_id,
-    providerCustomerId: item.provider_customer_id,
-    currency: item.currency,
-    amount: item.amount,
-    creditsAmount: item.credits_amount,
-    periodStart: item.period_start,
-    periodEnd: item.period_end,
-    isTrial: item.is_trial,
-    status: item.status,
-    claimedByUserId: item.claimed_by_user_id,
-    claimedByUserEmail: item.claimed_by_user_email,
-    claimedAt: item.claimed_at,
-    createdAt: item.created_at,
-    updatedAt: item.updated_at,
+    id: String(item.id ?? ''),
+    email: String(item.email ?? ''),
+    planTier: String(item.planTier ?? ''),
+    billingPeriod: String(item.billingPeriod ?? ''),
+    provider: String(item.provider ?? ''),
+    providerSubscriptionId: (item.providerSubscriptionId ?? null) as string | null,
+    providerTransactionId: (item.providerTransactionId ?? null) as string | null,
+    providerCustomerId: (item.providerCustomerId ?? null) as string | null,
+    currency: String(item.currency ?? ''),
+    amount: String(item.amount ?? ''),
+    creditsAmount: Number(item.creditsAmount ?? 0),
+    periodStart: (item.periodStart ?? null) as string | null,
+    periodEnd: (item.periodEnd ?? null) as string | null,
+    isTrial: Boolean(item.isTrial ?? false),
+    status: (item.status as PendingPurchase['status']) ?? 'pending',
+    claimedByUserId: (item.claimedByUserId ?? null) as string | null,
+    claimedByUserEmail: (item.claimedByUserEmail ?? null) as string | null,
+    claimedAt: (item.claimedAt ?? null) as string | null,
+    createdAt: String(item.createdAt ?? ''),
+    updatedAt: String(item.updatedAt ?? ''),
   }
 }
 
@@ -91,17 +76,18 @@ export function useAdminPendingPurchases(filters: PendingPurchaseFilters = {}) {
       if (email)
         params.email = email
 
-      const data = await apiClient.get<ApiPendingPurchasesResponse>(
+      const data = await apiClient.get<Record<string, unknown>>(
         '/platform/pending-purchases',
         params,
       )
 
+      const items = (data.items ?? []) as Record<string, unknown>[]
       return {
-        items: data.items.map(toFrontend),
-        total: data.total,
-        page: data.page,
-        perPage: data.per_page,
-        totalPages: data.total_pages,
+        items: items.map(toFrontend),
+        total: Number(data.total ?? 0),
+        page: Number(data.page ?? 1),
+        perPage: Number(data.perPage ?? perPage),
+        totalPages: Number(data.totalPages ?? 1),
       }
     },
   })

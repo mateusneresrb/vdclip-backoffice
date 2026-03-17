@@ -22,7 +22,7 @@ export interface CreditPackage {
 
 export interface AdminUser {
   id: string
-  external_id: string
+  externalId: string
   name: string
   email: string
   avatar?: string

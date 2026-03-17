@@ -19,8 +19,8 @@ function mapTeamToCompany(t: Record<string, unknown>): BusinessCompany {
     document: null,
     plan,
     status: plan === 'free' ? 'trial' : 'active',
-    userCount: Number(t.member_count ?? t.memberCount ?? 0),
-    createdAt: String(t.created_at ?? t.createdAt ?? ''),
+    userCount: Number(t.memberCount ?? 0),
+    createdAt: String(t.createdAt ?? ''),
     contactEmail: (t.email as string) ?? null,
   }
 }

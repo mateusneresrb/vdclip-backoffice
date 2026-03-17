@@ -17,7 +17,7 @@ function mapProvider(p: Record<string, unknown>): SupportedProvider {
     type: (p.type as SupportedProvider['type']) ?? 'social',
     category: (p.category as SupportedProvider['category']) ?? 'video_source',
     description: p.description ? String(p.description) : undefined,
-    connectionCount: p.connection_count != null ? Number(p.connection_count) : (p.connectionCount != null ? Number(p.connectionCount) : undefined),
+    connectionCount: p.connectionCount != null ? Number(p.connectionCount) : undefined,
   }
 }
 

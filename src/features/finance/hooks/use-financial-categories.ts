@@ -19,21 +19,6 @@ interface ApiCategory {
   updated_at: string
 }
 
-function toFrontend(row: ApiCategory): FinancialCategory {
-  return {
-    id: row.id,
-    parentId: row.parent_id ?? null,
-    code: row.code,
-    name: row.name,
-    type: row.type as FinancialCategoryType,
-    costGroup: row.cost_group ?? null,
-    level: row.level ?? 0,
-    displayOrder: row.display_order ?? 0,
-    description: row.description ?? null,
-    isActive: row.is_active,
-  }
-}
-
 const financialCategoryKeys = {
   all: ['financial-categories'] as const,
   list: () => [...financialCategoryKeys.all, 'list'] as const,
@@ -44,7 +29,18 @@ export function useFinancialCategories() {
     queryKey: financialCategoryKeys.list(),
     queryFn: async () => {
       const res = await apiClient.get<ApiCategory[]>('/financial-categories')
-      return res.map(toFrontend)
+      return res.map((row): FinancialCategory => ({
+        id: row.id,
+        parentId: row.parentId ?? null,
+        code: row.code,
+        name: row.name,
+        type: row.type as FinancialCategoryType,
+        costGroup: row.costGroup ?? null,
+        level: row.level ?? 0,
+        displayOrder: row.displayOrder ?? 0,
+        description: row.description ?? null,
+        isActive: row.isActive,
+      }))
     },
   })
 }

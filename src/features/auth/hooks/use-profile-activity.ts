@@ -54,12 +54,12 @@ function actionToDescription(action: string, entityType?: string): string {
 
 function mapAuditToActivity(data: Record<string, unknown>): ProfileActivityEvent {
   const action = String(data.action ?? '')
-  const entityType = data.entity_type as string | undefined
+  const entityType = data.entityType as string | undefined
   return {
     id: String(data.id),
     type: actionToType(action),
     description: actionToDescription(action, entityType),
-    createdAt: String(data.created_at ?? data.createdAt ?? ''),
+    createdAt: String(data.createdAt ?? ''),
   }
 }
 

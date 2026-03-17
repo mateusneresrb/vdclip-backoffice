@@ -12,10 +12,10 @@ function mapRole(data: Record<string, unknown>): AdminRoleInfo {
   return {
     id: String(data.id),
     name: (data.name as AdminRoleInfo['name']) ?? 'viewer',
-    displayName: String(data.display_name ?? data.displayName ?? data.name ?? ''),
+    displayName: String(data.displayName ?? data.name ?? ''),
     description: String(data.description ?? ''),
-    permissionCount: Number(data.permission_count ?? data.permissionCount ?? 0),
-    adminCount: Number(data.admin_count ?? data.adminCount ?? 0),
+    permissionCount: Number(data.permissionCount ?? 0),
+    adminCount: Number(data.adminCount ?? 0),
   }
 }
 

@@ -22,13 +22,13 @@ function mapSubscription(sub: Record<string, unknown> | null): BusinessSubscript
     }
   }
   return {
-    planTier: String(sub.plan_tier ?? sub.planTier ?? sub.plan ?? 'free'),
+    planTier: String(sub.planTier ?? sub.plan ?? 'free'),
     status: (sub.status as BusinessSubscription['status']) ?? 'active',
-    currentPeriodStart: String(sub.current_period_start ?? sub.currentPeriodStart ?? ''),
-    currentPeriodEnd: String(sub.current_period_end ?? sub.currentPeriodEnd ?? ''),
-    monthlyPrice: Number(sub.amount ?? sub.monthly_price ?? sub.monthlyPrice ?? 0),
+    currentPeriodStart: String(sub.currentPeriodStart ?? ''),
+    currentPeriodEnd: String(sub.currentPeriodEnd ?? ''),
+    monthlyPrice: Number(sub.amount ?? sub.monthlyPrice ?? 0),
     currency: String(sub.currency ?? 'BRL'),
-    cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end ?? sub.cancelAtPeriodEnd ?? false),
+    cancelAtPeriodEnd: Boolean(sub.cancelAtPeriodEnd ?? false),
   }
 }
 
@@ -39,7 +39,7 @@ function mapMember(m: Record<string, unknown>): BusinessCompanyUser {
     email: String(m.email ?? ''),
     role: (m.role as BusinessCompanyUser['role']) ?? 'member',
     status: 'active',
-    joinedAt: String(m.created_at ?? m.joinedAt ?? ''),
+    joinedAt: String(m.createdAt ?? m.joinedAt ?? ''),
     lastLogin: null,
   }
 }
@@ -47,10 +47,10 @@ function mapMember(m: Record<string, unknown>): BusinessCompanyUser {
 function mapActivity(a: Record<string, unknown>): BusinessActivityEntry {
   return {
     id: String(a.id ?? ''),
-    timestamp: String(a.created_at ?? a.timestamp ?? ''),
-    action: String(a.event_type ?? a.action ?? ''),
+    timestamp: String(a.createdAt ?? a.timestamp ?? ''),
+    action: String(a.eventType ?? a.action ?? ''),
     actor: String(a.email ?? a.actor ?? ''),
-    details: String(a.event_type ?? a.details ?? ''),
+    details: String(a.eventType ?? a.details ?? ''),
   }
 }
 
@@ -78,8 +78,8 @@ export function useBusinessCompanyDetail(companyId: string) {
         document: null,
         plan,
         status: plan === 'free' ? 'trial' : 'active',
-        userCount: Number(team.member_count ?? team.memberCount ?? members.length),
-        createdAt: String(team.created_at ?? team.createdAt ?? ''),
+        userCount: Number(team.memberCount ?? members.length),
+        createdAt: String(team.createdAt ?? ''),
         contactEmail: (team.email as string) ?? null,
         phone: null,
         address: null,

@@ -92,7 +92,7 @@ export function CostCenterFormDialog({
   const onSubmit = (values: CostCenterFormValues) => {
     if (isEditing && costCenter) {
       update.mutate(
-        { id: costCenter.id, name: values.name, slug: values.slug, description: values.description, is_active: values.isActive },
+        { id: costCenter.id, name: values.name, slug: values.slug, description: values.description, isActive: values.isActive },
         { onSuccess: () => onOpenChange(false) },
       )
     } else {

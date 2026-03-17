@@ -18,17 +18,17 @@ interface ApiCostCenter {
   updated_at: string
 }
 
-function toFrontend(row: ApiCostCenter): CostCenter {
+function toCostCenter(row: Record<string, unknown>): CostCenter {
   return {
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    description: row.description ?? null,
-    budget: row.budget ? Number.parseFloat(row.budget) : null,
-    spent: Number.parseFloat(row.spent ?? '0'),
-    isActive: row.is_active,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    id: row.id as string,
+    slug: row.slug as string,
+    name: row.name as string,
+    description: (row.description as string) ?? null,
+    budget: row.budget ? Number.parseFloat(String(row.budget)) : null,
+    spent: Number.parseFloat(String(row.spent ?? '0')),
+    isActive: row.isActive as boolean,
+    createdAt: row.createdAt as string,
+    updatedAt: row.updatedAt as string,
   }
 }
 
@@ -42,7 +42,7 @@ export function useCostCenterMutations() {
         slug: data.slug,
         description: data.description ?? null,
       })
-      return toFrontend(res)
+      return toCostCenter(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cost-centers'] })
@@ -54,9 +54,9 @@ export function useCostCenterMutations() {
   })
 
   const update = useMutation({
-    mutationFn: async ({ id, ...data }: { id: string; name?: string; slug?: string; description?: string | null; is_active?: boolean }) => {
+    mutationFn: async ({ id, ...data }: { id: string; name?: string; slug?: string; description?: string | null; isActive?: boolean }) => {
       const res = await apiClient.patch<ApiCostCenter>(`/cost-centers/${id}`, data)
-      return toFrontend(res)
+      return toCostCenter(res as unknown as Record<string, unknown>)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cost-centers'] })
