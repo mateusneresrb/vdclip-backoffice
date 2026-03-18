@@ -2,7 +2,7 @@ export type UserStatus = 'active' | 'inactive' | 'suspended'
 export type UserPlan = 'free' | 'lite' | 'premium' | 'ultimate'
 export type PlanProvider = 'paddle' | 'pix' | 'internal'
 export type SocialProvider = 'google' | 'github' | 'discord'
-export type CreditType = 'plan_cycle' | 'purchased' | 'promotional' | 'bonus' | 'adjustment'
+export type CreditType = 'plan_cycle' | 'purchased' | 'promotional' | 'bonus' | 'adjustment' | 'admin_grant'
 
 export type MetricsDateRange = '1d' | '3d' | '7d' | '30d' | '90d' | 'ytd' | 'all' | 'custom'
 

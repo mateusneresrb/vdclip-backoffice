@@ -1,4 +1,4 @@
-import type { AdminUser, CreditType, UserPlan } from '@/features/admin/types'
+import type { AdminUser, UserPlan } from '@/features/admin/types'
 import { Link } from '@tanstack/react-router'
 import {
   AlertTriangle,
@@ -61,9 +61,8 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useUserMutations } from '../hooks/use-user-mutations'
 
-const creditTypes: CreditType[] = ['plan_cycle', 'purchased', 'promotional', 'bonus', 'adjustment']
 const plans: UserPlan[] = ['free', 'lite', 'premium', 'ultimate']
-const billingPeriods = ['monthly', 'annual'] as const
+const billingPeriods = ['monthly', 'yearly'] as const
 
 const planBadgeVariants: Record<UserPlan, string> = {
   free: 'bg-muted text-muted-foreground',
@@ -78,10 +77,12 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
 
   const [editingPlan, setEditingPlan] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<UserPlan>(user.plan)
+  const [planReason, setPlanReason] = useState('')
+  const [planConfirmOpen, setPlanConfirmOpen] = useState(false)
   const [creditDialogOpen, setCreditDialogOpen] = useState(false)
   const [creditAmount, setCreditAmount] = useState('')
-  const [creditType, setCreditType] = useState<CreditType>('plan_cycle')
-  const [creditDays, setCreditDays] = useState('30')
+  const [creditReason, setCreditReason] = useState('')
+  const [creditDays, setCreditDays] = useState('365')
   const [cancelPlanDialogOpen, setCancelPlanDialogOpen] = useState(false)
 
   // Remove credits dialog
@@ -92,7 +93,7 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
   // Pix subscription dialog
   const [pixDialogOpen, setPixDialogOpen] = useState(false)
   const [pixPlan, setPixPlan] = useState<UserPlan>('premium')
-  const [pixBillingPeriod, setPixBillingPeriod] = useState<'monthly' | 'annual'>('monthly')
+  const [pixBillingPeriod, setPixBillingPeriod] = useState<'monthly' | 'yearly'>('monthly')
   const [pixQuantity, setPixQuantity] = useState('1')
 
   const totalCredits = user.creditPackages.reduce((sum, p) => sum + p.amount, 0)
@@ -106,24 +107,21 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
 
   const handleGrantCredits = () => {
     const amount = Number(creditAmount)
-    if (!amount || amount <= 0) 
-return
-    const days = Number(creditDays) || 30
-    const expiresAt = new Date(Date.now() + days * 86400000).toISOString()
+    if (!amount || amount <= 0 || !creditReason.trim()) return
+    const days = Number(creditDays) || 365
     grantCredits.mutate(
       {
         userId: user.id,
         amount,
-        creditType,
-        description: `Admin grant: ${amount} ${creditType} credits`,
-        expiresAt,
+        expiresDays: days,
+        reason: creditReason.trim(),
       },
       {
         onSuccess: () => {
           setCreditDialogOpen(false)
           setCreditAmount('')
-          setCreditDays('30')
-          setCreditType('plan_cycle')
+          setCreditDays('365')
+          setCreditReason('')
         },
       },
     )
@@ -134,9 +132,20 @@ return
       setEditingPlan(false)
       return
     }
+    if (!planReason.trim()) return
+    setPlanConfirmOpen(true)
+  }
+
+  const handleConfirmChangePlan = () => {
     changePlan.mutate(
-      { userId: user.id, plan: selectedPlan },
-      { onSuccess: () => setEditingPlan(false) },
+      { userId: user.id, plan: selectedPlan, reason: planReason.trim() },
+      {
+        onSuccess: () => {
+          setEditingPlan(false)
+          setPlanConfirmOpen(false)
+          setPlanReason('')
+        },
+      },
     )
   }
 
@@ -149,10 +158,9 @@ return
 
   const handleDeductCredits = () => {
     const amount = Number(removeCreditAmount)
-    if (!amount || amount <= 0) 
-return
+    if (!amount || amount <= 0 || !removeCreditReason.trim()) return
     deductCredits.mutate(
-      { userId: user.id, amount, reason: removeCreditReason || 'Admin deduction' },
+      { userId: user.id, amount, reason: removeCreditReason.trim() },
       {
         onSuccess: () => {
           setRemoveCreditOpen(false)
@@ -249,8 +257,17 @@ return
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('userDetail.reason')}</Label>
+                  <Input
+                    className="h-8 text-xs"
+                    placeholder={t('userDetail.reasonPlaceholder')}
+                    value={planReason}
+                    onChange={(e) => setPlanReason(e.target.value)}
+                  />
+                </div>
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1" disabled={changePlan.isPending} onClick={handleChangePlan}>
+                  <Button size="sm" className="flex-1" disabled={changePlan.isPending || !planReason.trim() || selectedPlan === user.plan} onClick={handleChangePlan}>
                     <Save className="mr-1 h-3 w-3" />{t('userDetail.save')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setEditingPlan(false)}>
@@ -337,15 +354,6 @@ return
                   <DialogHeader><DialogTitle>{t('userDetail.addCreditTitle')}</DialogTitle></DialogHeader>
                   <div className="space-y-4 py-2">
                     <div className="space-y-2">
-                      <Label>{t('userDetail.creditType')}</Label>
-                      <Select value={creditType} onValueChange={(v) => setCreditType(v as CreditType)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {creditTypes.map((ct) => (<SelectItem key={ct} value={ct}>{t(`creditTypes.${ct}`)}</SelectItem>))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
                       <Label>{t('userDetail.creditAmount')}</Label>
                       <Input type="number" min={1} placeholder="100" value={creditAmount} onChange={(e) => setCreditAmount(e.target.value)} />
                     </div>
@@ -354,15 +362,23 @@ return
                       <Input
                         type="number"
                         min={1}
-                        placeholder="30"
+                        placeholder="365"
                         value={creditDays}
                         onChange={(e) => setCreditDays(e.target.value)}
                       />
                       <p className="text-xs text-muted-foreground">{t('userDetail.creditValidDaysHint')}</p>
                     </div>
+                    <div className="space-y-2">
+                      <Label>{t('userDetail.reason')}</Label>
+                      <Input
+                        placeholder={t('userDetail.reasonPlaceholder')}
+                        value={creditReason}
+                        onChange={(e) => setCreditReason(e.target.value)}
+                      />
+                    </div>
                     <Button
                       className="w-full"
-                      disabled={!creditAmount || Number(creditAmount) <= 0 || grantCredits.isPending}
+                      disabled={!creditAmount || Number(creditAmount) <= 0 || !creditReason.trim() || grantCredits.isPending}
                       onClick={handleGrantCredits}
                     >
                       {t('userDetail.confirmAddCredit')}
@@ -543,6 +559,24 @@ return
         </Card>
       </div>
 
+      {/* Plan Change Confirmation */}
+      <AlertDialog open={planConfirmOpen} onOpenChange={setPlanConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('userDetail.confirmPlanChangeTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('userDetail.confirmPlanChangeDescription', { from: t(`plan.${user.plan}`), to: t(`plan.${selectedPlan}`) })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('userDetail.cancel')}</AlertDialogCancel>
+            <AlertDialogAction disabled={changePlan.isPending} onClick={handleConfirmChangePlan}>
+              {t('userDetail.confirmPlanChange')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Cancel Plan Confirmation */}
       <AlertDialog open={cancelPlanDialogOpen} onOpenChange={setCancelPlanDialogOpen}>
         <AlertDialogContent>
@@ -571,12 +605,15 @@ return
             <DialogDescription>{t('userDetail.removeCreditDescription')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>{t('userDetail.fefoWarning')}</span>
+            </div>
             <div className="space-y-2">
               <Label>{t('userDetail.creditAmount')}</Label>
               <Input
                 type="number"
                 min={1}
-                max={user.credits}
                 placeholder="50"
                 value={removeCreditAmount}
                 onChange={(e) => setRemoveCreditAmount(e.target.value)}
@@ -586,9 +623,9 @@ return
               </p>
             </div>
             <div className="space-y-2">
-              <Label>{t('userDetail.removeCreditReason')}</Label>
+              <Label>{t('userDetail.reason')}</Label>
               <Input
-                placeholder={t('userDetail.removeCreditReasonPlaceholder')}
+                placeholder={t('userDetail.reasonPlaceholder')}
                 value={removeCreditReason}
                 onChange={(e) => setRemoveCreditReason(e.target.value)}
               />
@@ -596,7 +633,7 @@ return
             <Button
               className="w-full"
               variant="destructive"
-              disabled={!removeCreditAmount || Number(removeCreditAmount) <= 0 || Number(removeCreditAmount) > user.credits || deductCredits.isPending}
+              disabled={!removeCreditAmount || Number(removeCreditAmount) <= 0 || !removeCreditReason.trim() || deductCredits.isPending}
               onClick={handleDeductCredits}
             >
               {t('userDetail.confirmRemoveCredit')}
@@ -629,7 +666,7 @@ return
             </div>
             <div className="space-y-2">
               <Label>{t('userDetail.pixBillingPeriod')}</Label>
-              <Select value={pixBillingPeriod} onValueChange={(v) => setPixBillingPeriod(v as 'monthly' | 'annual')}>
+              <Select value={pixBillingPeriod} onValueChange={(v) => setPixBillingPeriod(v as 'monthly' | 'yearly')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {billingPeriods.map((bp) => (

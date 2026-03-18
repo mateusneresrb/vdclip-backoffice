@@ -1,4 +1,4 @@
-import type { AdminUser, CreditType, UserPlan, UserStatus } from '@/features/admin/types'
+import type { AdminUser, UserPlan, UserStatus } from '@/features/admin/types'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -36,18 +36,18 @@ export function useUserMutations() {
   })
 
   const grantCredits = useMutation({
-    mutationFn: async ({ userId, amount, creditType, description, expiresAt }: {
+    mutationFn: async ({ userId, amount, expiresDays, reason }: {
       userId: string
       amount: number
-      creditType: CreditType
-      description: string
-      expiresAt?: string
+      expiresDays: number
+      reason: string
     }) => {
+      const expiresAt = new Date(Date.now() + expiresDays * 86400000).toISOString()
       await apiClient.post(`/platform/users/${userId}/credits`, {
         amount,
-        creditType,
-        description,
-        expiresAt: expiresAt ?? null,
+        creditType: 'admin_grant',
+        description: reason,
+        expiresAt,
       })
       return { userId }
     },
@@ -82,14 +82,14 @@ export function useUserMutations() {
   })
 
   const changePlan = useMutation({
-    mutationFn: async ({ userId, plan, reason }: { userId: string; plan: UserPlan; reason?: string }) => {
+    mutationFn: async ({ userId, plan, reason }: { userId: string; plan: UserPlan; reason: string }) => {
       await apiClient.patch(`/platform/users/${userId}/plan`, { plan, reason })
       return { userId, plan }
     },
     onSuccess: ({ userId, plan }) => {
       queryClient.setQueryData<AdminUser>(
         ['admin-users', 'detail', userId],
-        (old) => (old ? { ...old, plan } : old),
+        (old) => (old ? { ...old, plan, planProvider: 'internal' } : old),
       )
       invalidateUser(userId)
       showSuccessToast({ title: i18n.t('admin:userDetail.planChanged') })
@@ -130,7 +130,7 @@ export function useUserMutations() {
     mutationFn: async ({ userId, plan, billingPeriod, quantity }: {
       userId: string
       plan: UserPlan
-      billingPeriod: 'monthly' | 'annual'
+      billingPeriod: 'monthly' | 'yearly'
       quantity: number
     }) => {
       const data = await apiClient.post<{ qr_code_text: string; qr_code_base64: string; amount: number; expires_at: string }>(`/platform/users/${userId}/pix-subscription`, {

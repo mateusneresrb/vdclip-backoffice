@@ -334,6 +334,12 @@
     "creditUpdateError": "Erro ao atualizar crédito",
     "editCreditTitle": "Editar Crédito",
     "editCreditExpiry": "Data de Expiração",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Ex: Compensação por erro, ajuste manual...",
+    "confirmPlanChangeTitle": "Confirmar alteração de plano?",
+    "confirmPlanChangeDescription": "O plano será alterado de {{from}} para {{to}}. Esta é uma operação administrativa — o webhook do provedor pode sobrescrever futuramente.",
+    "confirmPlanChange": "Confirmar Alteração",
+    "fefoWarning": "Os créditos serão removidos dos pacotes mais próximos da expiração primeiro (FEFO). Se não houver saldo suficiente, será removido o disponível.",
     "planChanged": "Plano alterado com sucesso",
     "planChangeError": "Erro ao alterar plano",
     "planCancelled": "Plano cancelado com sucesso",
@@ -355,7 +361,7 @@
     "pixQuantity": "Quantidade",
     "pixPeriod": {
       "monthly": "Mensal",
-      "annual": "Anual"
+      "yearly": "Anual"
     },
     "pixGenerate": "Gerar Cobrança Pix",
     "pixCreated": "Cobrança Pix gerada com sucesso",
@@ -418,7 +424,8 @@
     "purchased": "Comprado",
     "promotional": "Promocional",
     "bonus": "Bônus",
-    "adjustment": "Ajuste"
+    "adjustment": "Ajuste",
+    "admin_grant": "Admin"
   },
   "teamRole": {
     "owner": "Dono",
