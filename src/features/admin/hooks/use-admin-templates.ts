@@ -2,7 +2,9 @@ import type { AdminTemplate, TemplateCaptionSettings, TemplateSettings } from '.
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
+import { showMutationError } from '@/lib/toast'
 
 export const adminTemplateKeys = {
   all: ['admin-templates'] as const,
@@ -112,6 +114,9 @@ export function useDeleteTemplate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminTemplateKeys.all })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.templateDeleteError'))
+    },
   })
 }
 
@@ -123,6 +128,9 @@ export function useSetDefaultTemplate() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminTemplateKeys.all })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.templateSetDefaultError'))
     },
   })
 }
@@ -174,6 +182,9 @@ export function useUpdateTemplateSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminTemplateKeys.all })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.templateUpdateError'))
+    },
   })
 }
 
@@ -190,6 +201,9 @@ export function useCreateTemplate() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminTemplateKeys.all })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.templateCreateError'))
     },
   })
 }

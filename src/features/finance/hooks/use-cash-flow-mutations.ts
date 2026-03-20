@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 interface CreateCashFlowInput {
   description: string
@@ -38,6 +38,9 @@ export function useCashFlowMutations() {
       queryClient.invalidateQueries({ queryKey: ['admin-cash-flow'] })
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
       showSuccessToast({ title: i18n.t('admin:toast.cashFlowEntryCreated') })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.cashFlowEntryCreateError'))
     },
   })
 

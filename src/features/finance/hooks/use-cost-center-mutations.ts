@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showErrorToast, showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 interface ApiCostCenter {
   id: string
@@ -48,8 +48,8 @@ export function useCostCenterMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-centers'] })
       showSuccessToast({ title: i18n.t('admin:toast.costCenterCreated') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.costCenterCreateError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.costCenterCreateError'))
     },
   })
 
@@ -62,8 +62,8 @@ export function useCostCenterMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-centers'] })
       showSuccessToast({ title: i18n.t('admin:toast.costCenterUpdated') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.costCenterUpdateError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.costCenterUpdateError'))
     },
   })
 
@@ -76,8 +76,8 @@ export function useCostCenterMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-centers'] })
       showSuccessToast({ title: i18n.t('admin:toast.costCenterDeleted') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.costCenterDeleteError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.costCenterDeleteError'))
     },
   })
 

@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showErrorToast, showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 export function useUserMutations() {
   const queryClient = useQueryClient()
@@ -33,6 +33,9 @@ export function useUserMutations() {
       invalidateUser(userId)
       showSuccessToast({ title: i18n.t('admin:toast.userStatusUpdated') })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.userStatusUpdateError'))
+    },
   })
 
   const grantCredits = useMutation({
@@ -55,8 +58,8 @@ export function useUserMutations() {
       invalidateUser(userId)
       showSuccessToast({ title: i18n.t('admin:userDetail.creditGranted') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:userDetail.creditGrantError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:userDetail.creditGrantError'))
     },
   })
 
@@ -76,8 +79,8 @@ export function useUserMutations() {
       invalidateUser(userId)
       showSuccessToast({ title: i18n.t('admin:userDetail.creditDeducted') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:userDetail.creditDeductError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:userDetail.creditDeductError'))
     },
   })
 
@@ -94,8 +97,8 @@ export function useUserMutations() {
       invalidateUser(userId)
       showSuccessToast({ title: i18n.t('admin:userDetail.planChanged') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:userDetail.planChangeError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:userDetail.planChangeError'))
     },
   })
 
@@ -108,8 +111,8 @@ export function useUserMutations() {
       invalidateUser(userId)
       showSuccessToast({ title: i18n.t('admin:userDetail.planCancelled') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:userDetail.planCancelError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:userDetail.planCancelError'))
     },
   })
 
@@ -121,8 +124,8 @@ export function useUserMutations() {
     onSuccess: () => {
       showSuccessToast({ title: i18n.t('admin:userDetail.verificationEmailSent') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:userDetail.verificationEmailError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:userDetail.verificationEmailError'))
     },
   })
 
@@ -143,8 +146,8 @@ export function useUserMutations() {
     onSuccess: () => {
       showSuccessToast({ title: i18n.t('admin:userDetail.pixCreated') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:userDetail.pixCreateError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:userDetail.pixCreateError'))
     },
   })
 

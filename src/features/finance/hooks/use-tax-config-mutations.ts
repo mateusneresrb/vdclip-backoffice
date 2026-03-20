@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showErrorToast, showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 interface ApiTaxConfig {
   id: string
@@ -49,8 +49,8 @@ export function useTaxConfigMutations() {
       queryClient.invalidateQueries({ queryKey: ['tax-config'] })
       showSuccessToast({ title: i18n.t('admin:toast.taxConfigCreated') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.taxConfigCreateError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.taxConfigCreateError'))
     },
   })
 
@@ -66,6 +66,9 @@ export function useTaxConfigMutations() {
       queryClient.invalidateQueries({ queryKey: ['tax-config'] })
       showSuccessToast({ title: i18n.t('admin:toast.taxConfigUpdated') })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.taxConfigUpdateError'))
+    },
   })
 
   const remove = useMutation({
@@ -76,6 +79,9 @@ export function useTaxConfigMutations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tax-config'] })
       showSuccessToast({ title: i18n.t('admin:toast.taxConfigDeleted') })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.taxConfigDeleteError'))
     },
   })
 

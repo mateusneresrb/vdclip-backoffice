@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showErrorToast, showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 interface ApiCategory {
   id: string
@@ -57,8 +57,8 @@ export function useCategoryMutations() {
       queryClient.invalidateQueries({ queryKey: ['financial-categories'] })
       showSuccessToast({ title: i18n.t('admin:toast.categoryCreated') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.categoryCreateError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.categoryCreateError'))
     },
   })
 
@@ -76,6 +76,9 @@ export function useCategoryMutations() {
       queryClient.invalidateQueries({ queryKey: ['financial-categories'] })
       showSuccessToast({ title: i18n.t('admin:toast.categoryUpdated') })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.categoryUpdateError'))
+    },
   })
 
   const remove = useMutation({
@@ -86,6 +89,9 @@ export function useCategoryMutations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financial-categories'] })
       showSuccessToast({ title: i18n.t('admin:toast.categoryDeleted') })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.categoryDeleteError'))
     },
   })
 

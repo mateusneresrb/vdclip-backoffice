@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { authApi } from '@/features/auth/lib/auth-api'
 import { useAuthStore } from '@/features/auth/stores/auth-store'
 import { i18n } from '@/i18n'
-import { showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 const adminSessionsKeys = {
   all: ['admin-sessions'] as const,
@@ -54,6 +54,9 @@ export function useRevokeSession() {
       queryClient.invalidateQueries({ queryKey: adminSessionsKeys.all })
       showSuccessToast({ title: i18n.t('admin:toast.sessionRevoked') })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.sessionRevokeError'))
+    },
   })
 }
 
@@ -67,6 +70,9 @@ export function useRevokeOtherSessions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminSessionsKeys.all })
       showSuccessToast({ title: i18n.t('admin:toast.allSessionsRevoked') })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.sessionRevokeError'))
     },
   })
 }

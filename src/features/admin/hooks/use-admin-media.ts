@@ -2,7 +2,9 @@ import type { AdminMedia, MediaResult } from '../types'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
+import { showMutationError } from '@/lib/toast'
 
 export const adminMediaKeys = {
   all: ['admin-media'] as const,
@@ -112,21 +114,25 @@ export function useMediaMutations() {
   const softDelete = useMutation({
     mutationFn: (mediaId: string) => apiClient.delete(`/platform/media/${mediaId}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminMediaKeys.all }),
+    onError: (err) => showMutationError(err, i18n.t('admin:toast.mediaDeleteError')),
   })
 
   const restore = useMutation({
     mutationFn: (mediaId: string) => apiClient.post(`/platform/media/${mediaId}/restore`, {}),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminMediaKeys.all }),
+    onError: (err) => showMutationError(err, i18n.t('admin:toast.mediaRestoreError')),
   })
 
   const reprocess = useMutation({
     mutationFn: (mediaId: string) => apiClient.post(`/platform/media/${mediaId}/reprocess`, {}),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminMediaKeys.all }),
+    onError: (err) => showMutationError(err, i18n.t('admin:toast.mediaReprocessError')),
   })
 
   const renderResult = useMutation({
     mutationFn: (resultId: string) => apiClient.post(`/platform/results/${resultId}/render`, {}),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminMediaKeys.all }),
+    onError: (err) => showMutationError(err, i18n.t('admin:toast.mediaRenderError')),
   })
 
   return { softDelete, restore, reprocess, renderResult }

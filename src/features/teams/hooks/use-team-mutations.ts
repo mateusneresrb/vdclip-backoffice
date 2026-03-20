@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showErrorToast, showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 export function useTeamMutations() {
   const queryClient = useQueryClient()
@@ -27,8 +27,8 @@ export function useTeamMutations() {
       invalidateTeam(teamId)
       showSuccessToast({ title: i18n.t('admin:teams.toast.planChanged') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:teams.toast.planChangeError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:teams.toast.planChangeError'))
     },
   })
 
@@ -41,8 +41,8 @@ export function useTeamMutations() {
       invalidateTeam(teamId)
       showSuccessToast({ title: i18n.t('admin:teams.toast.planCancelled') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:teams.toast.planCancelError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:teams.toast.planCancelError'))
     },
   })
 
@@ -60,8 +60,8 @@ export function useTeamMutations() {
       invalidateTeam(teamId)
       showSuccessToast({ title: i18n.t('admin:teams.toast.teamUpdated') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:teams.toast.teamUpdateError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:teams.toast.teamUpdateError'))
     },
   })
 
@@ -74,8 +74,8 @@ export function useTeamMutations() {
       invalidateTeam(teamId)
       showSuccessToast({ title: i18n.t('admin:teams.toast.teamDeleted') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:teams.toast.teamDeleteError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:teams.toast.teamDeleteError'))
     },
   })
 

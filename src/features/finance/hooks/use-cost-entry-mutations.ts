@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showErrorToast, showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 function toCostEntry(row: ReturnType<typeof Object> & Record<string, unknown>): CostEntry {
   return {
@@ -67,8 +67,8 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryCreated') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.costEntryCreateError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.costEntryCreateError'))
     },
   })
 
@@ -88,8 +88,8 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryUpdated') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.costEntryUpdateError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.costEntryUpdateError'))
     },
   })
 
@@ -102,8 +102,8 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryDeleted') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.costEntryDeleteError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.costEntryDeleteError'))
     },
   })
 
@@ -115,8 +115,8 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryApproved') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.costEntryApproveError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.costEntryApproveError'))
     },
   })
 
@@ -135,8 +135,8 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['admin-cash-flow'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryPaid') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:toast.costEntryPayError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.costEntryPayError'))
     },
   })
 

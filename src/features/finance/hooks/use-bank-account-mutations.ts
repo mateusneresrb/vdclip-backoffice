@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 interface ApiBankAccount {
   id: string
@@ -58,6 +58,9 @@ export function useBankAccountMutations() {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
       showSuccessToast({ title: i18n.t('admin:toast.bankAccountCreated') })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.bankAccountCreateError'))
+    },
   })
 
   const update = useMutation({
@@ -75,6 +78,9 @@ export function useBankAccountMutations() {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
       showSuccessToast({ title: i18n.t('admin:toast.bankAccountUpdated') })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.bankAccountUpdateError'))
+    },
   })
 
   const remove = useMutation({
@@ -85,6 +91,9 @@ export function useBankAccountMutations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
       showSuccessToast({ title: i18n.t('admin:toast.bankAccountDeleted') })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.bankAccountDeleteError'))
     },
   })
 

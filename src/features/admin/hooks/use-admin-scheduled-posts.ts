@@ -2,7 +2,9 @@ import type { ScheduledPost, ScheduledPostStatus } from '../types'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
+import { showMutationError } from '@/lib/toast'
 
 export const adminScheduledPostsKeys = {
   all: ['admin-scheduled-posts'] as const,
@@ -91,6 +93,9 @@ body.status = data.status
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: key })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.scheduledPostUpdateError'))
+    },
   })
 }
 
@@ -108,6 +113,9 @@ export function useCancelScheduledPost(scope: 'user' | 'team', scopeId: string) 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: key })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.scheduledPostCancelError'))
     },
   })
 }
