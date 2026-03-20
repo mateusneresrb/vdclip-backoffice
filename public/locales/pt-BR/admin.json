@@ -52,7 +52,16 @@
     "verify": "Verificar",
     "back": "Voltar",
     "loginError": "Credenciais inválidas. Tente novamente.",
-    "mfaError": "Código MFA inválido. Tente novamente."
+    "mfaError": "Código MFA inválido. Tente novamente.",
+    "passwordChangeTitle": "Defina sua Nova Senha",
+    "passwordChangeDescription": "Sua conta possui uma senha temporaria. Defina uma nova senha para continuar.",
+    "newPassword": "Nova Senha",
+    "confirmPassword": "Confirmar Senha",
+    "changePassword": "Alterar Senha",
+    "passwordMismatch": "As senhas nao coincidem.",
+    "passwordTooShort": "A senha deve ter no minimo 8 caracteres.",
+    "passwordChangeError": "Erro ao alterar senha. Tente novamente.",
+    "passwordRequirements": "Minimo 8 caracteres, com letra maiuscula, minuscula, numero e caractere especial."
   },
   "dashboard": {
     "consolidatedDescription": "Visão consolidada de todos os produtos VDClip. Métricas detalhadas por produto estão nas respectivas seções.",
@@ -67,6 +76,9 @@
       "mrr": "Valor que entra todo mes de forma recorrente",
       "totalRevenue": "Soma de toda a receita no periodo selecionado",
       "activeSubs": "Clientes que estao pagando atualmente",
+      "activeSubsTooltip": "Quantidade de assinaturas ativas. Inclui todos os planos pagos (Lite, Premium, Ultimate).",
+      "completedTooltip": "Projetos que foram processados com sucesso pela IA e geraram clips.",
+      "usedTooltip": "Creditos consumidos pelos usuarios para processar videos e gerar clips.",
       "totalUsersTooltip": "Total de contas criadas na plataforma, incluindo gratuitas",
       "contentTooltip": "Resumo de todo conteúdo processado: vídeos, clips e publicações",
       "contentDesc": "Vídeos processados e concluídos no período.",
@@ -147,6 +159,14 @@
     "financialKpis": "KPIs Financeiros",
     "viewAll": "Ver tudo",
     "viewDetail": "Ver detalhe",
+    "kpiTooltips": {
+      "runway": "Quantos meses a empresa consegue operar com o caixa atual, considerando o ritmo de gastos. Acima de 12 meses é saudável.",
+      "mrr": "Receita Recorrente Mensal — valor que entra todo mês de assinaturas ativas. Principal indicador de saúde do SaaS.",
+      "ltvCac": "Relação entre o valor vitalício do cliente (LTV) e o custo de aquisição (CAC). Acima de 3x é saudável.",
+      "churn": "Percentual de clientes que cancelaram no período. Abaixo de 5% é considerado bom para SaaS.",
+      "nrr": "Net Revenue Retention — retenção líquida de receita. Acima de 100% significa que expansão supera cancelamentos.",
+      "activeCustomers": "Total de clientes com assinatura ativa no momento. Inclui todos os planos pagos."
+    },
     "vsLastMonth": "vs mês anterior",
     "customers": "clientes",
     "nrr": "Net Revenue Retention",
@@ -258,10 +278,33 @@
         "pending": "Pendente"
       },
       "renderingStatus": {
+        "created": "Não renderizado",
         "completed": "Renderizado",
         "rendering": "Renderizando",
-        "pending": "Pendente",
+        "pending": "Na fila",
         "failed": "Falhou"
+      },
+      "render": "Renderizar",
+      "actions": {
+        "delete": "Excluir mídia",
+        "restore": "Restaurar mídia",
+        "reprocess": "Reprocessar",
+        "deleted": "Excluído",
+        "deleteSuccess": "Mídia excluída com sucesso",
+        "deleteError": "Erro ao excluir mídia",
+        "restoreSuccess": "Mídia restaurada com sucesso",
+        "restoreError": "Erro ao restaurar mídia",
+        "reprocessTitle": "Reprocessar mídia",
+        "reprocessDescription": "Tem certeza que deseja reprocessar \"{{title}}\"? O projeto será processado novamente do início.",
+        "reprocessSuccess": "Reprocessamento iniciado",
+        "reprocessError": "Erro ao reprocessar mídia",
+        "cancel": "Cancelar",
+        "confirmReprocess": "Reprocessar",
+        "renderTitle": "Renderizar resultado",
+        "renderDescription": "Deseja enviar \"{{title}}\" para a fila de renderização?",
+        "confirmRender": "Renderizar",
+        "renderSuccess": "Enviado para renderização",
+        "renderError": "Erro ao enviar para renderização"
       }
     },
     "description": "Gerencie todos os usuários da plataforma VDClip."
@@ -294,6 +337,44 @@
     "noExpiryLabel": "Sem expiração",
     "creditValidDaysHint": "Dias de validade após emissão.",
     "confirmAddCredit": "Confirmar",
+    "creditGranted": "Créditos adicionados com sucesso",
+    "creditGrantError": "Erro ao adicionar créditos",
+    "creditUpdated": "Crédito atualizado com sucesso",
+    "creditUpdateError": "Erro ao atualizar crédito",
+    "editCreditTitle": "Editar Crédito",
+    "editCreditExpiry": "Data de Expiração",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Ex: Compensação por erro, ajuste manual...",
+    "confirmPlanChangeTitle": "Confirmar alteração de plano?",
+    "confirmPlanChangeDescription": "O plano será alterado de {{from}} para {{to}}. Esta é uma operação administrativa — o webhook do provedor pode sobrescrever futuramente.",
+    "confirmPlanChange": "Confirmar Alteração",
+    "fefoWarning": "Os créditos serão removidos dos pacotes mais próximos da expiração primeiro (FEFO). Se não houver saldo suficiente, será removido o disponível.",
+    "planChanged": "Plano alterado com sucesso",
+    "planChangeError": "Erro ao alterar plano",
+    "planCancelled": "Plano cancelado com sucesso",
+    "planCancelError": "Erro ao cancelar plano",
+    "verificationEmailSent": "Email verificado com sucesso",
+    "verificationEmailError": "Erro ao verificar email",
+    "creditDeducted": "Créditos removidos com sucesso",
+    "creditDeductError": "Erro ao remover créditos",
+    "removeCredit": "Remover",
+    "removeCreditTitle": "Remover Créditos",
+    "removeCreditDescription": "Os créditos serão consumidos dos pacotes mais próximos da expiração (FEFO).",
+    "removeCreditAvailable": "Disponível: {{credits}} créditos",
+    "removeCreditReason": "Motivo",
+    "removeCreditReasonPlaceholder": "Ex: Ajuste manual, correção...",
+    "confirmRemoveCredit": "Remover Créditos",
+    "pixTitle": "Gerar Pix — Woovi",
+    "pixDescription": "Gere uma cobrança Pix para este usuário assinar um plano.",
+    "pixBillingPeriod": "Frequência",
+    "pixQuantity": "Quantidade",
+    "pixPeriod": {
+      "monthly": "Mensal",
+      "yearly": "Anual"
+    },
+    "pixGenerate": "Gerar Cobrança Pix",
+    "pixCreated": "Cobrança Pix gerada com sucesso",
+    "pixCreateError": "Erro ao gerar cobrança Pix",
     "creditPackages": "pacotes",
     "expired": "Expirado",
     "mediaStats": "Estatísticas de Mídia",
@@ -352,7 +433,8 @@
     "purchased": "Comprado",
     "promotional": "Promocional",
     "bonus": "Bônus",
-    "adjustment": "Ajuste"
+    "adjustment": "Ajuste",
+    "admin_grant": "Admin"
   },
   "teamRole": {
     "owner": "Dono",
@@ -476,6 +558,16 @@
     "members": {
       "searchPlaceholder": "Buscar por nome ou email...",
       "noResults": "Nenhum membro encontrado para esta busca."
+    },
+    "toast": {
+      "planChanged": "Plano do time alterado com sucesso",
+      "planChangeError": "Erro ao alterar plano do time",
+      "planCancelled": "Plano do time cancelado com sucesso",
+      "planCancelError": "Erro ao cancelar plano do time",
+      "teamUpdated": "Time atualizado com sucesso",
+      "teamUpdateError": "Erro ao atualizar time",
+      "teamDeleted": "Time excluído com sucesso",
+      "teamDeleteError": "Erro ao excluir time"
     }
   },
   "business": {
@@ -742,7 +834,11 @@
       "cancel": "Cancelar",
       "save": "Salvar",
       "requiredField": "Campo obrigatório",
-      "invalidAmount": "Informe um valor maior que zero"
+      "invalidAmount": "Informe um valor maior que zero",
+      "bankAccount": "Conta Bancária",
+      "selectBankAccount": "Selecione a conta bancária",
+      "financialCategory": "Categoria Financeira",
+      "selectCategory": "Selecione a categoria"
     },
     "addEntryDescription": "Registre uma nova movimentação de entrada ou saída no fluxo de caixa."
   },
@@ -800,6 +896,7 @@
     "accountTypes": {
       "checking": "Corrente",
       "savings": "Poupança",
+      "paymentGateway": "Gateway de Pagamento",
       "investment": "Investimento"
     },
     "categories": {
@@ -813,8 +910,12 @@
     "categoryTypes": {
       "asset": "Ativo",
       "liability": "Passivo",
+      "equity": "Patrimônio Líquido",
       "revenue": "Receita",
-      "expense": "Despesa"
+      "expense": "Despesa",
+      "cogs": "CPV (Custo dos Produtos)",
+      "opex": "OPEX (Despesas Operacionais)",
+      "tax": "Impostos e Taxas"
     },
     "costType": {
       "recurring": "Recorrente",
@@ -874,7 +975,41 @@
       "newTax": "Novo Imposto",
       "editTax": "Editar Imposto",
       "taxDescription": "Preencha os dados do imposto.",
-      "taxType": "Tipo do Imposto"
+      "taxType": "Tipo do Imposto",
+      "vendor": "Fornecedor",
+      "recurring": "Recorrente",
+      "costAllocation": "Alocação de Custo",
+      "competenceMonth": "Mês de Competência",
+      "billingDate": "Data de Vencimento",
+      "recurringUntil": "Recorrente até",
+      "status": "Status",
+      "taxRegime": "Regime Tributário",
+      "municipalityCode": "Código do Município",
+      "effectiveFrom": "Vigência início",
+      "effectiveTo": "Vigência fim",
+      "accountNumber": "Número da Conta",
+      "agency": "Agência",
+      "bankCode": "Código do Banco",
+      "country": "País",
+      "initialBalance": "Saldo Inicial",
+      "registeredAs": "Será registrado como:"
+    },
+    "costAllocations": {
+      "cogs": "CPV (Custo dos Produtos)",
+      "rAndD": "P&D (Pesquisa e Desenvolvimento)",
+      "salesMarketing": "Vendas e Marketing",
+      "generalAdmin": "Administrativo Geral"
+    },
+    "costStatus": {
+      "draft": "Rascunho",
+      "approved": "Aprovado",
+      "paid": "Pago",
+      "cancelled": "Cancelado"
+    },
+    "taxRegimes": {
+      "simples_nacional": "Simples Nacional",
+      "lucro_presumido": "Lucro Presumido",
+      "lucro_real": "Lucro Real"
     },
     "costTypes": {
       "recurring": "Recorrente",
@@ -883,6 +1018,7 @@
     "frequencies": {
       "monthly": "Mensal",
       "quarterly": "Trimestral",
+      "annual": "Anual",
       "yearly": "Anual"
     },
     "taxTypes": {
@@ -952,7 +1088,11 @@
       "budgetUsage": "Uso do Orçamento",
       "filterActive": "Filtrar Ativos",
       "allCostCenters": "Todos os Centros",
-      "activeCostCenters": "Apenas Ativos"
+      "activeCostCenters": "Apenas Ativos",
+      "slug": "Identificador (slug)",
+      "inactive": "Inativo",
+      "deleteCostCenterTitle": "Excluir Centro de Custo",
+      "deleteCostCenterDescription": "Tem certeza que deseja excluir este centro de custo? Esta ação não pode ser desfeita."
     },
     "tabDescriptions": {
       "costs": "Custos fixos e variáveis do negócio, com controle de tipo e frequência.",
@@ -1306,6 +1446,8 @@
     "nameLabel": "Nome do Template",
     "namePlaceholder": "Meu Template",
     "confirmCreate": "Criar",
+    "createSuccess": "Template criado com sucesso",
+    "createError": "Erro ao criar template",
     "rename": "Renomear",
     "renameTitle": "Renomear Template",
     "confirmRename": "Renomear",
@@ -1313,6 +1455,10 @@
     "deleteTitle": "Excluir Template",
     "deleteDescription": "Tem certeza que deseja excluir \"{{name}}\"? Essa ação não pode ser desfeita.",
     "confirmDelete": "Excluir",
+    "deleteSuccess": "Template excluído com sucesso",
+    "deleteError": "Erro ao excluir template",
+    "defaultSuccess": "Template definido como padrão",
+    "defaultError": "Erro ao definir template como padrão",
     "viewSettings": "Ver Configurações",
     "default": "Padrão",
     "setDefault": "Definir como padrão",
@@ -1320,6 +1466,8 @@
     "edit": "Editar",
     "done": "Pronto",
     "save": "Salvar",
+    "saveSuccess": "Template salvo com sucesso",
+    "saveError": "Erro ao salvar template",
     "updated": "Atualizado",
     "tabs": {
       "layout": "Layout",
@@ -1684,16 +1832,41 @@
     "bankAccountCreated": "Conta bancária criada com sucesso",
     "bankAccountUpdated": "Conta bancária atualizada com sucesso",
     "bankAccountDeleted": "Conta bancária removida com sucesso",
+    "costCenterCreated": "Centro de custo criado com sucesso",
+    "costCenterCreateError": "Erro ao criar centro de custo",
+    "costCenterUpdated": "Centro de custo atualizado com sucesso",
+    "costCenterUpdateError": "Erro ao atualizar centro de custo",
+    "costCenterDeleted": "Centro de custo removido com sucesso",
+    "costCenterDeleteError": "Erro ao remover centro de custo",
     "categoryCreated": "Categoria criada com sucesso",
+    "categoryCreateError": "Erro ao criar categoria",
     "categoryUpdated": "Categoria atualizada com sucesso",
     "categoryDeleted": "Categoria removida com sucesso",
     "taxConfigCreated": "Configuração de imposto criada com sucesso",
+    "taxConfigCreateError": "Erro ao criar configuração de imposto",
     "taxConfigUpdated": "Configuração de imposto atualizada com sucesso",
     "taxConfigDeleted": "Configuração de imposto removida com sucesso",
     "costEntryCreated": "Lançamento de custo criado com sucesso",
+    "costEntryCreateError": "Erro ao criar lançamento de custo",
     "costEntryUpdated": "Lançamento de custo atualizado com sucesso",
+    "costEntryUpdateError": "Erro ao atualizar lançamento de custo",
     "costEntryDeleted": "Lançamento de custo removido com sucesso",
+    "costEntryDeleteError": "Erro ao remover lançamento de custo",
+    "costEntryApproved": "Lançamento de custo aprovado com sucesso",
+    "costEntryApproveError": "Erro ao aprovar lançamento de custo",
+    "costEntryPaid": "Lançamento de custo pago com sucesso",
+    "costEntryPayError": "Erro ao registrar pagamento do lançamento de custo",
+    "cashFlowEntryCreated": "Lançamento de fluxo de caixa criado com sucesso",
+    "cashFlowEntryCreateError": "Erro ao criar lançamento de fluxo de caixa",
+    "bankAccountCreateError": "Erro ao criar conta bancária",
+    "bankAccountUpdateError": "Erro ao atualizar conta bancária",
+    "bankAccountDeleteError": "Erro ao remover conta bancária",
+    "categoryUpdateError": "Erro ao atualizar categoria",
+    "categoryDeleteError": "Erro ao remover categoria",
+    "taxConfigUpdateError": "Erro ao atualizar configuração de imposto",
+    "taxConfigDeleteError": "Erro ao remover configuração de imposto",
     "userStatusUpdated": "Status atualizado com sucesso",
+    "userStatusUpdateError": "Erro ao atualizar status do usuário",
     "userDeleted": "Usuário excluído com sucesso",
     "adminActivated": "Administrador ativado com sucesso",
     "adminDeactivated": "Administrador desativado com sucesso",
@@ -1702,15 +1875,41 @@
     "roleCreated": "Função criada com sucesso",
     "roleUpdated": "Função atualizada com sucesso",
     "sessionRevoked": "Sessão revogada com sucesso",
+    "sessionRevokeError": "Erro ao revogar sessão",
     "allSessionsRevoked": "Todas as sessões foram revogadas",
     "passwordChanged": "Senha alterada com sucesso",
     "profileSessionRevoked": "Sessão encerrada com sucesso",
+    "profileSessionRevokeError": "Erro ao encerrar sessão",
     "mfaEnabled": "2FA ativado com sucesso",
     "mfaDisabled": "2FA desativado com sucesso",
     "receivableMarked": "Recebimento registrado com sucesso",
     "providerToggled": "Integração atualizada com sucesso",
+    "templateDeleteError": "Erro ao excluir template",
+    "templateSetDefaultError": "Erro ao definir template padrão",
+    "templateUpdateError": "Erro ao atualizar configurações do template",
+    "templateCreateError": "Erro ao criar template",
+    "mediaDeleteError": "Erro ao excluir mídia",
+    "mediaRestoreError": "Erro ao restaurar mídia",
+    "mediaReprocessError": "Erro ao reprocessar mídia",
+    "mediaRenderError": "Erro ao renderizar resultado",
+    "scheduledPostUpdateError": "Erro ao atualizar publicação agendada",
+    "scheduledPostCancelError": "Erro ao cancelar publicação agendada",
     "copied": "Copiado para a área de transferência",
-    "copyError": "Erro ao copiar"
+    "copyError": "Erro ao copiar",
+    "apiError": {
+      "COST_CENTER_SLUG_EXISTS": "Já existe um centro de custo com esse identificador",
+      "CATEGORY_CODE_EXISTS": "Já existe uma categoria com esse código",
+      "ADMIN_EMAIL_EXISTS": "Já existe um administrador com esse e-mail",
+      "ROLE_SLUG_EXISTS": "Já existe uma função com esse identificador",
+      "SYSTEM_ROLE_MODIFICATION": "Funções do sistema não podem ser modificadas",
+      "INVALID_STATUS_TRANSITION": "Transição de status inválida",
+      "INVALID_RECEIVABLE_STATUS": "Status de recebível inválido",
+      "NOTE_DELETE_FORBIDDEN": "Você não tem permissão para excluir esta nota",
+      "MFA_INVALID_CODE": "Código de verificação inválido",
+      "MFA_ALREADY_ENABLED": "2FA já está ativado",
+      "MFA_NOT_ENABLED": "2FA não está ativado",
+      "PASSWORD_REUSED": "A nova senha não pode ser igual à senha anterior"
+    }
   },
   "pendingPurchases": {
     "tabLabel": "Compras Pendentes",

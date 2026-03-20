@@ -47,8 +47,10 @@ export function AdminSessionsTab() {
   const [showRevokeAllDialog, setShowRevokeAllDialog] = useState(false)
 
   const filtered = useMemo(() => {
-    if (!sessions) return []
-    if (!search) return sessions
+    if (!sessions) 
+return []
+    if (!search) 
+return sessions
     const q = search.toLowerCase()
     return sessions.filter(
       (s) => s.ipAddress.includes(q) || s.userAgent.toLowerCase().includes(q),
@@ -183,7 +185,8 @@ export function AdminSessionsTab() {
       <PaginationControls {...pagination} />
 
       {/* Revoke Single Session Confirmation */}
-      <AlertDialog open={!!revokingSession} onOpenChange={(v) => { if (!v) setRevokingSession(null) }}>
+      <AlertDialog open={!!revokingSession} onOpenChange={(v) => { if (!v) 
+setRevokingSession(null) }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('adminUsers.confirmRevokeTitle')}</AlertDialogTitle>

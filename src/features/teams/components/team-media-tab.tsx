@@ -190,7 +190,7 @@ function MediaDetailView({
       </div>
 
       {isLoading && (
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {Array.from({ length: 12 }).map((_, i) => (
             <Skeleton key={i} className="aspect-[9/16] rounded-lg" />
           ))}
@@ -209,7 +209,7 @@ function MediaDetailView({
           <p className="text-xs text-muted-foreground">
             {filtered.length} {t('users.media.resultsTotal')}
           </p>
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {pagination.paginatedItems.map((result) => (
               <ResultCard key={result.id} result={result} t={t} />
             ))}

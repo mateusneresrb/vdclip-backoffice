@@ -2,15 +2,15 @@ import { Link, useMatches } from '@tanstack/react-router'
 import { BookOpen, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { cn } from '@/lib/utils'
-
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
@@ -20,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 
 const routeLabels: Record<string, string> = {
   dashboard: 'nav.dashboard',
@@ -145,9 +146,11 @@ export function AdminHeader() {
           {!isCompanyDetail && (
             <BreadcrumbItem>
               {isDetailPage ? (
-                <span className="text-muted-foreground">
-                  {isUserDetail ? t('nav.users') : isTeamDetail ? t('nav.teams') : t('nav.companies')}
-                </span>
+                <BreadcrumbLink asChild>
+                  <Link to={isUserDetail ? '/users' : isTeamDetail ? '/teams' : '/companies'}>
+                    {isUserDetail ? t('nav.users') : isTeamDetail ? t('nav.teams') : t('nav.companies')}
+                  </Link>
+                </BreadcrumbLink>
               ) : (
                 <BreadcrumbPage>
                   {labelKey ? t(labelKey) : t('nav.dashboard')}
@@ -174,9 +177,11 @@ export function AdminHeader() {
           {isCompanyDetail && (
             <>
               <BreadcrumbItem>
-                <span className="text-muted-foreground">
-                  {t('nav.companies')}
-                </span>
+                <BreadcrumbLink asChild>
+                  <Link to="/companies">
+                    {t('nav.companies')}
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>

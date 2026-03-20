@@ -6,7 +6,7 @@ import QRCode from 'react-qr-code'
 
 import { Button } from '@/components/ui/button'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
-import i18n from '@/i18n'
+import { i18n } from '@/i18n'
 
 import { showSuccessToast } from '@/lib/toast'
 
@@ -32,7 +32,7 @@ export function MfaSetupWall() {
     authApi.setupMfa()
       .then((res) => {
         setSecret(res.secret)
-        setProvisioningUri(res.provisioning_uri)
+        setProvisioningUri(res.provisioningUri)
       })
       .catch(() => {
         setError(t('profile.mfaSetupError'))
@@ -41,7 +41,8 @@ export function MfaSetupWall() {
   }, [t])
 
   const handleActivate = async () => {
-    if (otpCode.length !== 6) return
+    if (otpCode.length !== 6) 
+return
     setVerifying(true)
     setError(null)
     try {
@@ -120,7 +121,7 @@ export function MfaSetupWall() {
                 </p>
 
                 {provisioningUri && (
-                  <div className="rounded-xl border border-zinc-800 bg-white p-3">
+                  <div className="rounded-xl border border-zinc-800 bg-background p-3">
                     <QRCode value={provisioningUri} size={192} level="H" />
                   </div>
                 )}

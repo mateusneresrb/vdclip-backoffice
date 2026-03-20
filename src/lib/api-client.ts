@@ -1,92 +1,163 @@
 /**
- * API client base — authenticated fetch calls to vdclip-backoffice-api.
- * In dev: MSW intercepts all calls and returns mock data.
- * In prod: calls go to VITE_API_URL.
+ * API client — authenticated fetch calls with auto snake_case ↔ camelCase.
+ *
+ * - Response JSON keys are auto-converted from snake_case → camelCase
+ * - Request body JSON keys are auto-converted from camelCase → snake_case
+ * - Query params are NOT converted — always pass snake_case keys
+ * - 401 → auto refresh + retry (skips auth endpoints to avoid loops)
  */
 
+import type {CamelizeKeys} from './case-transform';
+
 import { useAuthStore } from '@/features/auth/stores/auth-store'
+import {  camelizeKeys, snakeizeKeys } from './case-transform'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
-let isRefreshing: Promise<boolean> | null = null
+// ── Error class ─────────────────────────────────────────────────────
 
-function getAuthHeader(): HeadersInit {
-  const token = useAuthStore.getState()._token
-  if (!token) return {}
-  return { Authorization: `Bearer ${token}` }
+export class ApiError extends Error {
+  status: number
+  body: unknown
+
+  constructor(status: number, body: unknown) {
+    super(`API error ${status}`)
+    this.name = 'ApiError'
+    this.status = status
+    this.body = body
+  }
+
+  get errorCode(): string {
+    const b = this.body as { error?: { code?: string } } | null
+    return b?.error?.code ?? ''
+  }
+
+  get errorMessage(): string {
+    const b = this.body as { error?: { message?: string } } | null
+    return b?.error?.message ?? `HTTP ${this.status}`
+  }
 }
 
-async function tryRefresh(): Promise<boolean> {
+// ── Token refresh queue ─────────────────────────────────────────────
+
+let refreshPromise: Promise<boolean> | null = null
+
+async function attemptTokenRefresh(): Promise<boolean> {
   try {
     const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) return false
+    if (!res.ok) 
+return false
     const data = await res.json()
     useAuthStore.getState().setToken(data.access_token)
     return true
-  } catch {
+  }
+  catch {
     return false
   }
 }
 
-async function request<T>(
-  method: string,
-  path: string,
-  options: { params?: Record<string, string | number | boolean | undefined>; body?: unknown } = {},
-): Promise<T> {
-  const url = new URL(`${BASE_URL}/api${path}`)
+function refreshTokenOnce(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = attemptTokenRefresh().finally(() => {
+      refreshPromise = null
+    })
+  }
+  return refreshPromise
+}
 
-  if (options.params) {
-    for (const [key, value] of Object.entries(options.params)) {
-      if (value !== undefined && value !== null) {
-        url.searchParams.set(key, String(value))
-      }
-    }
+// ── Auth headers ────────────────────────────────────────────────────
+
+function getAuthHeaders(): Record<string, string> {
+  const token = useAuthStore.getState()._token
+  if (token) 
+return { Authorization: `Bearer ${token}` }
+  return {}
+}
+
+// ── Core request ────────────────────────────────────────────────────
+
+async function request<TApi>(
+  method: string,
+  url: string,
+  init?: RequestInit,
+): Promise<CamelizeKeys<TApi>> {
+  const headers: Record<string, string> = {
+    ...getAuthHeaders(),
+    ...(init?.headers as Record<string, string>),
   }
 
   const doFetch = () =>
-    fetch(url.toString(), {
-      method,
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthHeader(),
-      },
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
-    })
+    fetch(url, { ...init, method, headers, credentials: 'include' })
 
   let res = await doFetch()
 
-  // On 401, try to refresh the token and retry once
-  if (res.status === 401 && useAuthStore.getState()._token) {
-    if (!isRefreshing) {
-      isRefreshing = tryRefresh().finally(() => { isRefreshing = null })
-    }
-    const refreshed = await isRefreshing
+  // 401 refresh + retry (skip auth endpoints to avoid loops)
+  if (res.status === 401 && useAuthStore.getState()._token && !url.includes('/api/auth/')) {
+    const refreshed = await refreshTokenOnce()
     if (refreshed) {
-      res = await doFetch()
-    } else {
+      const retryHeaders: Record<string, string> = {
+        ...getAuthHeaders(),
+        ...(init?.headers as Record<string, string>),
+      }
+      res = await fetch(url, { ...init, method, headers: retryHeaders, credentials: 'include' })
+    }
+    else {
       useAuthStore.getState().clearAuth()
-      throw new Error('Sessão expirada')
+      throw new ApiError(401, { error: { message: 'Sessão expirada' } })
     }
   }
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: { message: res.statusText } }))
-    throw new Error(error?.error?.message ?? `HTTP ${res.status}`)
+    const body = await res.json().catch(() => null)
+    throw new ApiError(res.status, body)
   }
 
-  return res.json() as Promise<T>
+  if (res.status === 204) 
+return undefined as CamelizeKeys<TApi>
+
+  const json: TApi = await res.json()
+  return camelizeKeys(json)
 }
 
+function withBody<TApi>(
+  method: string,
+  url: string,
+  body?: unknown,
+): Promise<CamelizeKeys<TApi>> {
+  return request<TApi>(method, url, {
+    headers: { 'Content-Type': 'application/json' },
+    ...(body !== undefined && { body: JSON.stringify(snakeizeKeys(body)) }),
+  })
+}
+
+// ── Public API ──────────────────────────────────────────────────────
+
 export const apiClient = {
-  get: <T>(path: string, params?: Record<string, string | number | boolean | undefined>) =>
-    request<T>('GET', path, { params }),
-  post: <T>(path: string, body: unknown) => request<T>('POST', path, { body }),
-  put: <T>(path: string, body: unknown) => request<T>('PUT', path, { body }),
-  patch: <T>(path: string, body: unknown) => request<T>('PATCH', path, { body }),
-  delete: <T>(path: string) => request<T>('DELETE', path),
+  get: <TApi>(path: string, params?: Record<string, string | number | boolean | undefined>) => {
+    const url = new URL(`${BASE_URL}/api${path}`)
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null) {
+          url.searchParams.set(key, String(value))
+        }
+      }
+    }
+    return request<TApi>('GET', url.toString())
+  },
+
+  post: <TApi>(path: string, body?: unknown) =>
+    withBody<TApi>('POST', `${BASE_URL}/api${path}`, body),
+
+  put: <TApi>(path: string, body?: unknown) =>
+    withBody<TApi>('PUT', `${BASE_URL}/api${path}`, body),
+
+  patch: <TApi>(path: string, body?: unknown) =>
+    withBody<TApi>('PATCH', `${BASE_URL}/api${path}`, body),
+
+  delete: <TApi>(path: string) =>
+    request<TApi>('DELETE', `${BASE_URL}/api${path}`),
 }

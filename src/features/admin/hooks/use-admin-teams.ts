@@ -19,10 +19,10 @@ function mapTeam(t: Record<string, unknown>): AdminTeamOverview {
   return {
     id: String(t.id ?? ''),
     name: String(t.name ?? ''),
-    memberCount: Number(t.member_count ?? t.memberCount ?? 0),
+    memberCount: Number(t.memberCount ?? 0),
     plan: (t.plan as AdminTeamOverview['plan']) ?? 'free',
     category: (t.category ?? null) as string | null,
-    createdAt: String(t.created_at ?? t.createdAt ?? ''),
+    createdAt: String(t.createdAt ?? ''),
   }
 }
 

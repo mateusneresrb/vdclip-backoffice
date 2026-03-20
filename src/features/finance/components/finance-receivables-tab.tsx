@@ -1,4 +1,4 @@
-import type { Currency, Receivable, ReceivableStatus } from '../types'
+import type { Receivable, ReceivableStatus } from '../types'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   CalendarCheck,
@@ -33,35 +33,29 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { apiClient } from '@/lib/api-client'
+import { formatCurrency } from '@/lib/format'
 import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 import { cn } from '@/lib/utils'
 import { useBankAccounts } from '../hooks/use-bank-accounts'
 import { useReceivables } from '../hooks/use-receivables'
 import { FinancialNotes } from './financial-notes'
-
-function formatCurrency(amount: number, currency: Currency) {
-  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
-    style: 'currency',
-    currency,
-  }).format(amount)
-}
 
 const statusColors: Record<ReceivableStatus, string> = {
   pending: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
@@ -150,10 +144,12 @@ return { pending: 0, received: 0, overdue: 0, cancelled: 0 }
     setIsSubmitting(true)
     try {
       await apiClient.post(`/receivables/${confirmEntry.id}/receive`, {
-        bank_account_id: bankAccountId,
-        transaction_date: receivedDate,
+        bankAccountId,
+        transactionDate: receivedDate,
       })
       await queryClient.invalidateQueries({ queryKey: ['receivables'] })
+      await queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-cash-flow'] })
       showSuccessToast({ title: t('toast.receivableMarked') })
       setConfirmEntry(null)
       setReceivedDate('')
@@ -350,7 +346,7 @@ setNotesEntry(null) }}>
 
       {/* Confirm Received Dialog */}
       <Dialog open={!!confirmEntry} onOpenChange={() => setConfirmEntry(null)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90svh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('finance.receivables.confirmTitle')}</DialogTitle>
             <DialogDescription>
@@ -385,11 +381,11 @@ setNotesEntry(null) }}>
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmEntry(null)}>
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={() => setConfirmEntry(null)} className="w-full sm:w-auto">
               {t('finance.form.cancel')}
             </Button>
-            <Button onClick={handleConfirmReceived} disabled={!receivedDate || !bankAccountId || isSubmitting}>
+            <Button onClick={handleConfirmReceived} disabled={!receivedDate || !bankAccountId || isSubmitting} className="w-full sm:w-auto">
               <CalendarCheck className="mr-1 h-4 w-4" />
               {t('finance.receivables.confirmButton')}
             </Button>

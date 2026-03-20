@@ -12,10 +12,19 @@ Gestão de times do produto VDClip.
 
 ## Hooks
 ```ts
+// Queries
 useTeams(filters)              → { teams: AdminTeamDetail[], total }
 useTeamDetail(teamId)          → AdminTeamDetail
 useTeamMembers(teamId)         → TeamMember[]
 useTeamInvitations(teamId)     → TeamInvitation[]
+
+// Mutations
+useTeamMutations()  → {
+  changePlan: mutation({ teamId, plan, reason? })     // PATCH /platform/teams/{id}/plan
+  cancelPlan: mutation({ teamId })                    // POST /platform/teams/{id}/cancel-plan
+  updateTeam: mutation({ teamId, name?, email?, category? }) // PATCH /platform/teams/{id}
+  deleteTeam: mutation({ teamId })                    // DELETE /platform/teams/{id}
+}
 ```
 
 ## Types (de `@/features/admin/types`)

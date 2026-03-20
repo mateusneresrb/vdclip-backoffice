@@ -100,41 +100,45 @@ return users
               {pagination.paginatedItems.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                  className="flex flex-col gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center"
                 >
-                  <Link to="/users/$userId" params={{ userId: user.id }} className="shrink-0">
-                    <Avatar className="h-10 w-10 transition-opacity hover:opacity-80">
-                      <AvatarImage src={user.avatarUrl} alt={user.name} />
-                      <AvatarFallback>
-                        {user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Link>
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      to="/users/$userId"
-                      params={{ userId: user.id }}
-                      className="truncate text-sm font-medium hover:underline"
-                    >
-                      {user.name}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <Link to="/users/$userId" params={{ userId: user.id }} className="shrink-0">
+                      <Avatar className="h-10 w-10 transition-opacity hover:opacity-80">
+                        <AvatarImage src={user.avatarUrl} alt={user.name} />
+                        <AvatarFallback>
+                          {user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
                     </Link>
-                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
-                      <Building2 className="h-3 w-3" />
-                      <span>{user.companyName}</span>
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        to="/users/$userId"
+                        params={{ userId: user.id }}
+                        className="truncate text-sm font-medium hover:underline"
+                      >
+                        {user.name}
+                      </Link>
+                      <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
+                        <Building2 className="h-3 w-3" />
+                        <span>{user.companyName}</span>
+                      </div>
                     </div>
                   </div>
-                  <Badge variant="outline" className="shrink-0 text-xs capitalize">
-                    {user.role}
-                  </Badge>
-                  <Badge variant="secondary" className={`shrink-0 text-xs ${statusVariants[user.status] ?? statusVariants.inactive}`}>
-                    {t(`business.users.status${user.status.charAt(0).toUpperCase()}${user.status.slice(1)}`)}
-                  </Badge>
-                  <Button variant="outline" size="sm" asChild className="shrink-0">
-                    <Link to="/users/$userId" params={{ userId: user.id }}>
-                      {t('users.view')}
-                    </Link>
-                  </Button>
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <Badge variant="outline" className="shrink-0 text-xs capitalize">
+                      {user.role}
+                    </Badge>
+                    <Badge variant="secondary" className={`shrink-0 text-xs ${statusVariants[user.status] ?? statusVariants.inactive}`}>
+                      {t(`business.users.status${user.status.charAt(0).toUpperCase()}${user.status.slice(1)}`)}
+                    </Badge>
+                    <Button variant="outline" size="sm" asChild className="shrink-0">
+                      <Link to="/users/$userId" params={{ userId: user.id }}>
+                        {t('users.view')}
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               ))}
               <PaginationControls {...pagination} />

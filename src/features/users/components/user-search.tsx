@@ -1,1 +1,1 @@
-export { UserSearch } from '@/features/admin/components/UserSearch'
+export { UserSearch } from '@/features/admin/components/user-search'

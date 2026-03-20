@@ -13,14 +13,13 @@ import type {
 import {
   Check,
   ChevronDown,
-  EllipsisVertical,
   Grid2x2,
   Image,
   Layers,
   Monitor,
   MonitorPlay,
-  Pencil,
   Plus,
+  Save,
   Scan,
   Sparkles,
   Star,
@@ -28,7 +27,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
@@ -40,13 +39,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -64,7 +56,9 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
+import { showErrorToast, showSuccessToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
+import { useCreateTemplate, useDeleteTemplate, useSetDefaultTemplate, useUpdateTemplateSettings } from '../hooks/use-admin-templates'
 
 /* ──────────────── Static Data ──────────────── */
 
@@ -171,11 +165,13 @@ const presetOptions = [
 interface TemplateManagerProps {
   templates: AdminTemplate[] | undefined
   isLoading: boolean
+  userId?: string
+  teamId?: string
 }
 
 /* ──────────────── Main Component ──────────────── */
 
-export function TemplateManager({ templates, isLoading }: TemplateManagerProps) {
+export function TemplateManager({ templates, isLoading, userId, teamId }: TemplateManagerProps) {
   const { t } = useTranslation('admin')
 
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -190,6 +186,23 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [editingSettings, setEditingSettings] = useState<TemplateSettings | null>(null)
+
+  const createMutation = useCreateTemplate()
+  const deleteMutation = useDeleteTemplate()
+  const setDefaultMutation = useSetDefaultTemplate()
+  const updateSettingsMutation = useUpdateTemplateSettings()
+
+  // Sync selectedId when templates load or change
+  useEffect(() => {
+    if (!templates || templates.length === 0) 
+return
+    const stillValid = templates.some((tpl) => tpl.id === selectedId)
+    if (!stillValid) {
+      const defaultId = templates.find((tpl) => tpl.isDefault)?.id ?? templates[0]?.id ?? null
+      setSelectedId(defaultId)
+      setEditingSettings(null)
+    }
+  }, [templates, selectedId])
 
   if (isLoading) {
     return (
@@ -221,14 +234,40 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
     setEditingSettings(settings)
   }
 
-  const handleSetDefault = (_id: string) => {
+  const handleSetDefault = (id: string) => {
     setSelectorOpen(false)
+    setDefaultMutation.mutate(id, {
+      onSuccess: () => showSuccessToast({ title: t('templates.defaultSuccess') }),
+      onError: () => showErrorToast({ title: t('templates.defaultError') }),
+    })
+  }
+
+  const handleDelete = () => {
+    if (!deleteId) 
+return
+    const wasSelected = deleteId === selectedId
+    deleteMutation.mutate(deleteId, {
+      onSuccess: () => {
+        showSuccessToast({ title: t('templates.deleteSuccess') })
+        setDeleteOpen(false)
+        setDeleteId(null)
+        if (wasSelected) {
+          setSelectedId(null)
+          setEditingSettings(null)
+        }
+      },
+      onError: () => {
+        showErrorToast({ title: t('templates.deleteError') })
+        setDeleteOpen(false)
+        setDeleteId(null)
+      },
+    })
   }
 
   return (
     <div className="space-y-3">
       {/* ── Toolbar ── */}
-      <div className="flex items-center gap-3 rounded-xl border bg-card p-3 shadow-sm">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card p-3 shadow-sm sm:gap-3">
         {hasTemplates ? (
           <Popover open={selectorOpen} onOpenChange={setSelectorOpen}>
             <PopoverTrigger asChild>
@@ -244,79 +283,33 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              className="w-[var(--radix-popover-trigger-width)] min-w-[220px] space-y-1 p-1"
+              className="w-[var(--radix-popover-trigger-width)] min-w-[220px] max-h-[280px] overflow-y-auto space-y-1 p-1"
             >
               {templateList.map((tpl) => (
-                <div
+                <button
                   key={tpl.id}
+                  type="button"
+                  onClick={() => handleSelect(tpl.id)}
                   className={cn(
-                    'group relative flex cursor-default items-center rounded-md py-2 pl-3 pr-9 text-sm select-none',
+                    'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm select-none',
                     tpl.id === selectedId
                       ? 'bg-accent text-accent-foreground'
                       : 'hover:bg-accent hover:text-accent-foreground',
                   )}
                 >
-                  <button
-                    type="button"
-                    className="flex min-w-0 flex-1 items-center gap-2"
-                    onClick={() => handleSelect(tpl.id)}
-                  >
-                    <span className="shrink-0 text-[10px] text-muted-foreground">
-                      {tpl.aspectRatio === 'auto' ? 'Auto' : tpl.aspectRatio}
+                  <span className="shrink-0 text-[10px] text-muted-foreground">
+                    {tpl.aspectRatio === 'auto' ? 'Auto' : tpl.aspectRatio}
+                  </span>
+                  <span className="min-w-0 truncate">{tpl.name}</span>
+                  {tpl.isDefault && (
+                    <span className="ml-auto shrink-0 rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                      {t('templates.default')}
                     </span>
-                    <span className="truncate">{tpl.name}</span>
-                    {tpl.isDefault && (
-                      <span className="shrink-0 rounded-md bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                        {t('templates.default')}
-                      </span>
-                    )}
-                  </button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground transition-opacity hover:text-foreground lg:opacity-0 lg:group-hover:opacity-100 data-[state=open]:opacity-100"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <EllipsisVertical className="h-4 w-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="right" align="start" sideOffset={8}>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelectorOpen(false)
-                          setRenameId(tpl.id)
-                          setRenameName(tpl.name)
-                          setRenameOpen(true)
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                        {t('templates.rename')}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        disabled={tpl.isDefault}
-                        onClick={() => handleSetDefault(tpl.id)}
-                      >
-                        <Star className="h-4 w-4" />
-                        {t('templates.setDefault')}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        disabled={tpl.isDefault}
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => {
-                          setSelectorOpen(false)
-                          setDeleteId(tpl.id)
-                          setDeleteOpen(true)
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        {t('templates.delete')}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                  )}
+                  {tpl.id === selectedId && (
+                    <Check className="ml-auto h-4 w-4 shrink-0 text-primary" />
+                  )}
+                </button>
               ))}
             </PopoverContent>
           </Popover>
@@ -331,15 +324,67 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
           </button>
         )}
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 rounded-lg"
-          onClick={() => { setNewName(''); setCreateOpen(true) }}
-        >
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('templates.create')}</span>
-        </Button>
+        {/* Action buttons */}
+        <div className="flex items-center gap-1">
+          {selectedTemplate && editingSettings && (
+            <Button
+              size="sm"
+              className="h-9 gap-1.5 rounded-lg"
+              disabled={updateSettingsMutation.isPending}
+              onClick={() => {
+                updateSettingsMutation.mutate(
+                  { templateId: selectedTemplate.id, settings: editingSettings },
+                  {
+                    onSuccess: () => {
+                      showSuccessToast({ title: t('templates.saveSuccess') })
+                      setEditingSettings(null)
+                    },
+                    onError: () => showErrorToast({ title: t('templates.saveError') }),
+                  },
+                )
+              }}
+            >
+              <Save className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('templates.save')}</span>
+            </Button>
+          )}
+          {selectedTemplate && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5 rounded-lg"
+                disabled={selectedTemplate.isDefault || setDefaultMutation.isPending}
+                onClick={() => handleSetDefault(selectedTemplate.id)}
+              >
+                <Star className={cn('h-4 w-4', selectedTemplate.isDefault && 'fill-primary text-primary')} />
+                <span className="hidden sm:inline">{t('templates.setDefault')}</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5 rounded-lg text-destructive hover:text-destructive"
+                disabled={selectedTemplate.isDefault || deleteMutation.isPending}
+                onClick={() => {
+                  setDeleteId(selectedTemplate.id)
+                  setDeleteOpen(true)
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('templates.delete')}</span>
+              </Button>
+            </>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5 rounded-lg"
+            onClick={() => { setNewName(''); setCreateOpen(true) }}
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('templates.create')}</span>
+          </Button>
+        </div>
       </div>
 
       {/* ── Main Content ── */}
@@ -423,7 +468,25 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
               <Label>{t('templates.nameLabel')}</Label>
               <Input placeholder={t('templates.namePlaceholder')} value={newName} onChange={(e) => setNewName(e.target.value)} />
             </div>
-            <Button className="w-full" disabled={!newName.trim()} onClick={() => { setCreateOpen(false); setNewName('') }}>
+            <Button
+              className="w-full"
+              disabled={!newName.trim() || createMutation.isPending}
+              onClick={() => {
+                createMutation.mutate(
+                  { name: newName.trim(), userId, teamId },
+                  {
+                    onSuccess: (data) => {
+                      showSuccessToast({ title: t('templates.createSuccess') })
+                      setCreateOpen(false)
+                      setNewName('')
+                      if (data?.id) 
+setSelectedId(data.id)
+                    },
+                    onError: () => showErrorToast({ title: t('templates.createError') }),
+                  },
+                )
+              }}
+            >
               {t('templates.confirmCreate')}
             </Button>
           </div>
@@ -455,7 +518,13 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
           </DialogHeader>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setDeleteOpen(false)}>{t('userDetail.cancel')}</Button>
-            <Button variant="destructive" onClick={() => { setDeleteOpen(false); setDeleteId(null) }}>{t('templates.confirmDelete')}</Button>
+            <Button
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={handleDelete}
+            >
+              {t('templates.confirmDelete')}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -466,7 +535,10 @@ export function TemplateManager({ templates, isLoading }: TemplateManagerProps) 
 /* ──────────────── Static Preview ──────────────── */
 
 function TemplateStaticPreview({ settings, t }: { settings: TemplateSettings; t: (key: string) => string }) {
-  const { caption, layout, hook, logo } = settings
+  const caption = settings?.caption ?? { enabled: false, position: 'bottom' as const, fontSize: 14, fontFamily: 'Inter', textColor: '#FFFFFF', backgroundColor: '#000000', backgroundOpacity: 80, bold: false, italic: false, outline: false, maxLines: 2, animation: 'none' as const, presetModel: '' }
+  const layout = settings?.layout ?? { aspectRatio: '9:16' as const, faceTracking: false, layouts: [] as string[] }
+  const hook = settings?.hook ?? { enabled: false, text: '', duration: 3, position: 'top' as const, fontSize: 18, fontFamily: 'Inter', textColor: '#FFFFFF', backgroundColor: '#000000', backgroundOpacity: 80 }
+  const logo = settings?.logo ?? { enabled: false, positions: [] as string[] }
 
   const isPortrait = layout.aspectRatio === '9:16' || layout.aspectRatio === 'auto'
   const isSquare = layout.aspectRatio === '1:1'
@@ -526,7 +598,7 @@ function TemplateStaticPreview({ settings, t }: { settings: TemplateSettings; t:
           <div className="flex flex-col items-center gap-2 opacity-20">
             <MonitorPlay className="h-8 w-8 text-white" />
             <div className="flex gap-1">
-              {layout.layouts.map((lo) => (
+              {(layout.layouts ?? []).map((lo) => (
                 <Badge key={lo} variant="secondary" className="bg-white/20 text-[8px] text-white/70 capitalize px-1.5 py-0 border-0">
                   {lo}
                 </Badge>

@@ -1,19 +1,18 @@
-import type { SessionResponse } from '@/features/auth/types'
 import type { AdminSession } from '../types'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { authApi } from '@/features/auth/lib/auth-api'
 import { useAuthStore } from '@/features/auth/stores/auth-store'
-import i18n from '@/i18n'
-import { showSuccessToast } from '@/lib/toast'
+import { i18n } from '@/i18n'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 const adminSessionsKeys = {
   all: ['admin-sessions'] as const,
 }
 
 function mapSession(
-  s: SessionResponse,
+  s: { id: string; ipAddress: string; userAgent: string; city: string | null; region: string | null; country: string | null; lastActivityAt: string; createdAt: string },
   admin: { id: string, name: string },
   isCurrent: boolean,
 ): AdminSession {
@@ -21,13 +20,13 @@ function mapSession(
     id: s.id,
     adminId: admin.id,
     adminName: admin.name,
-    ipAddress: s.ip_address,
-    userAgent: s.user_agent,
+    ipAddress: s.ipAddress,
+    userAgent: s.userAgent,
     city: s.city ?? undefined,
     region: s.region ?? undefined,
     country: s.country ?? undefined,
-    lastActivityAt: s.last_activity_at,
-    createdAt: s.created_at,
+    lastActivityAt: s.lastActivityAt,
+    createdAt: s.createdAt,
     isCurrent,
   }
 }
@@ -55,6 +54,9 @@ export function useRevokeSession() {
       queryClient.invalidateQueries({ queryKey: adminSessionsKeys.all })
       showSuccessToast({ title: i18n.t('admin:toast.sessionRevoked') })
     },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.sessionRevokeError'))
+    },
   })
 }
 
@@ -68,6 +70,9 @@ export function useRevokeOtherSessions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminSessionsKeys.all })
       showSuccessToast({ title: i18n.t('admin:toast.allSessionsRevoked') })
+    },
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:toast.sessionRevokeError'))
     },
   })
 }

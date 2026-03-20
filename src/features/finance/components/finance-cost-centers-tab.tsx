@@ -1,11 +1,27 @@
 import type { CostCenter } from '../types'
-import { Plus, Search, Target } from 'lucide-react'
+import { MoreVertical, Pencil, Plus, Search, Target, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
 import { EmptyState } from '@/components/shared/empty-state'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -17,6 +33,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { cn } from '@/lib/utils'
+import { useCostCenterMutations } from '../hooks/use-cost-center-mutations'
 import { useCostCenters } from '../hooks/use-cost-centers'
 import { CostCenterFormDialog } from './cost-center-form-dialog'
 
@@ -49,8 +66,10 @@ export function FinanceCostCentersTab() {
   const [filterActive, setFilterActive] = useState<'all' | 'active'>('all')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingCostCenter, setEditingCostCenter] = useState<CostCenter | undefined>()
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data: costCenters, isLoading } = useCostCenters(search, filterActive === 'active')
+  const { remove } = useCostCenterMutations()
 
   const handleEdit = (costCenter: CostCenter) => {
     setEditingCostCenter(costCenter)
@@ -120,22 +139,38 @@ export function FinanceCostCentersTab() {
               <Card
                 key={cc.id}
                 className={cn(
-                  'cursor-pointer transition-colors hover:bg-muted/50',
+                  'transition-colors hover:bg-muted/50',
                   !cc.isActive && 'opacity-60',
                 )}
-                onClick={() => handleEdit(cc)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div>
+                    <div className="cursor-pointer" onClick={() => handleEdit(cc)}>
                       <CardTitle className="text-base">{cc.name}</CardTitle>
                       <p className="text-xs text-muted-foreground">{cc.slug}</p>
                     </div>
-                    {!cc.isActive && (
-                      <span className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        {t('status.inactive')}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      {!cc.isActive && (
+                        <span className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                          {t('finance.costCenters.inactive')}
+                        </span>
+                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(cc)}>
+                            <Pencil className="mr-2 h-4 w-4" />{t('common.edit', { ns: 'common' })}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(cc.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" />{t('common.delete', { ns: 'common' })}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -190,6 +225,22 @@ export function FinanceCostCentersTab() {
         onOpenChange={setDialogOpen}
         costCenter={editingCostCenter}
       />
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('finance.costCenters.deleteCostCenterTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('finance.costCenters.deleteCostCenterDescription')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('finance.form.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (deleteId) 
+remove.mutate(deleteId); setDeleteId(null) }}>
+              {t('finance.confirmDelete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

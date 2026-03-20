@@ -16,7 +16,7 @@ Visão geral da plataforma VDClip. Não é financeiro profundo — é uma visão
 - `DashboardPage` — orquestra `MetricsQuickPanel` + tabs + filtro de período
 - `MetricCard` — card reutilizável com ícone, valor, tooltip, subtítulo
 - `DateRangeFilter` — filtro de período (1d, 7d, 30d, 90d, ytd, all)
-- `MetricsQuickPanel` — 6 cards de KPIs SaaS críticos (Runway, MRR, LTV/CAC, Churn, NRR, Clientes) acima das tabs; código de cor por threshold; links `<a href>` para `/revenue?tab=saas-metrics`
+- `MetricsQuickPanel` — 6 cards de KPIs SaaS críticos (Runway, MRR, LTV/CAC, Churn, NRR, Clientes) acima das tabs; código de cor por threshold; links `<Link to>` para `/revenue?tab=saas-metrics`
 - Tabs importam `DashboardContentTab` e `DashboardCreditsTab` diretamente
 
 ## Hook

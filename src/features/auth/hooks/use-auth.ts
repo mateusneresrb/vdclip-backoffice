@@ -1,18 +1,19 @@
-import type { AdminAccount, AdminProfileResponse } from '@/features/auth/types'
 import type { AdminRole } from '@/features/auth/lib/permissions'
+import type { AdminAccount, AdminProfileResponse } from '@/features/auth/types'
+import type { CamelizeKeys } from '@/lib/case-transform'
 
 import { useNavigate } from '@tanstack/react-router'
-import { useAuthStore } from '@/features/auth/stores/auth-store'
 import { authApi } from '@/features/auth/lib/auth-api'
+import { useAuthStore } from '@/features/auth/stores/auth-store'
 
-function mapProfileToAccount(profile: AdminProfileResponse): AdminAccount {
+function mapProfileToAccount(profile: CamelizeKeys<AdminProfileResponse>): AdminAccount {
   return {
     id: profile.id,
-    name: `${profile.first_name} ${profile.last_name ?? ''}`.trim(),
+    name: `${profile.firstName} ${profile.lastName ?? ''}`.trim(),
     email: profile.email,
     role: (profile.roles[0] ?? 'viewer') as AdminRole,
-    avatar: profile.picture_url ?? undefined,
-    mfaEnabled: profile.has_mfa_enabled,
+    avatar: profile.pictureUrl ?? undefined,
+    mfaEnabled: profile.hasMfaEnabled,
   }
 }
 
@@ -29,7 +30,7 @@ export async function restoreSession(): Promise<boolean> {
   try {
     store.setStatus('loading')
     const tokenRes = await authApi.refresh()
-    await fetchAndSetAdmin(tokenRes.access_token)
+    await fetchAndSetAdmin(tokenRes.accessToken)
     return true
   } catch {
     store.setStatus('unauthenticated')
@@ -42,39 +43,63 @@ export function useAuth() {
   const status = useAuthStore((s) => s.status)
   const setStatus = useAuthStore((s) => s.setStatus)
   const setMfaToken = useAuthStore((s) => s.setMfaToken)
+  const setPasswordChangeToken = useAuthStore((s) => s.setPasswordChangeToken)
   const clearAuth = useAuthStore((s) => s.clearAuth)
   const navigate = useNavigate()
 
-  const login = async (email: string, password: string): Promise<{ mfaRequired: boolean }> => {
+  const login = async (email: string, password: string): Promise<{ mfaRequired: boolean; passwordChangeRequired: boolean }> => {
     setStatus('loading')
     try {
       const response = await authApi.login(email, password)
 
-      if ('mfa_required' in response) {
-        setMfaToken(response.mfa_token)
-        setStatus('mfa_required')
-        return { mfaRequired: true }
+      if ('passwordChangeRequired' in response) {
+        setPasswordChangeToken(response.passwordChangeToken)
+        setStatus('password_change_required')
+        return { mfaRequired: false, passwordChangeRequired: true }
       }
 
-      const tokenResponse = response as { access_token: string }
-      await fetchAndSetAdmin(tokenResponse.access_token)
+      if ('mfaRequired' in response) {
+        setMfaToken(response.mfaToken)
+        setStatus('mfa_required')
+        return { mfaRequired: true, passwordChangeRequired: false }
+      }
+
+      const tokenResponse = response as { accessToken: string }
+      await fetchAndSetAdmin(tokenResponse.accessToken)
       navigate({ to: '/dashboard' })
-      return { mfaRequired: false }
+      return { mfaRequired: false, passwordChangeRequired: false }
     } catch (err) {
       setStatus('unauthenticated')
       throw err
     }
   }
 
+  const forceChangePassword = async (newPassword: string) => {
+    const token = useAuthStore.getState()._passwordChangeToken
+    if (!token) 
+throw new Error('No password change token')
+
+    setStatus('loading')
+    try {
+      await authApi.forceChangePassword(token, newPassword)
+      setPasswordChangeToken(null)
+      setStatus('unauthenticated')
+    } catch (err) {
+      setStatus('password_change_required')
+      throw err
+    }
+  }
+
   const verifyMfa = async (code: string) => {
     const mfaToken = useAuthStore.getState()._mfaToken
-    if (!mfaToken) throw new Error('No MFA token')
+    if (!mfaToken) 
+throw new Error('No MFA token')
 
     setStatus('loading')
     try {
       const response = await authApi.verifyMfa(mfaToken, code)
       setMfaToken(null)
-      await fetchAndSetAdmin(response.access_token)
+      await fetchAndSetAdmin(response.accessToken)
       navigate({ to: '/dashboard' })
     } catch (err) {
       setStatus('mfa_required')
@@ -92,5 +117,5 @@ export function useAuth() {
     navigate({ to: '/login' })
   }
 
-  return { admin, status, login, verifyMfa, logout }
+  return { admin, status, login, verifyMfa, forceChangePassword, logout }
 }

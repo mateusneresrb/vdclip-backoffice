@@ -1,12 +1,29 @@
 import type { AdminMedia, MediaResult, MediaStatus, RenderingStatus } from '@/features/admin/types'
-import { ArrowLeft, Download, Film, Image, Search, Server, Sparkles, Tag, Video, Zap } from 'lucide-react'
+import { ArrowLeft, Download, Film, Image, MoreVertical, Play, RefreshCw, RotateCcw, Search, Server, Sparkles, Tag, Trash2, Video, Zap } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { PaginationControls } from '@/components/pagination-controls'
 import { EmptyState } from '@/components/shared/empty-state'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -17,7 +34,8 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 
-import { useAdminMediaResults, useAdminUserMedia } from '@/features/admin/hooks/use-admin-media'
+import { useAdminMediaResults, useAdminUserMedia, useMediaMutations  } from '@/features/admin/hooks/use-admin-media'
+
 import { usePagination } from '@/hooks/use-pagination'
 
 const statusStyles: Record<MediaStatus, string> = {
@@ -27,33 +45,61 @@ const statusStyles: Record<MediaStatus, string> = {
   pending: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
 }
 
-const statusDot: Record<MediaStatus, string> = {
-  completed: 'bg-emerald-500',
-  processing: 'bg-blue-500 animate-pulse',
-  failed: 'bg-red-500',
-  pending: 'bg-amber-500',
-}
-
 const renderingStatusStyles: Record<string, string> = {
+  created: 'bg-muted text-muted-foreground',
   completed: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
   rendering: 'bg-blue-500/15 text-blue-700 dark:text-blue-400',
   pending: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
   failed: 'bg-destructive/15 text-destructive',
 }
 
-function ResultCard({ result, t }: { result: MediaResult; t: (key: string) => string }) {
+const MEDIA_URL = 'https://media.vdclip.com'
+const PLAYER_URL = 'https://player.vdclip.com'
+
+function buildProjectUrl(ownerType: string, ownerId: string, processId: string, resultId: string): string {
+  return `${MEDIA_URL}/${ownerType}/${ownerId}/${processId}/results/${resultId}/project/autosave.json`
+}
+
+interface ResultCardProps {
+  result: MediaResult
+  t: (key: string, options?: Record<string, unknown>) => string
+  processId: string
+  newVersion: boolean
+  ownerId: string
+  ownerType: 'USER' | 'TEAM'
+  onRender: (resultId: string) => void
+  isRendering?: boolean
+}
+
+function ResultCard({ result, t, processId, newVersion, ownerId, ownerType, onRender, isRendering }: ResultCardProps) {
+  const validTags = (result.highlightTags ?? []).filter(
+    (tag) => tag.length > 1 && /^[\p{L}\p{N}]/u.test(tag),
+  )
+
+  const projectUrl = newVersion && processId && ownerId
+    ? buildProjectUrl(ownerType, ownerId, processId, result.id)
+    : undefined
+
   return (
     <div className="group rounded-lg border bg-card overflow-hidden transition-all hover:shadow-md">
       <div className="relative aspect-[9/16] overflow-hidden bg-muted">
-        {result.thumbnailUrl ? (
+        {projectUrl ? (
+          <iframe
+            src={`${PLAYER_URL}/?url=${encodeURIComponent(projectUrl)}&muted=true&lazyload=true`}
+            className="h-full w-full border-0"
+            allow="autoplay; fullscreen"
+            allowFullScreen
+            title={result.title}
+          />
+        ) : result.thumbnailUrl ? (
           <img
             src={result.thumbnailUrl}
             alt={result.title}
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center">
-            <Video className="h-8 w-8 text-muted-foreground/40" />
+          <div className="flex h-full flex-col items-center justify-center gap-2">
+            <Video className="h-8 w-8 text-muted-foreground/30" />
           </div>
         )}
         {result.viralityScore != null && (
@@ -65,7 +111,7 @@ function ResultCard({ result, t }: { result: MediaResult; t: (key: string) => st
           </div>
         )}
       </div>
-      <div className="p-2.5 space-y-1.5">
+      <div className="p-3 space-y-1.5">
         <p className="text-xs font-semibold leading-snug line-clamp-2">{result.title}</p>
         {result.description && (
           <p className="text-[11px] text-muted-foreground line-clamp-2">{result.description}</p>
@@ -83,24 +129,42 @@ function ResultCard({ result, t }: { result: MediaResult; t: (key: string) => st
             </Badge>
           )}
         </div>
-        {result.highlightTags && result.highlightTags.length > 0 && (
+        {validTags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {result.highlightTags.slice(0, 4).map((tag) => (
+            {validTags.slice(0, 5).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-0.5 rounded text-[10px] text-muted-foreground"
+                className="inline-flex items-center gap-0.5 rounded bg-muted/60 px-1.5 py-0.5 text-[10px] text-muted-foreground"
               >
                 <Tag className="h-2.5 w-2.5" />#{tag}
               </span>
             ))}
           </div>
         )}
-        {result.renderingStatus === 'completed' && (
-          <Button size="sm" variant="outline" className="w-full h-7 text-xs gap-1">
-            <Download className="h-3 w-3" />
-            {t('users.media.download')}
-          </Button>
-        )}
+        <div className="flex gap-1.5 pt-0.5">
+          {result.renderingStatus === 'completed' ? (
+            <Button size="sm" variant="outline" className="flex-1 h-7 text-xs gap-1">
+              <Download className="h-3 w-3" />
+              {t('users.media.download')}
+            </Button>
+          ) : result.renderingStatus === 'rendering' ? (
+            <Button size="sm" variant="outline" className="flex-1 h-7 text-xs gap-1" disabled>
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              {t('users.media.renderingStatus.rendering')}
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="default"
+              className="flex-1 h-7 text-xs gap-1"
+              disabled={isRendering}
+              onClick={(e) => { e.stopPropagation(); onRender(result.id) }}
+            >
+              <Play className="h-3 w-3" />
+              {t('users.media.render')}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -110,14 +174,27 @@ function MediaDetailView({
   media,
   onBack,
   t,
+  userId,
 }: {
   media: AdminMedia
   onBack: () => void
-  t: (key: string) => string
+  t: (key: string, options?: Record<string, unknown>) => string
+  userId: string
 }) {
-  const { data: results, isLoading } = useAdminMediaResults(media.id, true)
+  const { data: results, isLoading } = useAdminMediaResults(media.id, true, userId)
+  const { renderResult } = useMediaMutations()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<RenderingStatus | 'all'>('all')
+  const [renderTarget, setRenderTarget] = useState<MediaResult | null>(null)
+
+  const handleConfirmRender = () => {
+    if (!renderTarget) 
+return
+    renderResult.mutate(renderTarget.id, {
+      onSuccess: () => { toast.success(t('users.media.actions.renderSuccess')); setRenderTarget(null) },
+      onError: () => toast.error(t('users.media.actions.renderError')),
+    })
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -181,6 +258,7 @@ function MediaDetailView({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t('users.media.allStatuses')}</SelectItem>
+            <SelectItem value="created">{t('users.media.renderingStatus.created')}</SelectItem>
             <SelectItem value="completed">{t('users.media.renderingStatus.completed')}</SelectItem>
             <SelectItem value="rendering">{t('users.media.renderingStatus.rendering')}</SelectItem>
             <SelectItem value="pending">{t('users.media.renderingStatus.pending')}</SelectItem>
@@ -190,7 +268,7 @@ function MediaDetailView({
       </div>
 
       {isLoading && (
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {Array.from({ length: 12 }).map((_, i) => (
             <Skeleton key={i} className="aspect-[9/16] rounded-lg" />
           ))}
@@ -209,14 +287,44 @@ function MediaDetailView({
           <p className="text-xs text-muted-foreground">
             {filtered.length} {t('users.media.resultsTotal')}
           </p>
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {pagination.paginatedItems.map((result) => (
-              <ResultCard key={result.id} result={result} t={t} />
+              <ResultCard
+                key={result.id}
+                result={result}
+                t={t}
+                processId={media.id}
+                newVersion={media.newVersion}
+                ownerId={media.ownerId}
+                ownerType={media.ownerType}
+                onRender={(resultId) => setRenderTarget(results?.find(r => r.id === resultId) ?? null)}
+                isRendering={renderResult.isPending}
+              />
             ))}
           </div>
           <PaginationControls {...pagination} />
         </div>
       )}
+
+      {/* Render confirmation dialog */}
+      <AlertDialog open={!!renderTarget} onOpenChange={(open) => { if (!open) 
+setRenderTarget(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('users.media.actions.renderTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('users.media.actions.renderDescription', { title: renderTarget?.title ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('users.media.actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRender}>
+              <Play className="mr-2 h-3.5 w-3.5" />
+              {t('users.media.actions.confirmRender')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
@@ -225,88 +333,147 @@ function MediaCard({
   item,
   t,
   onClick,
+  onDelete,
+  onRestore,
+  onReprocess,
 }: {
   item: AdminMedia
   t: (key: string) => string
   onClick: () => void
+  onDelete: () => void
+  onRestore: () => void
+  onReprocess: () => void
 }) {
+  const isDeleted = !!item.deletedAt
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group rounded-xl border overflow-hidden bg-card transition-all hover:shadow-lg hover:-translate-y-0.5 text-left w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <div className="relative aspect-video overflow-hidden bg-muted">
-        {item.thumbnailUrl ? (
-          <img
-            src={item.thumbnailUrl}
-            alt={item.title}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Image className="h-8 w-8 text-muted-foreground/40" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+    <div className={`group relative rounded-xl border bg-card transition-all hover:shadow-lg hover:-translate-y-0.5 ${isDeleted ? 'opacity-60' : ''}`}>
+      {/* Menu 3 pontos */}
+      <div className="absolute top-2 right-2 z-20">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition-opacity hover:bg-black/70"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-3.5 w-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            {isDeleted ? (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRestore() }}>
+                <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                {t('users.media.actions.restore')}
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete() }} className="text-destructive focus:text-destructive">
+                <Trash2 className="mr-2 h-3.5 w-3.5" />
+                {t('users.media.actions.delete')}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onReprocess() }}>
+              <RefreshCw className="mr-2 h-3.5 w-3.5" />
+              {t('users.media.actions.reprocess')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-        {item.aiType && (
-          <div className="absolute top-2.5 left-2.5">
-            <Badge className="bg-black/50 text-white text-[10px] backdrop-blur-md border-0 shadow-sm">
-              <Sparkles className="mr-1 h-2.5 w-2.5" />
-              {item.aiType}
+      <button
+        type="button"
+        onClick={onClick}
+        className="w-full overflow-hidden rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <div className="relative aspect-video overflow-hidden bg-muted">
+          {item.thumbnailUrl ? (
+            <img
+              src={item.thumbnailUrl}
+              alt={item.title}
+              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <Image className="h-8 w-8 text-muted-foreground/40" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+          {item.aiType && (
+            <div className="absolute top-2.5 left-2.5">
+              <Badge className="bg-black/50 text-white text-[10px] backdrop-blur-md border-0 shadow-sm">
+                <Sparkles className="mr-1 h-2.5 w-2.5" />
+                {item.aiType}
+              </Badge>
+            </div>
+          )}
+
+          {isDeleted && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+              <Badge variant="destructive" className="text-xs">{t('users.media.actions.deleted')}</Badge>
+            </div>
+          )}
+
+          <div className="absolute bottom-2.5 left-2.5 right-10">
+            <h4 className="text-sm font-semibold text-white line-clamp-2 drop-shadow-md leading-tight">
+              {item.title}
+            </h4>
+          </div>
+        </div>
+
+        <div className="px-3 py-2.5 flex flex-wrap items-center gap-1.5">
+          <Badge variant="secondary" className={`text-[10px] ${statusStyles[item.status]}`}>
+            {t(`users.media.status.${item.status}`)}
+          </Badge>
+          {item.provider && (
+            <Badge variant="outline" className="text-[10px] rounded-full">
+              <Server className="mr-1 h-2.5 w-2.5" />
+              {item.provider}
             </Badge>
-          </div>
-        )}
-
-        <div className="absolute top-2.5 right-2.5">
-          <span className="flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-md shadow-sm">
-            <span className={`h-1.5 w-1.5 rounded-full ${statusDot[item.status]}`} />
-            <span className="text-[10px] font-medium text-white">
-              {t(`users.media.status.${item.status}`)}
-            </span>
-          </span>
+          )}
+          {item.resultsCount > 0 && (
+            <Badge variant="outline" className="text-[10px] rounded-full">
+              <Video className="mr-1 h-2.5 w-2.5" />
+              {item.resultsCount} {t('users.media.results')}
+            </Badge>
+          )}
         </div>
-
-        <div className="absolute bottom-2.5 left-2.5 right-2.5">
-          <h4 className="text-sm font-semibold text-white line-clamp-2 drop-shadow-md leading-tight">
-            {item.title}
-          </h4>
-        </div>
-      </div>
-
-      <div className="px-3 py-2.5 flex flex-wrap items-center gap-1.5">
-        <Badge variant="secondary" className={`text-[10px] ${statusStyles[item.status]}`}>
-          {t(`users.media.status.${item.status}`)}
-        </Badge>
-        {item.provider && (
-          <Badge variant="outline" className="text-[10px] rounded-full">
-            <Server className="mr-1 h-2.5 w-2.5" />
-            {item.provider}
-          </Badge>
-        )}
-        {item.resultsCount > 0 && (
-          <Badge variant="outline" className="text-[10px] rounded-full">
-            <Video className="mr-1 h-2.5 w-2.5" />
-            {item.resultsCount} {t('users.media.results')}
-          </Badge>
-        )}
-        {item.externalId && (
-          <Badge variant="outline" className="text-[10px] rounded-full font-mono ml-auto shrink-0 max-w-[120px] truncate">
-            {item.externalId}
-          </Badge>
-        )}
-      </div>
-    </button>
+      </button>
+    </div>
   )
 }
 
 export function UserMediaTab({ userId }: { userId: string }) {
   const { t } = useTranslation('admin')
   const { data: media, isLoading } = useAdminUserMedia(userId, true)
+  const { softDelete, restore, reprocess } = useMediaMutations()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<MediaStatus | 'all'>('all')
   const [selectedMedia, setSelectedMedia] = useState<AdminMedia | null>(null)
+  const [reprocessTarget, setReprocessTarget] = useState<AdminMedia | null>(null)
+
+  const handleDelete = (item: AdminMedia) => {
+    softDelete.mutate(item.id, {
+      onSuccess: () => toast.success(t('users.media.actions.deleteSuccess')),
+      onError: () => toast.error(t('users.media.actions.deleteError')),
+    })
+  }
+
+  const handleRestore = (item: AdminMedia) => {
+    restore.mutate(item.id, {
+      onSuccess: () => toast.success(t('users.media.actions.restoreSuccess')),
+      onError: () => toast.error(t('users.media.actions.restoreError')),
+    })
+  }
+
+  const handleReprocess = () => {
+    if (!reprocessTarget) 
+return
+    reprocess.mutate(reprocessTarget.id, {
+      onSuccess: () => { toast.success(t('users.media.actions.reprocessSuccess')); setReprocessTarget(null) },
+      onError: () => toast.error(t('users.media.actions.reprocessError')),
+    })
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -325,7 +492,7 @@ export function UserMediaTab({ userId }: { userId: string }) {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <Skeleton key={i} className="h-56 rounded-xl" />
         ))}
@@ -343,6 +510,7 @@ export function UserMediaTab({ userId }: { userId: string }) {
         media={selectedMedia}
         onBack={() => setSelectedMedia(null)}
         t={t}
+        userId={userId}
       />
     )
   }
@@ -381,19 +549,42 @@ export function UserMediaTab({ userId }: { userId: string }) {
         <EmptyState icon={Film} title={t('users.media.noMediaFilter')} />
       ) : (
         <>
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
             {pagination.paginatedItems.map((item) => (
               <MediaCard
                 key={item.id}
                 item={item}
                 t={t}
                 onClick={() => setSelectedMedia(item)}
+                onDelete={() => handleDelete(item)}
+                onRestore={() => handleRestore(item)}
+                onReprocess={() => setReprocessTarget(item)}
               />
             ))}
           </div>
           <PaginationControls {...pagination} />
         </>
       )}
+
+      {/* Reprocess confirmation dialog */}
+      <AlertDialog open={!!reprocessTarget} onOpenChange={(open) => { if (!open) 
+setReprocessTarget(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('users.media.actions.reprocessTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('users.media.actions.reprocessDescription', { title: reprocessTarget?.title ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('users.media.actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReprocess}>
+              <RefreshCw className="mr-2 h-3.5 w-3.5" />
+              {t('users.media.actions.confirmReprocess')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

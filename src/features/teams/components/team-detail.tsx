@@ -1,4 +1,5 @@
 import type { UserPlan } from '@/features/admin/types'
+import { useNavigate } from '@tanstack/react-router'
 import { MoreHorizontal, Pencil, Save, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -41,10 +42,11 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { TemplateManager } from '@/features/admin/components/TemplateManager'
-
+import { TemplateManager } from '@/features/admin/components/template-manager'
 import { useAdminTeamTemplates } from '@/features/admin/hooks/use-admin-templates'
+
 import { useTeamDetail } from '../hooks/use-team-detail'
+import { useTeamMutations } from '../hooks/use-team-mutations'
 import { TeamActivityTab } from './team-activity-tab'
 import { TeamConnectionsTab } from './team-connections-tab'
 import { TeamInvitationsTab } from './team-invitations-tab'
@@ -62,7 +64,9 @@ const planBadgeVariants: Record<string, string> = {
 
 export function TeamDetail({ teamId }: { teamId: string }) {
   const { t } = useTranslation('admin')
+  const navigate = useNavigate()
   const { data: team, isLoading } = useTeamDetail(teamId)
+  const { updateTeam, deleteTeam } = useTeamMutations()
   const [tab, setTab] = useState('overview')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -127,7 +131,7 @@ return null
         </Avatar>
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-xl font-bold">{team.name}</h2>
+            <h2 className="truncate text-lg font-bold sm:text-xl">{team.name}</h2>
             <Badge variant="secondary" className={planBadgeVariants[team.plan as UserPlan]}>
               {t(`plan.${team.plan}`)}
             </Badge>
@@ -135,7 +139,7 @@ return null
               <Badge variant="outline" className="text-xs">{categoryLabel}</Badge>
             )}
           </div>
-          {team.email && <p className="text-sm text-muted-foreground">{team.email}</p>}
+          {team.email && <p className="truncate text-sm text-muted-foreground">{team.email}</p>}
           <p className="mt-0.5 text-xs text-muted-foreground">
             {t('teams.createdAt')}: {new Date(team.createdAt).toLocaleDateString()}
           </p>
@@ -172,7 +176,22 @@ return null
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('userDetail.cancel')}</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteTeam.isPending}
+              onClick={() => {
+                deleteTeam.mutate(
+                  { teamId },
+                  {
+                    onSuccess: () => {
+                      setDeleteDialogOpen(false)
+                      navigate({ to: '/teams' })
+                    },
+                    onSettled: () => setDeleteDialogOpen(false),
+                  },
+                )
+              }}
+            >
               {t('teams.actions.deleteTeam')}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -231,7 +250,21 @@ return null
               </Label>
               <Input value={editTiktok} onChange={(e) => setEditTiktok(e.target.value)} placeholder="https://tiktok.com/@profile" />
             </div>
-            <Button className="w-full" onClick={() => setEditDialogOpen(false)}>
+            <Button
+              className="w-full"
+              disabled={updateTeam.isPending}
+              onClick={() => {
+                updateTeam.mutate(
+                  {
+                    teamId,
+                    name: editName || undefined,
+                    email: editEmail || undefined,
+                    category: editCategory || undefined,
+                  },
+                  { onSettled: () => setEditDialogOpen(false) },
+                )
+              }}
+            >
               <Save className="mr-2 h-4 w-4" />
               {t('userDetail.save')}
             </Button>
@@ -285,7 +318,7 @@ return null
               <CardTitle className="text-base">{t('templates.title')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <TemplateManager templates={teamTemplates} isLoading={teamTemplatesLoading} />
+              <TemplateManager templates={teamTemplates} isLoading={teamTemplatesLoading} teamId={teamId} />
             </CardContent>
           </Card>
         </TabsContent>

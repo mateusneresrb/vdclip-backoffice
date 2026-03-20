@@ -31,6 +31,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { formatCurrency } from '@/lib/format'
 import { useAdminCashFlow } from '../hooks/use-admin-cash-flow'
 
 const categoryColors: Record<CashFlowEntry['category'], string> = {
@@ -40,13 +41,6 @@ const categoryColors: Record<CashFlowEntry['category'], string> = {
   tax: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
   investment: 'bg-blue-500/15 text-blue-700 dark:text-blue-400',
   other: 'bg-muted text-muted-foreground',
-}
-
-function formatCurrency(amount: number, currency: Currency) {
-  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
-    style: 'currency',
-    currency,
-  }).format(amount)
 }
 
 export function CashFlowManager() {

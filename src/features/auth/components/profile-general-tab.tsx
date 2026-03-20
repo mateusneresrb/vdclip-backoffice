@@ -37,8 +37,8 @@ return null
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
-              <p className="text-lg font-semibold">{admin.name}</p>
-              <p className="text-sm text-muted-foreground">{admin.email}</p>
+              <p className="truncate text-lg font-semibold">{admin.name}</p>
+              <p className="truncate text-sm text-muted-foreground">{admin.email}</p>
             </div>
           </div>
 

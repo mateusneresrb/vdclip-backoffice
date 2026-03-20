@@ -9,9 +9,11 @@ interface AuthState {
   status: AuthStatus
   _token: string | null
   _mfaToken: string | null
+  _passwordChangeToken: string | null
   setAdmin: (admin: AdminAccount, permissions?: string[]) => void
   setToken: (token: string) => void
   setMfaToken: (token: string | null) => void
+  setPasswordChangeToken: (token: string | null) => void
   clearAuth: () => void
   setStatus: (status: AuthStatus) => void
   completeMfaSetup: () => void
@@ -23,14 +25,16 @@ export const useAuthStore = create<AuthState>()((set) => ({
   status: 'unauthenticated' as AuthStatus,
   _token: null,
   _mfaToken: null,
+  _passwordChangeToken: null,
   setAdmin: (admin, permissions) =>
     set({
       admin,
-      permissions: new Set(permissions ?? ROLE_PERMISSIONS[admin.role]),
+      permissions: new Set(permissions?.length ? permissions : ROLE_PERMISSIONS[admin.role]),
       status: 'authenticated',
     }),
   setToken: (token) => set({ _token: token }),
   setMfaToken: (mfaToken) => set({ _mfaToken: mfaToken }),
+  setPasswordChangeToken: (token) => set({ _passwordChangeToken: token }),
   clearAuth: () =>
     set({
       admin: null,
@@ -38,6 +42,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
       status: 'unauthenticated',
       _token: null,
       _mfaToken: null,
+      _passwordChangeToken: null,
     }),
   setStatus: (status) => set({ status }),
   completeMfaSetup: () =>

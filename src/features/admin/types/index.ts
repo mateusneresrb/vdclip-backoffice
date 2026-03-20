@@ -2,7 +2,7 @@ export type UserStatus = 'active' | 'inactive' | 'suspended'
 export type UserPlan = 'free' | 'lite' | 'premium' | 'ultimate'
 export type PlanProvider = 'paddle' | 'pix' | 'internal'
 export type SocialProvider = 'google' | 'github' | 'discord'
-export type CreditType = 'plan_cycle' | 'purchased' | 'promotional' | 'bonus' | 'adjustment'
+export type CreditType = 'plan_cycle' | 'purchased' | 'promotional' | 'bonus' | 'adjustment' | 'admin_grant'
 
 export type MetricsDateRange = '1d' | '3d' | '7d' | '30d' | '90d' | 'ytd' | 'all' | 'custom'
 
@@ -22,7 +22,7 @@ export interface CreditPackage {
 
 export interface AdminUser {
   id: string
-  external_id: string
+  externalId: string
   name: string
   email: string
   avatar?: string
@@ -176,6 +176,7 @@ export interface TemplateCaptionSettings {
   removePunctuation: boolean
   removeProfanity: boolean
   uppercaseAll: boolean
+  format?: string
 }
 
 export interface TemplateHookSettings {
@@ -225,7 +226,7 @@ export interface SupportedProvider {
 
 export type MediaStatus = 'completed' | 'processing' | 'failed' | 'pending'
 export type AiType = 'clips' | 'highlights' | 'shorts'
-export type RenderingStatus = 'pending' | 'rendering' | 'completed' | 'failed'
+export type RenderingStatus = 'created' | 'pending' | 'rendering' | 'completed' | 'failed'
 
 export interface AdminMedia {
   id: string
@@ -244,6 +245,9 @@ export interface AdminMedia {
   errorCode: string | null
   deletedAt: string | null
   resultsCount: number
+  newVersion: boolean
+  ownerId: string
+  ownerType: 'USER' | 'TEAM'
 }
 
 export interface MediaResult {
@@ -255,6 +259,10 @@ export interface MediaResult {
   viralityScore: number | null
   projectVersion: number
   renderingStatus: RenderingStatus
+  processId?: string
+  newVersion?: boolean
+  ownerId?: string
+  ownerType?: 'USER' | 'TEAM'
 }
 
 // Financial types

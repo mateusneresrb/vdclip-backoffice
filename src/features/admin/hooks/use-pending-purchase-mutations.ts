@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import i18n from '@/i18n'
+import { i18n } from '@/i18n'
 
 import { apiClient } from '@/lib/api-client'
-import { showErrorToast, showSuccessToast } from '@/lib/toast'
+import { showMutationError, showSuccessToast } from '@/lib/toast'
 
 import { pendingPurchasesKeys } from './use-admin-pending-purchases'
 
@@ -20,8 +20,8 @@ export function useDismissPendingPurchase() {
       queryClient.invalidateQueries({ queryKey: pendingPurchasesKeys.all })
       showSuccessToast({ title: i18n.t('admin:pendingPurchases.toast.dismissed') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:pendingPurchases.toast.dismissError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:pendingPurchases.toast.dismissError'))
     },
   })
 }
@@ -40,8 +40,8 @@ export function useCancelPendingPurchase() {
       queryClient.invalidateQueries({ queryKey: pendingPurchasesKeys.all })
       showSuccessToast({ title: i18n.t('admin:pendingPurchases.toast.cancelled') })
     },
-    onError: () => {
-      showErrorToast({ title: i18n.t('admin:pendingPurchases.toast.cancelError') })
+    onError: (err) => {
+      showMutationError(err, i18n.t('admin:pendingPurchases.toast.cancelError'))
     },
   })
 }

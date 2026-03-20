@@ -234,10 +234,10 @@ return []
           <CardDescription>{t('revenue.businessHealthDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-3">
             <div>
               <p className="text-xs font-medium text-muted-foreground">{t('revenue.totalIncome')}</p>
-              <p className="text-base font-bold text-emerald-600 sm:text-lg dark:text-emerald-400">
+              <p className="whitespace-nowrap text-base font-bold text-emerald-600 sm:text-lg dark:text-emerald-400">
                 {formatCurrency(totalIncome.usd, 'USD')}
               </p>
               <p className="text-sm font-medium text-emerald-600/70 dark:text-emerald-400/70">
@@ -246,7 +246,7 @@ return []
             </div>
             <div>
               <p className="text-xs font-medium text-muted-foreground">{t('revenue.totalExpense')}</p>
-              <p className="text-base font-bold text-red-600 sm:text-lg dark:text-red-400">
+              <p className="whitespace-nowrap text-base font-bold text-red-600 sm:text-lg dark:text-red-400">
                 {formatCurrency(totalExpense.usd, 'USD')}
               </p>
               <p className="text-sm font-medium text-red-600/70 dark:text-red-400/70">
@@ -256,7 +256,7 @@ return []
             <div>
               <p className="text-xs font-medium text-muted-foreground">{t('revenue.netResult')}</p>
               <p className={cn(
-                'text-lg font-bold',
+                'text-base font-bold sm:text-lg',
                 netResult.usd >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400',
               )}>
                 {netResult.usd >= 0 ? '+' : ''}{formatCurrency(netResult.usd, 'USD')}
@@ -355,7 +355,7 @@ return []
       </div>
 
       {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         {combinedMrrData.length > 1 && (
           <ChartCard
             title={t('revenue.mrrTrendCombined')}

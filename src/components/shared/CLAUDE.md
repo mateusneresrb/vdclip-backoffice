@@ -45,6 +45,21 @@ const pagination = usePagination(items)
 />
 ```
 
+## `ErrorFallback` (`error-fallback.tsx`)
+
+Error boundary fallback para TanStack Router `errorComponent`. Exibe mensagem amigavel, botao de retry e link para /dashboard.
+
+```tsx
+import { ErrorFallback } from '@/components/shared/error-fallback'
+
+export const Route = createFileRoute('/_app/my-route')({
+  component: MyComponent,
+  errorComponent: ErrorFallback,
+})
+```
+
+Recebe `ErrorComponentProps` do TanStack Router (`error`, `reset`). Usa chaves i18n `error.*` do namespace `common`.
+
 ## `InfoTooltip` (`src/components/info-tooltip.tsx`)
 
 Ícone de interrogação com tooltip. Usar em labels de métricas e campos complexos.

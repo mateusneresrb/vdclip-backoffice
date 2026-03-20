@@ -135,22 +135,22 @@ next.delete(id)
                 <div key={event.id} className={cn('relative pl-8', !isLast && 'pb-6')}>
                   <div className={cn('absolute left-0 top-1 flex size-[15px] items-center justify-center rounded-full ring-2 ring-background', eventDotColors[event.type])} />
                   <div className="rounded-lg border bg-card p-3 shadow-sm">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <div className={cn('flex size-7 items-center justify-center rounded-md', eventColors[event.type])}>
+                    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <div className={cn('flex size-7 shrink-0 items-center justify-center rounded-md', eventColors[event.type])}>
                           <Icon className="size-3.5" />
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <p className="text-sm font-medium">{t(`activity.eventTypes.${event.type}`)}</p>
                             <Badge variant="secondary" className={cn('text-[10px] font-normal', eventColors[event.type])}>
                               {t(`activity.eventTypes.${event.type}`)}
                             </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground">{event.description}</p>
+                          <p className="truncate text-xs text-muted-foreground">{event.description}</p>
                         </div>
                       </div>
-                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                      <span className="shrink-0 whitespace-nowrap pl-9 text-[11px] text-muted-foreground sm:pl-0">
                         {new Date(event.createdAt).toLocaleString()}
                       </span>
                     </div>

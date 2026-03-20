@@ -73,6 +73,8 @@ PendingPurchase  // status: 'pending' | 'claimed' | 'expired'
 
 ## Importante
 - Todos os hooks usam `api-client` para chamadas reais (exceto `useAdminUserAffiliate` que mantém mock — sem endpoint backend)
-- Cada hook tem mappers inline para converter snake_case do backend para camelCase do frontend
+- O `api-client` auto-converte snake_case/camelCase: responses chegam camelCase, request bodies saem snake_case. Mappers nos hooks apenas extraem/tipam campos — sem conversao de case manual
+- Query params permanecem snake_case (ex: `per_page`, `date_from`) — nao sao auto-convertidos
+- Api* interfaces foram movidas para JSDoc comments — documentam o shape snake_case do backend
 - Types devem espelhar o schema do backend — quando o schema mudar, atualizar aqui primeiro
 - `SaasMetricsSnapshot` espelha a tabela `business_metrics_snapshots` (migration V016)

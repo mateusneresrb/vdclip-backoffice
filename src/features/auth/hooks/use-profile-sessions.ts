@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { authApi } from '@/features/auth/lib/auth-api'
+import { i18n } from '@/i18n'
+import { showMutationError } from '@/lib/toast'
 
 export interface ProfileSession {
   id: string
@@ -23,11 +25,11 @@ export function useProfileSessions() {
       const { sessions } = await authApi.getSessions()
       return sessions.map((s, index): ProfileSession => ({
         id: s.id,
-        device: s.user_agent,
-        ip: s.ip_address,
+        device: s.userAgent,
+        ip: s.ipAddress,
         city: s.city ?? undefined,
         country: s.country ?? undefined,
-        lastActiveAt: s.last_activity_at,
+        lastActiveAt: s.lastActivityAt,
         isCurrent: index === 0,
       }))
     },
@@ -39,5 +41,6 @@ export function useRevokeSession() {
   return useMutation({
     mutationFn: (sessionId: string) => authApi.revokeSession(sessionId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: profileSessionKeys.all }),
+    onError: (err) => showMutationError(err, i18n.t('admin:toast.profileSessionRevokeError')),
   })
 }

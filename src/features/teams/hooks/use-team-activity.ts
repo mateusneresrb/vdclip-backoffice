@@ -15,7 +15,7 @@ function mapActivityEvent(data: Record<string, unknown>): UserActivityEvent {
     type: (data.type as UserActivityEvent['type']) ?? 'login',
     description: String(data.description ?? ''),
     metadata: data.metadata as Record<string, unknown> | undefined,
-    createdAt: String(data.created_at ?? data.createdAt ?? ''),
+    createdAt: String(data.createdAt ?? ''),
   }
 }
 

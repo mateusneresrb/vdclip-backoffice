@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { TemplateManager } from '@/features/admin/components/TemplateManager'
+import { TemplateManager } from '@/features/admin/components/template-manager'
 import {
   useAdminUserTemplates,
 } from '@/features/admin/hooks/use-admin-templates'
@@ -92,7 +92,7 @@ return null
               <CardTitle className="text-base">{t('templates.title')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <TemplateManager templates={userTemplates} isLoading={userTemplatesLoading} />
+              <TemplateManager templates={userTemplates} isLoading={userTemplatesLoading} userId={userId} />
             </CardContent>
           </Card>
         </TabsContent>

@@ -304,7 +304,7 @@ function CreateRoleDialog({
       })
       if (role?.id && selectedPermissions.size > 0) {
         await apiClient.put(`/admin-roles/${role.id}/permissions`, {
-          permission_ids: Array.from(selectedPermissions),
+          permissionIds: Array.from(selectedPermissions),
         })
       }
       await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
@@ -332,7 +332,7 @@ onClose()
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90svh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('adminUsers.createRoleTitle')}</DialogTitle>
           <DialogDescription>{t('adminUsers.createRoleDescription')}</DialogDescription>
@@ -422,7 +422,7 @@ return new Set<string>()
         description: description || undefined,
       })
       await apiClient.put(`/admin-roles/${role.id}/permissions`, {
-        permission_ids: Array.from(selectedPermissions),
+        permissionIds: Array.from(selectedPermissions),
       })
       await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t('toast.roleUpdated') })
@@ -444,7 +444,7 @@ onClose()
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90svh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('adminUsers.editRoleTitle')}</DialogTitle>
           <DialogDescription>{t('adminUsers.editRoleDescription')}</DialogDescription>

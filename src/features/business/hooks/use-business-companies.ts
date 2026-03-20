@@ -2,30 +2,42 @@ import type { BusinessCompany } from '../types'
 
 import { useQuery } from '@tanstack/react-query'
 
-const mockBusinessCompanies: BusinessCompany[] = [
-  { id: '1', externalId: 'bc_001', name: 'Acme Corp', document: '12.345.678/0001-90', plan: 'enterprise', status: 'active', userCount: 12, createdAt: '2025-04-01T00:00:00Z', contactEmail: 'contato@acmecorp.com' },
-  { id: '2', externalId: 'bc_002', name: 'Tech Startup', document: '98.765.432/0001-10', plan: 'business', status: 'active', userCount: 5, createdAt: '2025-07-15T00:00:00Z', contactEmail: 'hello@techstartup.io' },
-  { id: '3', externalId: 'bc_003', name: 'Media House', document: '11.222.333/0001-44', plan: 'business', status: 'trial', userCount: 3, createdAt: '2025-11-01T00:00:00Z', contactEmail: 'admin@mediahouse.com.br' },
-  { id: '4', externalId: 'bc_004', name: 'Digital Agency', document: null, plan: 'enterprise', status: 'active', userCount: 20, createdAt: '2025-02-10T00:00:00Z', contactEmail: 'ops@digitalagency.com' },
-  { id: '5', externalId: 'bc_005', name: 'Studio Pro', document: '55.666.777/0001-88', plan: 'business', status: 'inactive', userCount: 0, createdAt: '2025-09-20T00:00:00Z', contactEmail: null },
-]
+import { apiClient } from '@/lib/api-client'
 
 const businessCompanyKeys = {
   all: ['business-companies'] as const,
   list: (search: string) => [...businessCompanyKeys.all, 'list', search] as const,
 }
 
+function mapTeamToCompany(t: Record<string, unknown>): BusinessCompany {
+  const plan = String(t.plan ?? 'free')
+  return {
+    id: String(t.id ?? ''),
+    externalId: String(t.id ?? ''),
+    name: String(t.name ?? ''),
+    logoUrl: t.picture ? String(t.picture) : undefined,
+    document: null,
+    plan,
+    status: plan === 'free' ? 'trial' : 'active',
+    userCount: Number(t.memberCount ?? 0),
+    createdAt: String(t.createdAt ?? ''),
+    contactEmail: (t.email as string) ?? null,
+  }
+}
+
 export function useBusinessCompanies(search: string = '') {
   return useQuery({
     queryKey: businessCompanyKeys.list(search),
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 400))
-      if (!search) 
-return mockBusinessCompanies
-      const q = search.toLowerCase()
-      return mockBusinessCompanies.filter(
-        (c) => c.name.toLowerCase().includes(q) || c.contactEmail?.toLowerCase().includes(q) || c.document?.includes(q),
-      )
+      const params: Record<string, string | number> = {
+        page: 1,
+        per_page: 50,
+      }
+      if (search.trim()) {
+        params.search = search.trim()
+      }
+      const data = await apiClient.get<{ items: Record<string, unknown>[] }>('/platform/teams', params)
+      return data.items.map(mapTeamToCompany)
     },
   })
 }

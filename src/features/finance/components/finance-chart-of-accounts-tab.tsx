@@ -1,5 +1,20 @@
 import type { FinancialCategory } from '../types'
-import { FolderTree, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import {
+  Banknote,
+  ChevronRight,
+  CircleDollarSign,
+  FolderTree,
+  Landmark,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Receipt,
+  Search,
+  ShoppingCart,
+  Trash2,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
@@ -14,33 +29,86 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { cn } from '@/lib/utils'
+import { useCategoryMutations } from '../hooks/use-category-mutations'
 import { useFinancialCategories } from '../hooks/use-financial-categories'
 import { CategoryFormDialog } from './category-form-dialog'
 
-const typeLabels: Record<FinancialCategory['type'], string> = {
-  revenue: 'finance.categoryTypes.revenue',
-  cogs: 'finance.categoryTypes.cogs',
-  opex: 'finance.categoryTypes.opex',
-  tax: 'finance.categoryTypes.tax',
-  asset: 'finance.categoryTypes.asset',
-  liability: 'finance.categoryTypes.liability',
-  equity: 'finance.categoryTypes.equity',
-}
-
-const typeColors: Record<FinancialCategory['type'], string> = {
-  revenue: 'text-emerald-600 dark:text-emerald-400',
-  cogs: 'text-orange-600 dark:text-orange-400',
-  opex: 'text-amber-600 dark:text-amber-400',
-  tax: 'text-violet-600 dark:text-violet-400',
-  asset: 'text-blue-600 dark:text-blue-400',
-  liability: 'text-red-600 dark:text-red-400',
-  equity: 'text-teal-600 dark:text-teal-400',
+const typeConfig: Record<FinancialCategory['type'], {
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  bg: string
+  text: string
+  badge: string
+  border: string
+}> = {
+  revenue: {
+    label: 'finance.categoryTypes.revenue',
+    icon: TrendingUp,
+    bg: 'bg-emerald-500/10',
+    text: 'text-emerald-600 dark:text-emerald-400',
+    badge: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+    border: 'border-l-emerald-500',
+  },
+  cogs: {
+    label: 'finance.categoryTypes.cogs',
+    icon: ShoppingCart,
+    bg: 'bg-orange-500/10',
+    text: 'text-orange-600 dark:text-orange-400',
+    badge: 'bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/20',
+    border: 'border-l-orange-500',
+  },
+  opex: {
+    label: 'finance.categoryTypes.opex',
+    icon: Wallet,
+    bg: 'bg-amber-500/10',
+    text: 'text-amber-600 dark:text-amber-400',
+    badge: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20',
+    border: 'border-l-amber-500',
+  },
+  tax: {
+    label: 'finance.categoryTypes.tax',
+    icon: Receipt,
+    bg: 'bg-violet-500/10',
+    text: 'text-violet-600 dark:text-violet-400',
+    badge: 'bg-violet-500/15 text-violet-700 dark:text-violet-400 border-violet-500/20',
+    border: 'border-l-violet-500',
+  },
+  asset: {
+    label: 'finance.categoryTypes.asset',
+    icon: CircleDollarSign,
+    bg: 'bg-blue-500/10',
+    text: 'text-blue-600 dark:text-blue-400',
+    badge: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20',
+    border: 'border-l-blue-500',
+  },
+  liability: {
+    label: 'finance.categoryTypes.liability',
+    icon: Banknote,
+    bg: 'bg-red-500/10',
+    text: 'text-red-600 dark:text-red-400',
+    badge: 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20',
+    border: 'border-l-red-500',
+  },
+  equity: {
+    label: 'finance.categoryTypes.equity',
+    icon: Landmark,
+    bg: 'bg-teal-500/10',
+    text: 'text-teal-600 dark:text-teal-400',
+    badge: 'bg-teal-500/15 text-teal-700 dark:text-teal-400 border-teal-500/20',
+    border: 'border-l-teal-500',
+  },
 }
 
 function buildTree(categories: FinancialCategory[]): FinancialCategory[] {
@@ -67,46 +135,130 @@ function buildTree(categories: FinancialCategory[]): FinancialCategory[] {
   return roots
 }
 
-function CategoryNode({
+function CategoryItem({
   category,
   depth,
+  config,
   onEdit,
   onDelete,
 }: {
   category: FinancialCategory
   depth: number
+  config: typeof typeConfig[FinancialCategory['type']]
   onEdit: (cat: FinancialCategory) => void
   onDelete: (cat: FinancialCategory) => void
 }) {
-  const isRoot = depth === 0
-  const [hovered, setHovered] = useState(false)
+  const hasChildren = (category.children?.length ?? 0) > 0
 
   return (
-    <div>
+    <>
       <div
-        className={cn('group flex items-center gap-2 rounded-md px-3 py-1.5', isRoot && 'mt-2')}
-        style={{ paddingLeft: `${depth * 24 + 12}px` }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        className={cn(
+          'group flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-accent/50',
+          depth > 0 && 'ml-6 border-l-2 border-muted',
+        )}
       >
-        <span className="font-mono text-xs text-muted-foreground">{category.code}</span>
-        <span className={cn('flex-1 text-sm', isRoot ? 'font-semibold' : 'font-normal', isRoot && typeColors[category.type])}>
+        {depth > 0 && (
+          <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />
+        )}
+        <Badge variant="outline" className="shrink-0 font-mono text-[10px] tabular-nums">
+          {category.code}
+        </Badge>
+        <span className={cn('flex-1 truncate text-sm', depth === 0 ? 'font-semibold' : 'font-normal')}>
           {category.name}
         </span>
-        {hovered && (
-          <div className="flex gap-1">
-            <button type="button" onClick={() => onEdit(category)} className="rounded p-0.5 text-muted-foreground hover:text-foreground">
-              <Pencil className="h-3 w-3" />
-            </button>
-            <button type="button" onClick={() => onDelete(category)} className="rounded p-0.5 text-muted-foreground hover:text-destructive">
-              <Trash2 className="h-3 w-3" />
-            </button>
-          </div>
+        {category.description && (
+          <span className="hidden truncate text-xs text-muted-foreground lg:block lg:max-w-[200px]">
+            {category.description}
+          </span>
         )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem onClick={() => onEdit(category)}>
+              <Pencil className="mr-2 h-3.5 w-3.5" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onDelete(category)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 h-3.5 w-3.5" />
+              Excluir
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      {category.children?.map((child) => (
-        <CategoryNode key={child.id} category={child} depth={depth + 1} onEdit={onEdit} onDelete={onDelete} />
+      {hasChildren && category.children!.map((child) => (
+        <CategoryItem
+          key={child.id}
+          category={child}
+          depth={depth + 1}
+          config={config}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       ))}
+    </>
+  )
+}
+
+function CategoryGroup({
+  type,
+  categories,
+  onEdit,
+  onDelete,
+  t,
+}: {
+  type: FinancialCategory['type']
+  categories: FinancialCategory[]
+  onEdit: (cat: FinancialCategory) => void
+  onDelete: (cat: FinancialCategory) => void
+  t: (key: string) => string
+}) {
+  const config = typeConfig[type]
+  const Icon = config.icon
+
+  if (categories.length === 0) 
+return null
+
+  return (
+    <div className={cn('overflow-hidden rounded-xl border border-l-[3px]', config.border)}>
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b bg-muted/30 px-4 py-3">
+        <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', config.bg)}>
+          <Icon className={cn('h-4 w-4', config.text)} />
+        </div>
+        <div className="flex-1">
+          <h3 className={cn('text-sm font-semibold', config.text)}>
+            {t(config.label)}
+          </h3>
+        </div>
+        <Badge variant="secondary" className={cn('text-[10px] font-medium', config.badge)}>
+          {categories.reduce((acc, c) => acc + 1 + (c.children?.length ?? 0), 0)}
+        </Badge>
+      </div>
+
+      {/* Items */}
+      <div className="divide-y divide-muted/50 p-1.5">
+        {categories.map((root) => (
+          <CategoryItem
+            key={root.id}
+            category={root}
+            depth={0}
+            config={config}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -114,6 +266,7 @@ function CategoryNode({
 export function FinanceChartOfAccountsTab() {
   const { t } = useTranslation('admin')
   const { data: categories, isLoading } = useFinancialCategories()
+  const { remove } = useCategoryMutations()
   const [formOpen, setFormOpen] = useState(false)
   const [editCategory, setEditCategory] = useState<FinancialCategory | undefined>()
   const [deleteTarget, setDeleteTarget] = useState<FinancialCategory | null>(null)
@@ -133,9 +286,9 @@ return all
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-32" />
+          <Skeleton key={i} className="h-40 rounded-xl" />
         ))}
       </div>
     )
@@ -143,7 +296,8 @@ return all
 
   const allCategories = categories ?? []
   const tree = buildTree(filteredCategories)
-  const grouped = {
+
+  const grouped: Record<FinancialCategory['type'], FinancialCategory[]> = {
     revenue: tree.filter((c) => c.type === 'revenue'),
     cogs: tree.filter((c) => c.type === 'cogs'),
     opex: tree.filter((c) => c.type === 'opex'),
@@ -152,6 +306,10 @@ return all
     liability: tree.filter((c) => c.type === 'liability'),
     equity: tree.filter((c) => c.type === 'equity'),
   }
+
+  const activeTypes = (Object.keys(grouped) as FinancialCategory['type'][]).filter(
+    (type) => grouped[type].length > 0,
+  )
 
   const hasChildren = (cat: FinancialCategory) => (cat.children?.length ?? 0) > 0
 
@@ -163,7 +321,7 @@ return all
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="h-9 w-full sm:w-52 pl-8 text-sm"
+              className="h-9 w-full pl-8 text-sm sm:w-52"
               placeholder={t('finance.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -186,25 +344,15 @@ return all
         <EmptyState icon={FolderTree} title={t('finance.noResults')} />
       ) : (
         <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
-          {(Object.keys(grouped) as FinancialCategory['type'][]).map((type) => (
-            <Card key={type}>
-              <CardHeader className="pb-2">
-                <CardTitle className={cn('text-sm font-medium', typeColors[type])}>
-                  {t(typeLabels[type])}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {grouped[type].map((root) => (
-                  <CategoryNode
-                    key={root.id}
-                    category={root}
-                    depth={0}
-                    onEdit={(cat) => { setEditCategory(cat); setFormOpen(true) }}
-                    onDelete={(cat) => setDeleteTarget(cat)}
-                  />
-                ))}
-              </CardContent>
-            </Card>
+          {activeTypes.map((type) => (
+            <CategoryGroup
+              key={type}
+              type={type}
+              categories={grouped[type]}
+              onEdit={(cat) => { setEditCategory(cat); setFormOpen(true) }}
+              onDelete={(cat) => setDeleteTarget(cat)}
+              t={t}
+            />
           ))}
         </div>
       )}
@@ -229,7 +377,7 @@ return all
           <AlertDialogFooter>
             <AlertDialogCancel>{t('finance.form.cancel')}</AlertDialogCancel>
             {deleteTarget && !hasChildren(deleteTarget) && (
-              <AlertDialogAction onClick={() => setDeleteTarget(null)}>
+              <AlertDialogAction onClick={() => { remove.mutate(deleteTarget.id); setDeleteTarget(null) }}>
                 {t('finance.confirmDelete')}
               </AlertDialogAction>
             )}

@@ -72,6 +72,7 @@ const statusDot: Record<MediaStatus, string> = {
 }
 
 const renderStyles: Record<RenderingStatus, string> = {
+  created: 'bg-muted text-muted-foreground',
   completed: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
   rendering: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
   pending: 'bg-blue-500/15 text-blue-700 dark:text-blue-400',

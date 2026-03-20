@@ -12,15 +12,15 @@ const adminAuthLogsKeys = {
 function mapLogEntry(l: Record<string, unknown>): AuthLogEntry {
   return {
     id: String(l.id ?? ''),
-    userId: l.user_id != null ? Number(l.user_id) : (l.userId != null ? Number(l.userId) : null),
-    userName: (l.user_name ?? l.userName ?? null) as string | null,
-    userEmail: (l.user_email ?? l.userEmail ?? null) as string | null,
-    userSource: (l.user_source ?? l.userSource ?? 'vdclip') as AuthLogEntry['userSource'],
-    eventType: (l.event_type ?? l.eventType) as AuthLogEntry['eventType'],
-    ipAddress: (l.ip_address ?? l.ipAddress ?? null) as string | null,
-    userAgent: (l.user_agent ?? l.userAgent ?? null) as string | null,
+    userId: l.userId != null ? Number(l.userId) : null,
+    userName: (l.userName ?? null) as string | null,
+    userEmail: (l.userEmail ?? null) as string | null,
+    userSource: (l.userSource ?? 'vdclip') as AuthLogEntry['userSource'],
+    eventType: l.eventType as AuthLogEntry['eventType'],
+    ipAddress: (l.ipAddress ?? null) as string | null,
+    userAgent: (l.userAgent ?? null) as string | null,
     metadata: (l.metadata ?? null) as Record<string, unknown> | null,
-    createdAt: String(l.created_at ?? l.createdAt ?? ''),
+    createdAt: String(l.createdAt ?? ''),
   }
 }
 

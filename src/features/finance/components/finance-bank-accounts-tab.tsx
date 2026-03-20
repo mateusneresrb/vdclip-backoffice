@@ -1,4 +1,4 @@
-import type { BankAccount, Currency } from '../types'
+import type { BankAccount } from '../types'
 import { Building2, CircleDot, MoreVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -26,7 +26,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 
+import { formatCurrency } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { useBankAccountMutations } from '../hooks/use-bank-account-mutations'
 import { useBankAccounts } from '../hooks/use-bank-accounts'
 import { BankAccountFormDialog } from './bank-account-form-dialog'
 
@@ -37,16 +39,10 @@ const accountTypeMap: Record<BankAccount['accountType'], string> = {
   investment: 'finance.accountTypes.investment',
 }
 
-function formatCurrency(amount: number, currency: Currency) {
-  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
-    style: 'currency',
-    currency,
-  }).format(amount)
-}
-
 export function FinanceBankAccountsTab() {
   const { t } = useTranslation('admin')
   const { data: accounts, isLoading } = useBankAccounts()
+  const { remove } = useBankAccountMutations()
   const [formOpen, setFormOpen] = useState(false)
   const [editAccount, setEditAccount] = useState<BankAccount | undefined>()
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -67,7 +63,7 @@ return accounts
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-44" />
         ))}
@@ -163,7 +159,8 @@ return accounts
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('finance.form.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setDeleteId(null)}>
+            <AlertDialogAction onClick={() => { if (deleteId) 
+remove.mutate(deleteId); setDeleteId(null) }}>
               {t('finance.confirmDelete')}
             </AlertDialogAction>
           </AlertDialogFooter>

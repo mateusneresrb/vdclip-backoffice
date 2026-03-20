@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { apiClient } from '@/lib/api-client'
 import { useAuthStore } from '@/features/auth/stores/auth-store'
+import { apiClient } from '@/lib/api-client'
 
 export interface ProfileActivityEvent {
   id: string
@@ -15,11 +15,16 @@ const profileActivityKeys = {
 }
 
 function actionToType(action: string): string {
-  if (action.includes('login') || action.includes('auth')) return 'login'
-  if (action.includes('password')) return 'password_changed'
-  if (action.includes('mfa')) return 'mfa_enabled'
-  if (action.includes('oauth')) return 'oauth_connected'
-  if (action.includes('session')) return 'session_revoked'
+  if (action.includes('login') || action.includes('auth')) 
+return 'login'
+  if (action.includes('password')) 
+return 'password_changed'
+  if (action.includes('mfa')) 
+return 'mfa_enabled'
+  if (action.includes('oauth')) 
+return 'oauth_connected'
+  if (action.includes('session')) 
+return 'session_revoked'
   return action
 }
 
@@ -49,12 +54,12 @@ function actionToDescription(action: string, entityType?: string): string {
 
 function mapAuditToActivity(data: Record<string, unknown>): ProfileActivityEvent {
   const action = String(data.action ?? '')
-  const entityType = data.entity_type as string | undefined
+  const entityType = data.entityType as string | undefined
   return {
     id: String(data.id),
     type: actionToType(action),
     description: actionToDescription(action, entityType),
-    createdAt: String(data.created_at ?? data.createdAt ?? ''),
+    createdAt: String(data.createdAt ?? ''),
   }
 }
 
@@ -64,7 +69,8 @@ export function useProfileActivity() {
   return useQuery({
     queryKey: profileActivityKeys.all,
     queryFn: async () => {
-      if (!adminId) return []
+      if (!adminId) 
+return []
 
       const data = await apiClient.get<
         Record<string, unknown>[]

@@ -2,6 +2,41 @@ import type { Currency } from '@/features/admin/types'
 
 export type { CashFlowEntry, CashFlowSummary, Currency } from '@/features/admin/types'
 
+export interface ApiCostEntry {
+  id: string
+  category_id: string
+  category_name: string | null
+  cost_center_id: string | null
+  cost_center_name: string | null
+  recurring_parent_id: string | null
+  vendor: string
+  description: string
+  amount: string
+  currency: string
+  is_recurring: boolean
+  recurrence_interval: string | null
+  recurring_since: string | null
+  recurring_until: string | null
+  status: string
+  billing_date: string
+  due_date: string | null
+  competence_month: string
+  cost_allocation: string
+  is_variable: boolean
+  unit_metric: string | null
+  unit_quantity: string | null
+  unit_cost: string | null
+  paid_at: string | null
+  payment_method: string | null
+  financial_transaction_id: string | null
+  receipt_url: string | null
+  notes: string | null
+  created_by: string | null
+  created_by_email: string | null
+  created_at: string
+  updated_at: string
+}
+
 export type FinancialCategoryType = 'revenue' | 'cogs' | 'opex' | 'tax' | 'asset' | 'liability' | 'equity'
 
 export interface FinancialCategory {
@@ -113,7 +148,7 @@ export interface TaxConfig {
   taxType: string
   rate: number
   municipalityCode: string | null
-  taxRegime: string | null
+  taxRegime: string
   effectiveFrom: string
   effectiveTo: string | null
 }
@@ -126,7 +161,7 @@ export interface Receivable {
   sourceType: ReceivableSourceType
   sourceReference: string | null
   description: string
-  customerName: string
+  customerName: string | null
   customerExternalId: string | null
   amount: number
   currency: Currency
@@ -136,7 +171,7 @@ export interface Receivable {
   notes: string | null
   costCenterId: string | null
   costCenterName: string | null
-  categoryId: string | null
+  categoryId: string
   categoryName: string | null
   financialTransactionId: string | null
   createdBy: string | null

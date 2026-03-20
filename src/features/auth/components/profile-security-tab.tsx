@@ -22,7 +22,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import i18n from '@/i18n'
+import { i18n } from '@/i18n'
 import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 import { useAuth } from '../hooks/use-auth'
@@ -95,7 +95,7 @@ return null
     setMfaLoading(true)
     try {
       const data = await authApi.setupMfa()
-      setMfaSetupData({ secret: data.secret, provisioningUri: data.provisioning_uri })
+      setMfaSetupData({ secret: data.secret, provisioningUri: data.provisioningUri })
     } catch (err) {
       showErrorToast({ title: err instanceof Error ? err.message : i18n.t('admin:toast.error') })
       setSetupDialogOpen(false)
@@ -229,7 +229,7 @@ return null
                     </div>
                   ) : mfaSetupData ? (
                     <>
-                      <div className="rounded-lg border bg-white p-3">
+                      <div className="rounded-lg border bg-background p-3">
                         <QRCode
                           value={mfaSetupData.provisioningUri}
                           size={192}

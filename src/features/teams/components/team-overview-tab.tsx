@@ -37,8 +37,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
 import { Separator } from '@/components/ui/separator'
+
+import { useTeamMutations } from '../hooks/use-team-mutations'
 
 const planBadgeVariants: Record<UserPlan, string> = {
   free: 'bg-muted text-muted-foreground',
@@ -54,6 +55,7 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
   const [editingPlan, setEditingPlan] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<UserPlan>(team.plan)
   const [cancelPlanDialogOpen, setCancelPlanDialogOpen] = useState(false)
+  const { changePlan, cancelPlan } = useTeamMutations()
 
   const postRate = team.mediaCreated > 0 ? Math.round((team.mediaPosted / team.mediaCreated) * 100) : 0
   const memberPercent = Math.min((team.memberCount / team.maxMembers) * 100, 100)
@@ -113,7 +115,7 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
         </Card>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
         {/* Plan Info */}
         <Card>
           <CardHeader className="pb-3">
@@ -139,7 +141,17 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
                   </Select>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1" onClick={() => setEditingPlan(false)}>
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    disabled={changePlan.isPending}
+                    onClick={() => {
+                      changePlan.mutate(
+                        { teamId: team.id, plan: selectedPlan },
+                        { onSettled: () => setEditingPlan(false) },
+                      )
+                    }}
+                  >
                     <Save className="mr-1 h-3 w-3" />{t('userDetail.save')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setEditingPlan(false)}>
@@ -194,7 +206,7 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-2xl font-bold sm:text-3xl">{team.credits.toLocaleString()}</p>
+            <p className="text-lg font-bold sm:text-3xl">{team.credits.toLocaleString()}</p>
             <p className="text-xs text-muted-foreground">{t('teams.detail.creditsAvailable')}</p>
             <Separator />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -246,7 +258,7 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
 
         {/* Social URLs */}
         {socialEntries.length > 0 && (
-          <Card className="sm:col-span-2 lg:col-span-3">
+          <Card className="sm:col-span-2 md:col-span-3">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
                 <Globe className="h-4 w-4" />
@@ -284,7 +296,13 @@ export function TeamOverviewTab({ team }: { team: AdminTeamDetail }) {
             <AlertDialogCancel>{t('userDetail.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => setCancelPlanDialogOpen(false)}
+              disabled={cancelPlan.isPending}
+              onClick={() => {
+                cancelPlan.mutate(
+                  { teamId: team.id },
+                  { onSettled: () => setCancelPlanDialogOpen(false) },
+                )
+              }}
             >
               {t('userDetail.cancelPlanConfirm')}
             </AlertDialogAction>

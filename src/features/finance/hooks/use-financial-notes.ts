@@ -14,18 +14,6 @@ interface ApiNote {
   updated_at: string
 }
 
-function toFrontend(row: ApiNote): FinancialNote {
-  return {
-    id: row.id,
-    entityType: row.entity_type as FinancialNoteEntityType,
-    entityId: row.entity_id,
-    content: row.content,
-    createdBy: row.created_by,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  }
-}
-
 const noteKeys = {
   all: ['financial-notes'] as const,
   forEntity: (entityType: FinancialNoteEntityType, entityId: string) =>
@@ -40,7 +28,10 @@ export function useFinancialNotes(entityType: FinancialNoteEntityType, entityId:
         entity_type: entityType,
         entity_id: entityId,
       })
-      return rows.map(toFrontend)
+      return rows.map((row): FinancialNote => ({
+        ...row,
+        entityType: row.entityType as FinancialNoteEntityType,
+      }))
     },
     enabled: Boolean(entityId),
   })
@@ -51,11 +42,14 @@ export function useCreateFinancialNote(entityType: FinancialNoteEntityType, enti
   return useMutation({
     mutationFn: async (content: string) => {
       const row = await apiClient.post<ApiNote>('/financial-notes', {
-        entity_type: entityType,
-        entity_id: entityId,
+        entityType,
+        entityId,
         content,
       })
-      return toFrontend(row)
+      return {
+        ...row,
+        entityType: (row as unknown as Record<string, unknown>).entityType as FinancialNoteEntityType,
+      } as FinancialNote
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: noteKeys.forEntity(entityType, entityId) })

@@ -19,11 +19,12 @@ export function AdminProfilePage() {
 return null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader title={t('profile.title')} description={t('profile.description')} />
 
       <Tabs defaultValue="general">
-        <TabsList className="w-full sm:w-auto">
+        <div className="-mb-px overflow-x-auto overflow-y-hidden">
+        <TabsList className="w-max sm:w-auto">
           <TabsTrigger value="general" className="gap-1.5">
             <User className="hidden size-3.5 sm:block" />
             {t('profile.tabs.general')}
@@ -41,6 +42,7 @@ return null
             {t('profile.tabs.preferences')}
           </TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="general" className="mt-6">
           <ProfileGeneralTab />
