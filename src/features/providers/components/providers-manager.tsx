@@ -9,12 +9,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useAdminProviders } from '@/features/admin/hooks/use-admin-providers'
 import { showSuccessToast } from '@/lib/toast'
 
+import { useUpdateVideoSources, useVideoSources } from '../hooks/use-video-sources'
 import { ProviderSection } from './provider-section'
 
 export function ProvidersManager() {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
   const { data: providers, isLoading } = useAdminProviders()
+  const { data: videoSources } = useVideoSources()
+  const updateMutation = useUpdateVideoSources()
 
   if (isLoading) {
     return (
@@ -38,17 +41,28 @@ export function ProvidersManager() {
     )
   }
 
-  const videoSourceProviders = providers.filter((p) => p.category === 'video_source')
+  // Merge DynamoDB enabled state into provider list
+  const mergedProviders = providers.map((p) => ({
+    ...p,
+    enabled: videoSources?.providers?.[p.slug] ?? p.enabled,
+  }))
+
+  const videoSourceProviders = mergedProviders.filter((p) => p.category === 'video_source')
 
   const handleToggle = (provider: SupportedProvider) => {
-    // TODO: Wire to API when provider toggle endpoint is available
-    // (e.g., PATCH /platform/providers/{id} with { enabled: boolean }).
-    // For now, apply optimistic update to the query cache.
-    queryClient.setQueryData<SupportedProvider[]>(
-      ['admin-providers'],
-      (old) => old?.map((p) => (p.id === provider.id ? { ...p, enabled: !p.enabled } : p)),
-    )
-    showSuccessToast({ title: t('toast.providerToggled') })
+    if (!videoSources?.providers) return
+
+    const updatedProviders = {
+      ...videoSources.providers,
+      [provider.slug]: !provider.enabled,
+    }
+
+    updateMutation.mutate(updatedProviders, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['admin-providers'] })
+        showSuccessToast({ title: t('toast.providerToggled') })
+      },
+    })
   }
 
   return (
