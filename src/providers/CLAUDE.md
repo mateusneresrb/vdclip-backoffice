@@ -13,10 +13,11 @@ Wrapper do `QueryClient` do TanStack Query. Montado em `main.tsx` na raiz da ár
 </QueryProvider>
 ```
 
-Configurações do `QueryClient` (padrões do TanStack Query):
-- `staleTime`: 0 (refetch ao focar janela)
-- `retry`: 3 tentativas em falha
-- Para alterar por query: passar `staleTime` / `retry` diretamente no `useQuery()`
+Configurações do `QueryClient`:
+- `staleTime`: 5 minutos (`1000 * 60 * 5`)
+- `retry`: 1 tentativa em falha
+- `refetchOnWindowFocus`: false
+- Para alterar por query: passar `staleTime` / `retry` / `refetchOnWindowFocus` diretamente no `useQuery()`
 
 ## Não confundir com
 

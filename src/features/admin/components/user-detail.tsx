@@ -1,4 +1,4 @@
-import type { CreditType, UserPlan, UserStatus } from '../types'
+import type { AffiliateInfo, CreditType, UserPlan, UserStatus } from '../types'
 import {
   Calendar,
   CreditCard,
@@ -51,8 +51,8 @@ import {
   useAdminUser,
   useAdminUserAffiliate,
 } from '../hooks/use-admin-users'
-import { MediaManager } from './MediaManager'
-import { TemplateManager } from './TemplateManager'
+import { MediaManager } from './media-manager'
+import { TemplateManager } from './template-manager'
 
 const statusVariant: Record<UserStatus, string> = {
   active: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
@@ -104,7 +104,7 @@ export function UserDetail({ userId }: { userId: string }) {
   const [selectedTeamPlan, setSelectedTeamPlan] = useState<UserPlan>('free')
 
   const { data: affiliate, isLoading: affiliateLoading } =
-    useAdminUserAffiliate(userId, showAffiliate) as { data: any, isLoading: boolean }
+    useAdminUserAffiliate(userId, showAffiliate) as { data: AffiliateInfo | undefined, isLoading: boolean }
 
   const { data: userTemplates, isLoading: userTemplatesLoading } =
     useAdminUserTemplates(userId, showTemplates)

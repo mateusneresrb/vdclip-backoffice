@@ -57,6 +57,7 @@ FinancialNotes  // src/features/finance/components/financial-notes.tsx
 ## Types
 ```ts
 // em features/finance/types
+ApiCostEntry          // shape snake_case do backend (usado por use-cost-entries e use-cost-entry-mutations)
 FinancialCategoryType // 'revenue' | 'cogs' | 'opex' | 'tax' | 'asset' | 'liability' | 'equity'
 FinancialCategory     // árvore: { id, parentId, code, name, type, costGroup, level, displayOrder, description, isActive, children? }
 BankAccount           // { name, bank, accountType, agency, accountNumber, currency, initialBalance, balance, isActive }

@@ -1,4 +1,4 @@
-import type { CostAllocation, CostEntry, CostEntryStatus, CreateCostEntryInput, RecurrenceInterval } from '../types'
+import type { ApiCostEntry, CostAllocation, CostEntry, CostEntryStatus, CreateCostEntryInput, RecurrenceInterval } from '../types'
 
 import type { Currency } from '@/features/admin/types'
 
@@ -6,42 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
-import { showSuccessToast } from '@/lib/toast'
-
-interface ApiCostEntry {
-  id: string
-  category_id: string
-  category_name: string | null
-  cost_center_id: string | null
-  cost_center_name: string | null
-  recurring_parent_id: string | null
-  vendor: string
-  description: string
-  amount: string
-  currency: string
-  is_recurring: boolean
-  recurrence_interval: string | null
-  recurring_since: string | null
-  recurring_until: string | null
-  status: string
-  billing_date: string
-  due_date: string | null
-  competence_month: string
-  cost_allocation: string
-  is_variable: boolean
-  unit_metric: string | null
-  unit_quantity: string | null
-  unit_cost: string | null
-  paid_at: string | null
-  payment_method: string | null
-  financial_transaction_id: string | null
-  receipt_url: string | null
-  notes: string | null
-  created_by: string | null
-  created_by_email: string | null
-  created_at: string
-  updated_at: string
-}
+import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 function toCostEntry(row: ReturnType<typeof Object> & Record<string, unknown>): CostEntry {
   return {
@@ -102,6 +67,9 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryCreated') })
     },
+    onError: () => {
+      showErrorToast({ title: i18n.t('admin:toast.costEntryCreateError') })
+    },
   })
 
   const update = useMutation({
@@ -120,6 +88,9 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryUpdated') })
     },
+    onError: () => {
+      showErrorToast({ title: i18n.t('admin:toast.costEntryUpdateError') })
+    },
   })
 
   const remove = useMutation({
@@ -131,6 +102,9 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryDeleted') })
     },
+    onError: () => {
+      showErrorToast({ title: i18n.t('admin:toast.costEntryDeleteError') })
+    },
   })
 
   const approve = useMutation({
@@ -140,6 +114,9 @@ export function useCostEntryMutations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cost-entries'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryApproved') })
+    },
+    onError: () => {
+      showErrorToast({ title: i18n.t('admin:toast.costEntryApproveError') })
     },
   })
 
@@ -157,6 +134,9 @@ export function useCostEntryMutations() {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
       queryClient.invalidateQueries({ queryKey: ['admin-cash-flow'] })
       showSuccessToast({ title: i18n.t('admin:toast.costEntryPaid') })
+    },
+    onError: () => {
+      showErrorToast({ title: i18n.t('admin:toast.costEntryPayError') })
     },
   })
 

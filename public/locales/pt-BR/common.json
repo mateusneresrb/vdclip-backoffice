@@ -37,6 +37,12 @@
     "back": "Voltar",
     "noData": "Nenhum dado disponivel."
   },
+  "error": {
+    "title": "Algo deu errado",
+    "description": "Ocorreu um erro inesperado. Tente novamente.",
+    "tryAgain": "Tentar novamente",
+    "goHome": "Ir para o inicio"
+  },
   "sidebar": {
     "account": "Conta",
     "settings": "Configuracoes"

@@ -6,7 +6,12 @@ import { router } from './router'
 import './index.css'
 import './i18n'
 
-async function bootstrap() {
+async function startApp() {
+  if (import.meta.env.DEV) {
+    const { worker } = await import('./mocks/browser')
+    await worker.start({ onUnhandledRequest: 'bypass' })
+  }
+
   // Try to restore session from refresh token cookie
   await restoreSession()
 
@@ -17,4 +22,4 @@ async function bootstrap() {
   )
 }
 
-bootstrap()
+startApp()

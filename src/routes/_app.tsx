@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 import { AdminHeader } from '@/components/layout/admin-header'
 import { AdminSidebar } from '@/components/layout/admin-sidebar'
+import { ErrorFallback } from '@/components/shared/error-fallback'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { useAuthStore } from '@/features/auth'
 import { MfaSetupWall } from '@/features/auth/components/mfa-setup-wall'
@@ -14,6 +15,7 @@ export const Route = createFileRoute('/_app')({
     }
   },
   component: AdminLayout,
+  errorComponent: ErrorFallback,
 })
 
 const isDev = import.meta.env.DEV

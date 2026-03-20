@@ -36,6 +36,7 @@ Para adicionar novo componente: `bunx shadcn@latest add <name>` — sobrescreve 
 | `Table` | `table.tsx` | Tabelas de dados |
 | `Tabs` | `tabs.tsx` | Navegação por abas |
 | `Toggle` / `ToggleGroup` | `toggle.tsx` / `toggle-group.tsx` | Seleção exclusiva/múltipla |
+| `Textarea` | `textarea.tsx` | Campos de texto multi-linha |
 | `Tooltip` | `tooltip.tsx` | Dicas de contexto |
 
 ## Padrões de Uso

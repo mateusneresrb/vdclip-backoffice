@@ -9,6 +9,8 @@ Utilitários base. Manter mínimo — sem dependências de features.
 | `api-client.ts` | HTTP client com auth, auto case transform, retry 401 |
 | `case-transform.ts` | snake_case ↔ camelCase (runtime + compile-time types) |
 | `toast.ts` | Wrappers para Sonner toasts |
+| `date-utils.ts` | `getDateParams()` — converte `MetricsDateRange` em `{ date_from, date_to }` |
+| `format.ts` | `formatCurrency()` — formata valor numérico como string de moeda localizada |
 | `utils.ts` | `cn()` para merge de classes Tailwind |
 
 ## `api-client.ts`
@@ -70,6 +72,38 @@ try {
 - `camelizeKeys()` / `snakeizeKeys()` — conversão runtime recursiva
 - Handles nested objects e arrays, pula Date objects
 - **NUNCA chamar manualmente** — `api-client.ts` faz automaticamente
+
+## `date-utils.ts`
+
+Converte `MetricsDateRange` (ou string genérica) em query params `{ date_from, date_to }` (YYYY-MM-DD).
+
+```ts
+import { getDateParams } from '@/lib/date-utils'
+
+getDateParams('7d')   // { date_from: '2026-03-12', date_to: '2026-03-19' }
+getDateParams('ytd')  // { date_from: '2026-01-01', date_to: '2026-03-19' }
+getDateParams('all')  // { date_from: '2024-01-01', date_to: '2026-03-19' }
+```
+
+Periodos suportados: `1d`, `3d`, `7d`, `30d`, `90d`, `12m`, `ytd`, `all`. Default: 30 dias.
+
+Usado por: `useAdminMetrics`, `useAdminRevenue`, `useAdminCashFlow`.
+
+## `format.ts`
+
+Formatação de valores para exibição.
+
+```ts
+import { formatCurrency } from '@/lib/format'
+
+formatCurrency(1234.56)                // "$1,234.56"
+formatCurrency(1234.56, 'BRL')         // "R$ 1.234,56"
+formatCurrency(1234.56, 'USD', { maximumFractionDigits: 0 }) // "$1,235"
+```
+
+- Locale automático: `'BRL'` → `'pt-BR'`, demais → `'en-US'`
+- Terceiro parâmetro opcional: `Intl.NumberFormatOptions` para customizar (e.g. `maximumFractionDigits`)
+- Usado por: dashboard KPIs, TransactionsManager, CashFlowManager, finance tabs (bank accounts, receivables)
 
 ## `cn()` (`utils.ts`)
 

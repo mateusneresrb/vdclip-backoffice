@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { usePagination } from '@/hooks/use-pagination'
+import { formatCurrency } from '@/lib/format'
 import { useAdminTransactions } from '../hooks/use-admin-transactions'
 
 const statusColors: Record<TransactionStatus, string> = {
@@ -32,13 +33,6 @@ const typeIcons: Record<TransactionType, React.ComponentType<{ className?: strin
   subscription_payment: ArrowDownLeft,
   credit_purchase: ArrowDownLeft,
   refund: ArrowUpRight,
-}
-
-function formatCurrency(amount: number, currency: Currency) {
-  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
-    style: 'currency',
-    currency,
-  }).format(amount)
 }
 
 export function TransactionsManager() {

@@ -1,4 +1,4 @@
-import type { Currency, Receivable, ReceivableStatus } from '../types'
+import type { Receivable, ReceivableStatus } from '../types'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   CalendarCheck,
@@ -49,19 +49,13 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePagination } from '@/hooks/use-pagination'
 import { apiClient } from '@/lib/api-client'
+import { formatCurrency } from '@/lib/format'
 import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 import { cn } from '@/lib/utils'
 import { useBankAccounts } from '../hooks/use-bank-accounts'
 import { useReceivables } from '../hooks/use-receivables'
 import { FinancialNotes } from './financial-notes'
-
-function formatCurrency(amount: number, currency: Currency) {
-  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
-    style: 'currency',
-    currency,
-  }).format(amount)
-}
 
 const statusColors: Record<ReceivableStatus, string> = {
   pending: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',

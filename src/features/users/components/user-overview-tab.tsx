@@ -107,7 +107,8 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
 
   const handleGrantCredits = () => {
     const amount = Number(creditAmount)
-    if (!amount || amount <= 0 || !creditReason.trim()) return
+    if (!amount || amount <= 0 || !creditReason.trim()) 
+return
     const days = Number(creditDays) || 365
     grantCredits.mutate(
       {
@@ -132,7 +133,8 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
       setEditingPlan(false)
       return
     }
-    if (!planReason.trim()) return
+    if (!planReason.trim()) 
+return
     setPlanConfirmOpen(true)
   }
 
@@ -158,7 +160,8 @@ export function UserOverviewTab({ user }: { user: AdminUser }) {
 
   const handleDeductCredits = () => {
     const amount = Number(removeCreditAmount)
-    if (!amount || amount <= 0 || !removeCreditReason.trim()) return
+    if (!amount || amount <= 0 || !removeCreditReason.trim()) 
+return
     deductCredits.mutate(
       { userId: user.id, amount, reason: removeCreditReason.trim() },
       {

@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import {
   ArrowRight,
   BarChart2,
@@ -15,14 +16,19 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSaasMetrics } from '@/features/admin/hooks/use-saas-metrics'
+import { formatCurrency } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-function formatCurrency(value: number, currency = 'USD') {
-  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(value)
+const SAAS_HEALTH_THRESHOLDS = {
+  runway: { good: 18, warn: 9 },
+  churn: { good: 2, warn: 4 },
+  ltvCac: { good: 3, warn: 1.5 },
+  nrr: { good: 100, warn: 90 },
+  customers: { good: 100, warn: 50 },
+} as const
+
+function formatCurrencyCompact(value: number, currency = 'USD') {
+  return formatCurrency(value, currency, { maximumFractionDigits: 0 })
 }
 
 function formatPct(value: number) {
@@ -36,10 +42,10 @@ interface KpiCardProps {
   tooltip?: string
   icon: React.ComponentType<{ className?: string }>
   status?: 'good' | 'warn' | 'bad' | 'neutral'
-  href?: string
+  linkTo?: string
 }
 
-function KpiCard({ label, value, subtitle, tooltip, icon: Icon, status = 'neutral', href }: KpiCardProps) {
+function KpiCard({ label, value, subtitle, tooltip, icon: Icon, status = 'neutral', linkTo }: KpiCardProps) {
   const { t } = useTranslation('admin')
   const statusClass = {
     good: 'text-emerald-600 dark:text-emerald-400',
@@ -69,13 +75,14 @@ function KpiCard({ label, value, subtitle, tooltip, icon: Icon, status = 'neutra
       <CardContent>
         <p className={cn('text-lg font-bold sm:text-2xl', statusClass)}>{value}</p>
         {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
-        {href && (
-          <a
-            href={href}
+        {linkTo && (
+          <Link
+            to={linkTo as '/revenue'}
+            search={{ tab: undefined }}
             className="mt-2 flex items-center gap-1 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
           >
             {t('dashboard.viewDetail')} <ArrowRight className="size-3" />
-          </a>
+          </Link>
         )}
       </CardContent>
     </Card>
@@ -87,13 +94,13 @@ export function MetricsQuickPanel() {
   const { data: snapshots, isLoading } = useSaasMetrics()
 
   const latest = useMemo(() => {
-    if (!snapshots || snapshots.length === 0) 
+    if (!snapshots || snapshots.length === 0)
 return null
     return snapshots.reduce((a, b) => (a.month > b.month ? a : b))
   }, [snapshots])
 
   const previous = useMemo(() => {
-    if (!snapshots || snapshots.length < 2) 
+    if (!snapshots || snapshots.length < 2)
 return null
     const sorted = [...snapshots].sort((a, b) => b.month.localeCompare(a.month))
     return sorted[1]
@@ -115,7 +122,7 @@ return null
     )
   }
 
-  if (!latest) 
+  if (!latest)
 return null
 
   const mrrChange = previous
@@ -123,30 +130,30 @@ return null
     : null
 
   const runwayStatus =
-    latest.runwayMonths >= 18
+    latest.runwayMonths >= SAAS_HEALTH_THRESHOLDS.runway.good
       ? 'good'
-      : latest.runwayMonths >= 9
+      : latest.runwayMonths >= SAAS_HEALTH_THRESHOLDS.runway.warn
         ? 'warn'
         : 'bad'
 
   const churnStatus =
-    latest.churnRatePct <= 2
+    latest.churnRatePct <= SAAS_HEALTH_THRESHOLDS.churn.good
       ? 'good'
-      : latest.churnRatePct <= 4
+      : latest.churnRatePct <= SAAS_HEALTH_THRESHOLDS.churn.warn
         ? 'warn'
         : 'bad'
 
   const ltvCacStatus =
-    latest.ltvCacRatio >= 3
+    latest.ltvCacRatio >= SAAS_HEALTH_THRESHOLDS.ltvCac.good
       ? 'good'
-      : latest.ltvCacRatio >= 1.5
+      : latest.ltvCacRatio >= SAAS_HEALTH_THRESHOLDS.ltvCac.warn
         ? 'warn'
         : 'bad'
 
   const nrrStatus =
-    latest.nrrPct >= 100
+    latest.nrrPct >= SAAS_HEALTH_THRESHOLDS.nrr.good
       ? 'good'
-      : latest.nrrPct >= 90
+      : latest.nrrPct >= SAAS_HEALTH_THRESHOLDS.nrr.warn
         ? 'warn'
         : 'bad'
 
@@ -157,27 +164,28 @@ return null
         <Badge variant="outline" className="text-xs">
           {new Date(latest.month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
         </Badge>
-        <a
-          href="/revenue?tab=saas-metrics"
+        <Link
+          to="/revenue"
+          search={{ tab: 'saas-metrics' }}
           className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
         >
           {t('dashboard.viewAll')} <ArrowRight className="size-3" />
-        </a>
+        </Link>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         <KpiCard
           label={t('saasMetrics.runway')}
           value={`${latest.runwayMonths}m`}
-          subtitle={formatCurrency(latest.cashBalance, latest.currency)}
+          subtitle={formatCurrencyCompact(latest.cashBalance, latest.currency)}
           tooltip={t('dashboard.kpiTooltips.runway')}
           icon={Wallet}
           status={runwayStatus}
-          href="/finance"
+          linkTo="/finance"
         />
         <KpiCard
           label={t('saasMetrics.mrr')}
-          value={formatCurrency(latest.grossRevenue, latest.currency)}
+          value={formatCurrencyCompact(latest.grossRevenue, latest.currency)}
           tooltip={t('dashboard.kpiTooltips.mrr')}
           subtitle={
             mrrChange !== null
@@ -186,16 +194,16 @@ return null
           }
           icon={mrrChange !== null && mrrChange >= 0 ? TrendingUp : TrendingDown}
           status={mrrChange !== null && mrrChange >= 0 ? 'good' : 'warn'}
-          href="/revenue"
+          linkTo="/revenue"
         />
         <KpiCard
           label={t('saasMetrics.ltvCac')}
           value={`${latest.ltvCacRatio.toFixed(1)  }x`}
-          subtitle={`CAC ${formatCurrency(latest.cac, latest.currency)} · LTV ${formatCurrency(latest.ltv, latest.currency)}`}
+          subtitle={`CAC ${formatCurrencyCompact(latest.cac, latest.currency)} · LTV ${formatCurrencyCompact(latest.ltv, latest.currency)}`}
           tooltip={t('dashboard.kpiTooltips.ltvCac')}
           icon={BarChart2}
           status={ltvCacStatus}
-          href="/revenue"
+          linkTo="/revenue"
         />
         <KpiCard
           label={t('saasMetrics.churnRate')}
@@ -204,7 +212,7 @@ return null
           tooltip={t('dashboard.kpiTooltips.churn')}
           icon={TrendingDown}
           status={churnStatus}
-          href="/revenue"
+          linkTo="/revenue"
         />
         <KpiCard
           label={t('saasMetrics.nrr')}
@@ -213,7 +221,7 @@ return null
           tooltip={t('dashboard.kpiTooltips.nrr')}
           icon={Gauge}
           status={nrrStatus}
-          href="/revenue"
+          linkTo="/revenue"
         />
         <KpiCard
           label={t('saasMetrics.activeCustomers')}
@@ -222,7 +230,7 @@ return null
           tooltip={t('dashboard.kpiTooltips.activeCustomers')}
           icon={Users}
           status="neutral"
-          href="/revenue"
+          linkTo="/revenue"
         />
       </div>
 

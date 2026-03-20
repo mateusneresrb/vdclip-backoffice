@@ -1,4 +1,4 @@
-import type { BankAccount, Currency } from '../types'
+import type { BankAccount } from '../types'
 import { Building2, CircleDot, MoreVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -26,6 +26,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 
+import { formatCurrency } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useBankAccountMutations } from '../hooks/use-bank-account-mutations'
 import { useBankAccounts } from '../hooks/use-bank-accounts'
@@ -36,13 +37,6 @@ const accountTypeMap: Record<BankAccount['accountType'], string> = {
   savings: 'finance.accountTypes.savings',
   payment_gateway: 'finance.accountTypes.paymentGateway',
   investment: 'finance.accountTypes.investment',
-}
-
-function formatCurrency(amount: number, currency: Currency) {
-  return new Intl.NumberFormat(currency === 'BRL' ? 'pt-BR' : 'en-US', {
-    style: 'currency',
-    currency,
-  }).format(amount)
 }
 
 export function FinanceBankAccountsTab() {

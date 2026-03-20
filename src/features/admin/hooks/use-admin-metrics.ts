@@ -3,61 +3,12 @@ import type { MetricsDateRange, PlatformMetrics } from '../types'
 import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
+import { getDateParams } from '@/lib/date-utils'
 
 const adminMetricsKeys = {
   all: ['admin-metrics'] as const,
   byRange: (range: MetricsDateRange) =>
     [...adminMetricsKeys.all, range] as const,
-}
-
-function getDateParams(range: MetricsDateRange): Record<string, string> {
-  const now = new Date()
-  const to = now.toISOString().split('T')[0]
-  let from: string
-
-  switch (range) {
-    case '1d': {
-      const d = new Date(now)
-      d.setDate(d.getDate() - 1)
-      from = d.toISOString().split('T')[0]
-      break
-    }
-    case '3d': {
-      const d = new Date(now)
-      d.setDate(d.getDate() - 3)
-      from = d.toISOString().split('T')[0]
-      break
-    }
-    case '7d': {
-      const d = new Date(now)
-      d.setDate(d.getDate() - 7)
-      from = d.toISOString().split('T')[0]
-      break
-    }
-    case '90d': {
-      const d = new Date(now)
-      d.setDate(d.getDate() - 90)
-      from = d.toISOString().split('T')[0]
-      break
-    }
-    case 'ytd': {
-      from = `${now.getFullYear()}-01-01`
-      break
-    }
-    case 'all': {
-      from = '2024-01-01'
-      break
-    }
-    case '30d':
-    default: {
-      const d = new Date(now)
-      d.setDate(d.getDate() - 30)
-      from = d.toISOString().split('T')[0]
-      break
-    }
-  }
-
-  return { date_from: from, date_to: to }
 }
 
 function mapMetrics(d: Record<string, unknown>): PlatformMetrics {
@@ -136,6 +87,7 @@ function mapMetrics(d: Record<string, unknown>): PlatformMetrics {
         promotional: Number(byCredType.promotional ?? 0),
         bonus: Number(byCredType.bonus ?? 0),
         adjustment: Number(byCredType.adjustment ?? 0),
+        admin_grant: Number(byCredType.adminGrant ?? 0),
       },
       transactionVolume: Number(credits.transactionVolume ?? 0),
       refunds: Number(credits.refunds ?? 0),

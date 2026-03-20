@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { TemplateManager } from '@/features/admin/components/TemplateManager'
+import { TemplateManager } from '@/features/admin/components/template-manager'
 import {
   useAdminUserTemplates,
 } from '@/features/admin/hooks/use-admin-templates'

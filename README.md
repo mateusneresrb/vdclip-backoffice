@@ -180,4 +180,4 @@ O projeto inclui configuracao para Claude Code em `.claude/`:
 - **`.claude/skills/`** — skills: `ui-component`, `create-feature`, `create-route`, `i18n-add`, `security-audit`, `create-test`, `accessibility-audit`, `performance-review`
 - **`.claude/settings.json`** — permissoes de projeto
 
-> **Estado atual**: hooks financeiros usam `api-client.ts` com MSW em dev; alguns hooks ainda retornam mock data direto (sem integracao de API real).
+> **Estado atual**: hooks financeiros usam `api-client.ts` com MSW em dev. Apenas `useAdminUserAffiliate` ainda retorna mock data direto (sem endpoint no backend).

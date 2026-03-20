@@ -1,45 +1,10 @@
-import type { CostAllocation, CostEntry, CostEntryStatus, RecurrenceInterval } from '../types'
+import type { ApiCostEntry, CostAllocation, CostEntry, CostEntryStatus, RecurrenceInterval } from '../types'
 
 import type { Currency } from '@/features/admin/types'
 
 import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
-
-interface ApiCostEntry {
-  id: string
-  category_id: string
-  category_name: string | null
-  cost_center_id: string | null
-  cost_center_name: string | null
-  recurring_parent_id: string | null
-  vendor: string
-  description: string
-  amount: string
-  currency: string
-  is_recurring: boolean
-  recurrence_interval: string | null
-  recurring_since: string | null
-  recurring_until: string | null
-  status: string
-  billing_date: string
-  due_date: string | null
-  competence_month: string
-  cost_allocation: string
-  is_variable: boolean
-  unit_metric: string | null
-  unit_quantity: string | null
-  unit_cost: string | null
-  paid_at: string | null
-  payment_method: string | null
-  financial_transaction_id: string | null
-  receipt_url: string | null
-  notes: string | null
-  created_by: string | null
-  created_by_email: string | null
-  created_at: string
-  updated_at: string
-}
 
 const costEntryKeys = {
   all: ['cost-entries'] as const,

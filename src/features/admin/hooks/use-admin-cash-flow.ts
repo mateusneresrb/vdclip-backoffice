@@ -3,6 +3,7 @@ import type { CashFlowSummary, Currency } from '../types'
 import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
+import { getDateParams } from '@/lib/date-utils'
 
 /**
  * Backend JSON shape (snake_case) — kept for documentation.
@@ -16,40 +17,6 @@ import { apiClient } from '@/lib/api-client'
  *   id, type, direction, category_name, amount, currency,
  *   description, transaction_date, created_at?
  */
-
-function dateRangeToDates(dateRange: string): { date_from: string; date_to: string } {
-  const to = new Date()
-  const from = new Date()
-  switch (dateRange) {
-    case '1d':
-      from.setDate(from.getDate() - 1)
-      break
-    case '3d':
-      from.setDate(from.getDate() - 3)
-      break
-    case '7d':
-      from.setDate(from.getDate() - 7)
-      break
-    case '30d':
-      from.setDate(from.getDate() - 30)
-      break
-    case '90d':
-      from.setDate(from.getDate() - 90)
-      break
-    case 'ytd':
-      from.setMonth(0, 1)
-      break
-    case 'all':
-      from.setFullYear(from.getFullYear() - 5)
-      break
-    default:
-      from.setDate(from.getDate() - 30)
-  }
-  return {
-    date_from: from.toISOString().split('T')[0],
-    date_to: to.toISOString().split('T')[0],
-  }
-}
 
 function mapCategory(direction: string, type: string): CashFlowSummary['entries'][number]['category'] {
   if (type === 'tax') 
@@ -104,7 +71,7 @@ export function useAdminCashFlow(currency: Currency = 'USD', dateRange: string =
   return useQuery({
     queryKey: adminCashFlowKeys.byCurrency(currency, dateRange),
     queryFn: async () => {
-      const dates = dateRangeToDates(dateRange)
+      const dates = getDateParams(dateRange)
       const [summary, txPage] = await Promise.all([
         apiClient.get<Record<string, unknown>>('/dashboard/cash-flow', {
           currency,

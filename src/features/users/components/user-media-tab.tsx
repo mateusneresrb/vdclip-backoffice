@@ -62,7 +62,7 @@ function buildProjectUrl(ownerType: string, ownerId: string, processId: string, 
 
 interface ResultCardProps {
   result: MediaResult
-  t: (key: string) => string
+  t: (key: string, options?: Record<string, unknown>) => string
   processId: string
   newVersion: boolean
   ownerId: string
@@ -178,7 +178,7 @@ function MediaDetailView({
 }: {
   media: AdminMedia
   onBack: () => void
-  t: (key: string) => string
+  t: (key: string, options?: Record<string, unknown>) => string
   userId: string
 }) {
   const { data: results, isLoading } = useAdminMediaResults(media.id, true, userId)
@@ -313,7 +313,7 @@ setRenderTarget(null) }}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('users.media.actions.renderTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {(t as Function)('users.media.actions.renderDescription', { title: renderTarget?.title ?? '' })}
+              {t('users.media.actions.renderDescription', { title: renderTarget?.title ?? '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -573,7 +573,7 @@ setReprocessTarget(null) }}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('users.media.actions.reprocessTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {(t as Function)('users.media.actions.reprocessDescription', { title: reprocessTarget?.title ?? '' })}
+              {t('users.media.actions.reprocessDescription', { title: reprocessTarget?.title ?? '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
