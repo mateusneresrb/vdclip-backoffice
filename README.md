@@ -54,6 +54,10 @@ O servidor inicia em `http://localhost:5173/`.
 | `bun run lint` | Verificar codigo com ESLint |
 | `bun run lint:fix` | Corrigir erros do ESLint |
 | `bun run format` | Formatar codigo com Prettier |
+| `bun run test` | Rodar todos os testes (Vitest) |
+| `bun run test:watch` | Testes em modo watch |
+| `bun run test:coverage` | Testes com relatorio de cobertura (v8) |
+| `bun run typecheck` | Verificacao de tipos (tsc) |
 
 ## Stack
 
@@ -71,6 +75,7 @@ O servidor inicia em `http://localhost:5173/`.
 | Icones | Lucide React |
 | Charts | ApexCharts (wrappers proprios) |
 | Mock API | MSW 2 (Mock Service Worker) |
+| Testes | Vitest 4 + Testing Library + MSW |
 | Lint/Format | @antfu/eslint-config + Prettier |
 
 ## Estrutura do Projeto
@@ -84,8 +89,9 @@ src/
     ui/                   # Componentes shadcn/ui (nao editar manualmente)
   features/               # Modulos por dominio (componentes, hooks, types)
   hooks/                  # Hooks compartilhados (usePagination, useIsMobile, etc.)
-  lib/                    # utils.ts (cn), api-client.ts, toast.ts
+  lib/                    # api-client, case-transform, date-utils, format, toast, utils (cn)
   mocks/                  # MSW handlers e dados mock
+  test/                   # Setup Vitest, test-utils (QueryClient wrapper)
   providers/              # QueryProvider (TanStack Query)
   routes/                 # Rotas file-based (TanStack Router)
     _app.tsx              # Layout protegido (auth guard + sidebar)
@@ -170,6 +176,32 @@ Em desenvolvimento, o MSW 2 intercepta chamadas HTTP e retorna dados realistas:
 - **Cliente HTTP**: `src/lib/api-client.ts` — `get/post/patch/delete` com `Authorization` header automatico
 
 Em producao, as mesmas chamadas vao para `VITE_API_URL`.
+
+## Testes
+
+O projeto usa **Vitest 4** com **Testing Library** e **MSW** para testes unitarios e de integracao.
+
+```bash
+bun run test         # Rodar todos os testes
+bun run test:watch   # Modo watch (re-roda ao salvar)
+bun run test:coverage # Com relatorio de cobertura
+```
+
+### Cobertura atual (130 testes)
+
+| Modulo | Testes | Descricao |
+|--------|--------|-----------|
+| `lib/` (utilitarios) | 66 | api-client (unit + MSW), case-transform, date-utils, formatCurrency |
+| `auth/` (store + permissoes) | 50 | auth-store (state + actions), ROLE_PERMISSIONS por role, integracao |
+| `shared/` (componentes) | 13 | ErrorFallback, EmptyState, PageHeader |
+
+### Adicionar novo teste
+
+1. Criar `__tests__/` ao lado do codigo testado
+2. Nomear `*.test.ts` (puro) ou `*.test.tsx` (componentes)
+3. Vitest globals sao automaticos — nao importar `describe`/`it`/`expect`
+4. Para componentes: mockar `react-i18next` e `@tanstack/react-router`
+5. Para API: usar MSW `setupServer` de `msw/node`
 
 ## Claude Code
 

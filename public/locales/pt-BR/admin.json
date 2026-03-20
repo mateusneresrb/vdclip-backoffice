@@ -52,7 +52,16 @@
     "verify": "Verificar",
     "back": "Voltar",
     "loginError": "Credenciais inválidas. Tente novamente.",
-    "mfaError": "Código MFA inválido. Tente novamente."
+    "mfaError": "Código MFA inválido. Tente novamente.",
+    "passwordChangeTitle": "Defina sua Nova Senha",
+    "passwordChangeDescription": "Sua conta possui uma senha temporaria. Defina uma nova senha para continuar.",
+    "newPassword": "Nova Senha",
+    "confirmPassword": "Confirmar Senha",
+    "changePassword": "Alterar Senha",
+    "passwordMismatch": "As senhas nao coincidem.",
+    "passwordTooShort": "A senha deve ter no minimo 8 caracteres.",
+    "passwordChangeError": "Erro ao alterar senha. Tente novamente.",
+    "passwordRequirements": "Minimo 8 caracteres, com letra maiuscula, minuscula, numero e caractere especial."
   },
   "dashboard": {
     "consolidatedDescription": "Visão consolidada de todos os produtos VDClip. Métricas detalhadas por produto estão nas respectivas seções.",

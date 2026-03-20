@@ -11,7 +11,7 @@ export interface AdminAccount {
   createdAt?: string
 }
 
-export type AuthStatus = 'authenticated' | 'unauthenticated' | 'loading' | 'mfa_required'
+export type AuthStatus = 'authenticated' | 'unauthenticated' | 'loading' | 'mfa_required' | 'password_change_required'
 
 // --- API response types ---
 
@@ -26,7 +26,12 @@ export interface MfaTokenResponse {
   mfa_token: string
 }
 
-export type LoginResponse = TokenResponse | MfaTokenResponse
+export interface PasswordChangeRequiredResponse {
+  password_change_required: true
+  password_change_token: string
+}
+
+export type LoginResponse = TokenResponse | MfaTokenResponse | PasswordChangeRequiredResponse
 
 export interface AdminProfileResponse {
   id: string

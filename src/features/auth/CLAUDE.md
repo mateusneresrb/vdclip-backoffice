@@ -6,14 +6,15 @@ Autenticação e perfil de administradores do backoffice.
 Integrado com `vdclip-backoffice-api` (FastAPI). Autenticação via JWT + refresh token (httpOnly cookie).
 
 ## Auth Flow
-1. **Login** → `POST /api/auth/login` → retorna `TokenResponse` ou `MfaTokenResponse`
+1. **Login** → `POST /api/auth/login` → retorna `TokenResponse`, `MfaTokenResponse` ou `PasswordChangeRequiredResponse`
+1b. **Password Change (se necessario)** → `POST /api/auth/force-change-password` → retorna `TokenResponse` ou `MfaTokenResponse`
 2. **MFA (se habilitado)** → `POST /api/auth/mfa/verify` → retorna `TokenResponse`
 3. **Profile** → `GET /api/auth/me` → retorna `AdminProfileResponse`
 4. **Session restore** → `POST /api/auth/refresh` (cookie httpOnly) → novo access token
 5. **MFA Setup Wall** → `POST /api/auth/mfa/setup` + `POST /api/auth/mfa/enable`
 
 ## Componentes
-- `LoginForm` — formulário de login com email/senha + step MFA (rota pública `/login`)
+- `LoginForm` — formulário de login com email/senha + step password change + step MFA (rota pública `/login`)
 - `MfaSetupWall` — tela obrigatória de setup 2FA (chama API real para QR + verificação)
 - `AdminProfilePage` — página de perfil com 4 tabs
 - `ProfileGeneralTab` — nome, email, avatar
@@ -30,6 +31,8 @@ interface AuthState {
   status: AuthStatus
   _token: string | null      // JWT access token (30min)
   _mfaToken: string | null   // temporary MFA challenge token (5min)
+  _passwordChangeToken: string | null  // temporary password change token (5min)
+  setPasswordChangeToken(token): void
   setAdmin(admin, permissions?): void
   setToken(token): void
   setMfaToken(token): void
@@ -54,6 +57,7 @@ authApi.revokeSession(sessionId)      → void
 authApi.setupMfa()                    → MfaSetupResponse
 authApi.enableMfa(code)               → void
 authApi.disableMfa(code)              → void
+authApi.forceChangePassword(token, newPassword) → LoginResponse
 ```
 
 ## API Client (`lib/api-client.ts`)
@@ -71,7 +75,7 @@ Permissões podem vir do backend (`setAdmin(admin, permissions)`) ou serem deriv
 
 ## Hooks
 ```ts
-useAuth()                    → { admin, status, login(email, pwd), verifyMfa(code), logout }
+useAuth()                    → { admin, status, login(email, pwd), verifyMfa(code), forceChangePassword(newPassword), logout }
 restoreSession()             → Promise<boolean> (chamado no bootstrap)
 useHasPermission(perm)       → boolean
 useHasAnyPermission([perms]) → boolean
@@ -92,10 +96,11 @@ Dev bypass disponível em `import.meta.env.DEV`.
 ## Types
 ```ts
 AdminAccount           // { id, name, email, role, avatar?, mfaEnabled, lastLoginAt?, createdAt? }
-AuthStatus             // 'authenticated' | 'unauthenticated' | 'loading' | 'mfa_required'
+AuthStatus             // 'authenticated' | 'unauthenticated' | 'loading' | 'mfa_required' | 'password_change_required'
 AdminRole              // 'super_admin' | 'finance_admin' | 'finance_viewer' | 'support' | 'viewer'
 TokenResponse          // { access_token, token_type, expires_in }
 MfaTokenResponse       // { mfa_required, mfa_token }
+PasswordChangeRequiredResponse // { password_change_required, password_change_token }
 AdminProfileResponse   // { id, email, first_name, last_name?, picture_url, has_mfa_enabled, roles[], permissions[] }
 MfaSetupResponse       // { secret, qr_code, provisioning_uri }
 SessionResponse        // { id, ip_address, city, region, country, user_agent, last_activity_at, created_at }

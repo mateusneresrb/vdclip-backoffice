@@ -43,26 +43,49 @@ export function useAuth() {
   const status = useAuthStore((s) => s.status)
   const setStatus = useAuthStore((s) => s.setStatus)
   const setMfaToken = useAuthStore((s) => s.setMfaToken)
+  const setPasswordChangeToken = useAuthStore((s) => s.setPasswordChangeToken)
   const clearAuth = useAuthStore((s) => s.clearAuth)
   const navigate = useNavigate()
 
-  const login = async (email: string, password: string): Promise<{ mfaRequired: boolean }> => {
+  const login = async (email: string, password: string): Promise<{ mfaRequired: boolean; passwordChangeRequired: boolean }> => {
     setStatus('loading')
     try {
       const response = await authApi.login(email, password)
 
+      if ('passwordChangeRequired' in response) {
+        setPasswordChangeToken(response.passwordChangeToken)
+        setStatus('password_change_required')
+        return { mfaRequired: false, passwordChangeRequired: true }
+      }
+
       if ('mfaRequired' in response) {
         setMfaToken(response.mfaToken)
         setStatus('mfa_required')
-        return { mfaRequired: true }
+        return { mfaRequired: true, passwordChangeRequired: false }
       }
 
       const tokenResponse = response as { accessToken: string }
       await fetchAndSetAdmin(tokenResponse.accessToken)
       navigate({ to: '/dashboard' })
-      return { mfaRequired: false }
+      return { mfaRequired: false, passwordChangeRequired: false }
     } catch (err) {
       setStatus('unauthenticated')
+      throw err
+    }
+  }
+
+  const forceChangePassword = async (newPassword: string) => {
+    const token = useAuthStore.getState()._passwordChangeToken
+    if (!token) 
+throw new Error('No password change token')
+
+    setStatus('loading')
+    try {
+      await authApi.forceChangePassword(token, newPassword)
+      setPasswordChangeToken(null)
+      setStatus('unauthenticated')
+    } catch (err) {
+      setStatus('password_change_required')
       throw err
     }
   }
@@ -94,5 +117,5 @@ throw new Error('No MFA token')
     navigate({ to: '/login' })
   }
 
-  return { admin, status, login, verifyMfa, logout }
+  return { admin, status, login, verifyMfa, forceChangePassword, logout }
 }

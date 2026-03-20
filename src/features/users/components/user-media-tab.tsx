@@ -73,7 +73,7 @@ interface ResultCardProps {
 
 function ResultCard({ result, t, processId, newVersion, ownerId, ownerType, onRender, isRendering }: ResultCardProps) {
   const validTags = (result.highlightTags ?? []).filter(
-    (tag) => tag.length > 1 && /^[a-zA-Z0-9À-ÿ]/.test(tag),
+    (tag) => tag.length > 1 && /^[\p{L}\p{N}]/u.test(tag),
   )
 
   const projectUrl = newVersion && processId && ownerId

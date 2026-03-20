@@ -75,6 +75,13 @@ export const authApi = {
     return authFetch<AdminProfileResponse>('/me', { headers })
   },
 
+  forceChangePassword(passwordChangeToken: string, newPassword: string): Promise<CamelizeKeys<void>> {
+    return authFetch<void>('/force-change-password', {
+      method: 'POST',
+      body: jsonBody({ passwordChangeToken, newPassword }),
+    })
+  },
+
   changePassword(currentPassword: string, newPassword: string): Promise<CamelizeKeys<void>> {
     return authFetch<void>('/change-password', {
       method: 'PUT',

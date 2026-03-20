@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
-import { ArrowLeft, Loader2, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, KeyRound, Loader2, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -34,10 +34,13 @@ type LoginValues = z.infer<typeof loginSchema>
 
 export function LoginForm({ className }: { className?: string }) {
   const { t } = useTranslation('admin')
-  const { login, verifyMfa, status } = useAuth()
-  const [step, setStep] = useState<'credentials' | 'mfa'>('credentials')
+  const { login, verifyMfa, forceChangePassword, status } = useAuth()
+  const [step, setStep] = useState<'credentials' | 'mfa' | 'password_change'>('credentials')
   const [mfaCode, setMfaCode] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [loginEmail, setLoginEmail] = useState('')
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -49,12 +52,41 @@ export function LoginForm({ className }: { className?: string }) {
   const onLoginSubmit = async (data: LoginValues) => {
     setError(null)
     try {
+      setLoginEmail(data.email)
       const result = await login(data.email, data.password)
+      if (result.mfaRequired) {
+        setStep('mfa')
+      } else if (result.passwordChangeRequired) {
+        setStep('password_change')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('auth.loginError'))
+    }
+  }
+
+  const onPasswordChangeSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (newPassword !== confirmPassword) {
+      setError(t('auth.passwordMismatch'))
+      return
+    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,64}$/
+    if (!passwordRegex.test(newPassword)) {
+      setError(t('auth.passwordRequirements'))
+      return
+    }
+    setError(null)
+    try {
+      await forceChangePassword(newPassword)
+      // Auto-relogin with new password
+      const result = await login(loginEmail, newPassword)
       if (result.mfaRequired) {
         setStep('mfa')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.loginError'))
+      setError(err instanceof Error ? err.message : t('auth.passwordChangeError'))
+      setNewPassword('')
+      setConfirmPassword('')
     }
   }
 
@@ -142,7 +174,7 @@ return
             </form>
           </Form>
         </div>
-      ) : (
+      ) : step === 'mfa' ? (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-5">
             <div className="flex flex-col items-center gap-2">
@@ -222,7 +254,101 @@ return
             </div>
           </form>
         </div>
-      )}
+      ) : step === 'password_change' ? (
+        <div className="space-y-6">
+          <div className="flex flex-col items-center gap-5">
+            <div className="flex flex-col items-center gap-2">
+              <img src="/vdclip-logo.svg" alt="VDClip" className="h-9" />
+              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">
+                BackOffice
+              </span>
+            </div>
+
+            <div className="flex w-full items-center gap-3">
+              <div className="h-px flex-1 bg-zinc-800" />
+              <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800/80 ring-1 ring-zinc-700/50">
+                <KeyRound className="size-4 text-orange-500" />
+              </div>
+              <div className="h-px flex-1 bg-zinc-800" />
+            </div>
+
+            <div className="flex flex-col items-center gap-1">
+              <h1 className="text-lg font-semibold tracking-tight text-white">
+                {t('auth.passwordChangeTitle')}
+              </h1>
+              <p className="text-center text-sm text-zinc-400">
+                {t('auth.passwordChangeDescription')}
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={onPasswordChangeSubmit} className="space-y-4">
+            {error && (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-center text-sm text-red-400">
+                {error}
+              </div>
+            )}
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+                  {t('auth.newPassword')}
+                </label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  autoFocus
+                  className="h-10 border-zinc-700/50 bg-zinc-800/50 text-white placeholder:text-zinc-500 focus-visible:border-orange-500/50 focus-visible:ring-orange-500/20"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+                  {t('auth.confirmPassword')}
+                </label>
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  className="h-10 border-zinc-700/50 bg-zinc-800/50 text-white placeholder:text-zinc-500 focus-visible:border-orange-500/50 focus-visible:ring-orange-500/20"
+                />
+              </div>
+            </div>
+            <p className="text-center text-xs text-zinc-500">
+              {t('auth.passwordRequirements')}
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                type="submit"
+                className="h-10 w-full bg-gradient-to-r from-orange-500 to-orange-600 font-medium text-white shadow-lg shadow-orange-500/20 transition-all hover:from-orange-600 hover:to-orange-700 hover:shadow-orange-500/30"
+                disabled={isLoading || !newPassword || !confirmPassword}
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('auth.changePassword')}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300"
+                onClick={() => {
+                  setStep('credentials')
+                  setNewPassword('')
+                  setConfirmPassword('')
+                  setError(null)
+                }}
+                disabled={isLoading}
+              >
+                <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
+                {t('auth.back')}
+              </Button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   )
 }

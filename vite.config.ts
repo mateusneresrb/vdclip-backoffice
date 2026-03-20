@@ -3,7 +3,7 @@ import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react-swc'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 
 const needsPolling = process.platform === 'win32' || __dirname.startsWith('/mnt/')
 
@@ -46,6 +46,13 @@ export default defineConfig({
       'sonner',
       'date-fns',
     ],
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+    css: false,
   },
   build: {
     rollupOptions: {
