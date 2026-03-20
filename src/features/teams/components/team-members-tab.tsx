@@ -94,7 +94,7 @@ return members
           <>
             <div className="divide-y rounded-lg border">
               {pagination.paginatedItems.map((member) => {
-                const initials = member.name.split(' ').map((n) => n[0]).join('').toUpperCase()
+                const initials = member.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
                 const isOwner = member.role === 'owner'
                 const RoleIcon = roleIcons[member.role] ?? User
 
