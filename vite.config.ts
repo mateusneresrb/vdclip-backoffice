@@ -1,4 +1,4 @@
-import path from 'node:path'
+bun installimport path from 'node:path'
 import process from 'node:process'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'

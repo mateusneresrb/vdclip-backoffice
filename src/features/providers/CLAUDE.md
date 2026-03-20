@@ -19,13 +19,18 @@ type ProviderCategory = 'video_source' | 'payment' | 'ai_processing' | 'publishi
 
 Exibidas nessa ordem: Video Source → Payment → AI Processing → Publishing.
 
-## Hook
+## Hooks
 
 ```ts
-useAdminProviders()  // re-exportado de @/features/admin/hooks/use-admin-providers
+useAdminProviders()      // re-exportado de @/features/admin/hooks/use-admin-providers
+useVideoSources()        // GET /platform/video-sources — retorna { providers: Record<string, boolean> }
+useUpdateVideoSources()  // PATCH /platform/video-sources — mutation para toggle de providers
 ```
 
-Retorna `SupportedProvider[]` com todos os providers configurados.
+- `useAdminProviders()` retorna `SupportedProvider[]` com todos os providers configurados.
+- `useVideoSources()` retorna o estado enabled/disabled de cada provider no DynamoDB.
+- `ProvidersManager` faz merge dos dois: lista de providers vem de `useAdminProviders`, estado enabled vem de `useVideoSources`.
+- Toggle chama `useUpdateVideoSources` (PATCH real) e invalida ambas as queries.
 
 ## Types
 
@@ -41,5 +46,4 @@ SupportedProvider {
 
 ## Nota
 
-Este feature é um thin wrapper. Dados e tipos reais ficam em `@/features/admin`.
-`useProviders` e `SupportedProvider` re-exportam de lá via `index.ts`.
+Tipos e lista de providers ficam em `@/features/admin`. Estado de toggle (enabled/disabled) vem do DynamoDB via `use-video-sources.ts` (hook próprio deste feature).
