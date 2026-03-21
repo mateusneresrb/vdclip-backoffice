@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { i18n } from '@/i18n'
 
 import { adminProviderKeys } from '@/features/admin/hooks/use-admin-providers'
+import { i18n } from '@/i18n'
 import { apiClient } from '@/lib/api-client'
 import { showMutationError, showSuccessToast } from '@/lib/toast'
 
