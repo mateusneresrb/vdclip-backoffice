@@ -2,7 +2,7 @@ import type { AdminRole } from '@/features/auth/lib/permissions'
 import { useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronDown, ChevronUp, Pencil, Plus, Shield, Users } from 'lucide-react'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { EmptyState } from '@/components/shared/empty-state'
@@ -33,8 +33,6 @@ import { apiClient } from '@/lib/api-client'
 import { showErrorToast, showSuccessToast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { useAdminRoles } from '../hooks/use-admin-roles'
-
-const SYSTEM_ROLES: AdminRole[] = ['super_admin']
 
 const RESOURCES = ['users', 'teams', 'finance', 'metrics', 'admin', 'audit', 'providers', 'subscriptions'] as const
 const ACTIONS = ['read', 'write', 'delete', 'export'] as const
@@ -67,6 +65,7 @@ export function AdminRolesTab() {
     description: string
     permissionCount: number
     adminCount: number
+    isSystem: boolean
   } | null>(null)
 
   if (isLoading) {
@@ -99,7 +98,6 @@ export function AdminRolesTab() {
             role={role}
             t={t}
             onEdit={() => setEditingRole(role)}
-            isSystem={SYSTEM_ROLES.includes(role.name)}
           />
         ))}
       </div>
@@ -123,15 +121,46 @@ function RoleCard({
   role,
   t,
   onEdit,
-  isSystem,
 }: {
   role: { id: string; name: AdminRole; displayName: string; description: string; permissionCount: number; adminCount: number }
   t: (key: string) => string
   onEdit: () => void
-  isSystem: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
-  const permissions = ROLE_PERMISSIONS[role.name] ?? []
+  const [permissions, setPermissions] = useState<string[]>([])
+  const [loadingPerms, setLoadingPerms] = useState(false)
+
+  const fetchPermissions = async () => {
+    setLoadingPerms(true)
+    try {
+      const data = await apiClient.get<{ permissions?: { resource: string, action: string }[] }>(`/admin-roles/${role.id}`)
+      setPermissions((data.permissions ?? []).map(p => `${p.resource}:${p.action}`))
+    } catch {
+      setPermissions([])
+    } finally {
+      setLoadingPerms(false)
+    }
+  }
+
+  // Re-fetch permissions when role data changes (e.g. after edit save)
+  const permCountRef = useRef(role.permissionCount)
+  useEffect(() => {
+    if (permCountRef.current !== role.permissionCount) {
+      permCountRef.current = role.permissionCount
+      if (expanded) {
+        fetchPermissions()
+      } else {
+        setPermissions([])
+      }
+    }
+  }, [role.permissionCount])
+
+  const handleToggleExpand = async () => {
+    if (!expanded && permissions.length === 0) {
+      await fetchPermissions()
+    }
+    setExpanded(!expanded)
+  }
 
   return (
     <Card>
@@ -149,9 +178,8 @@ function RoleCard({
             variant="ghost"
             size="icon"
             className="size-8"
-            disabled={isSystem}
             onClick={onEdit}
-            title={isSystem ? t('adminUsers.systemRoleHint') : t('adminUsers.edit')}
+            title={t('adminUsers.edit')}
           >
             <Pencil className="size-3.5" />
           </Button>
@@ -177,7 +205,8 @@ function RoleCard({
           variant="ghost"
           size="sm"
           className="h-7 px-2 text-xs"
-          onClick={() => setExpanded(!expanded)}
+          onClick={handleToggleExpand}
+          disabled={loadingPerms}
         >
           {expanded ? (
             <>
@@ -194,11 +223,14 @@ function RoleCard({
 
         {expanded && (
           <div className="flex flex-wrap gap-1.5">
-            {permissions.map((perm) => (
+            {permissions.map(perm => (
               <Badge key={perm} variant="secondary" className="text-[10px] font-normal">
                 {perm}
               </Badge>
             ))}
+            {permissions.length === 0 && !loadingPerms && (
+              <span className="text-xs text-muted-foreground">Nenhuma permissão atribuída</span>
+            )}
           </div>
         )}
       </CardContent>
@@ -303,8 +335,11 @@ function CreateRoleDialog({
         description: description || undefined,
       })
       if (role?.id && selectedPermissions.size > 0) {
+        const permExternalIds = Array.from(selectedPermissions).map(
+          p => `perm-${p.replace(':', '-')}`,
+        )
         await apiClient.put(`/admin-roles/${role.id}/permissions`, {
-          permissionIds: Array.from(selectedPermissions),
+          permissionIds: permExternalIds,
         })
       }
       await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
@@ -372,17 +407,11 @@ function EditRoleDialog({
   role,
   onClose,
 }: {
-  role: { id: string; name: AdminRole; displayName: string; description: string; permissionCount: number; adminCount: number } | null
+  role: { id: string; name: AdminRole; displayName: string; description: string; permissionCount: number; adminCount: number; isSystem: boolean } | null
   onClose: () => void
 }) {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
-
-  const initialPermissions = useMemo(() => {
-    if (!role)
-return new Set<string>()
-    return new Set(ROLE_PERMISSIONS[role.name] ?? [])
-  }, [role])
 
   const [displayName, setDisplayName] = useState('')
   const [description, setDescription] = useState('')
@@ -391,14 +420,21 @@ return new Set<string>()
 
   const open = !!role
 
-  // Sync state when role changes
+  // Fetch current permissions from API when role changes
   useEffect(() => {
     if (role) {
       setDisplayName(role.displayName)
       setDescription(role.description)
-      setSelectedPermissions(initialPermissions)
+      apiClient.get<{ permissions?: { resource: string, action: string }[] }>(`/admin-roles/${role.id}`)
+        .then((data) => {
+          const perms = (data.permissions ?? []).map(p => `${p.resource}:${p.action}`)
+          setSelectedPermissions(new Set(perms))
+        })
+        .catch(() => {
+          setSelectedPermissions(new Set(ROLE_PERMISSIONS[role.name] ?? []))
+        })
     }
-  }, [role, initialPermissions])
+  }, [role])
 
   const handleToggle = (perm: string) => {
     setSelectedPermissions((prev) => {
@@ -417,12 +453,19 @@ return new Set<string>()
       return
     setIsSubmitting(true)
     try {
-      await apiClient.patch(`/admin-roles/${role.id}`, {
-        name: displayName,
-        description: description || undefined,
-      })
+      // System roles can't have name/description changed, only permissions
+      if (!role.isSystem) {
+        await apiClient.patch(`/admin-roles/${role.id}`, {
+          name: displayName,
+          description: description || undefined,
+        })
+      }
+      // Convert permission strings (e.g. "finance:read") to external_ids (e.g. "perm-finance-read")
+      const permExternalIds = Array.from(selectedPermissions).map(
+        p => `perm-${p.replace(':', '-')}`,
+      )
       await apiClient.put(`/admin-roles/${role.id}/permissions`, {
-        permissionIds: Array.from(selectedPermissions),
+        permissionIds: permExternalIds,
       })
       await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t('toast.roleUpdated') })

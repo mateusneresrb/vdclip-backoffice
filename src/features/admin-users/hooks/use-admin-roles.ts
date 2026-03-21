@@ -11,11 +11,12 @@ const adminRolesKeys = {
 function mapRole(data: Record<string, unknown>): AdminRoleInfo {
   return {
     id: String(data.id),
-    name: (data.name as AdminRoleInfo['name']) ?? 'viewer',
-    displayName: String(data.displayName ?? data.name ?? ''),
+    name: (data.slug as AdminRoleInfo['name']) ?? 'viewer',
+    displayName: String(data.name ?? data.slug ?? ''),
     description: String(data.description ?? ''),
     permissionCount: Number(data.permissionCount ?? 0),
     adminCount: Number(data.adminCount ?? 0),
+    isSystem: Boolean(data.isSystem ?? false),
   }
 }
 

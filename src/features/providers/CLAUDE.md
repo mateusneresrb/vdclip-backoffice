@@ -32,6 +32,14 @@ useUpdateVideoSources()  // PATCH /platform/video-sources — mutation para togg
 - `ProvidersManager` faz merge dos dois: lista de providers vem de `useAdminProviders`, estado enabled vem de `useVideoSources`.
 - Toggle chama `useUpdateVideoSources` (PATCH real) e invalida ambas as queries.
 
+## Mutation Hook
+
+```ts
+useToggleProvider()  // from ./hooks/use-provider-mutations
+```
+
+Calls `PATCH /platform/providers/{slug}` with `{ enabled: boolean }`. On success, invalidates `adminProviderKeys.all` query and shows success toast.
+
 ## Types
 
 ```ts
@@ -46,4 +54,4 @@ SupportedProvider {
 
 ## Nota
 
-Tipos e lista de providers ficam em `@/features/admin`. Estado de toggle (enabled/disabled) vem do DynamoDB via `use-video-sources.ts` (hook próprio deste feature).
+Tipos e lista de providers ficam em `@/features/admin`. Estado de toggle (enabled/disabled) vem do DynamoDB via `use-video-sources.ts` (hook proprio deste feature). O toggle persiste o estado via `PATCH /platform/video-sources`.

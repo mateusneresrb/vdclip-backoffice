@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { apiClient } from '@/lib/api-client'
 
-const adminProviderKeys = {
+export const adminProviderKeys = {
   all: ['admin-providers'] as const,
 }
 

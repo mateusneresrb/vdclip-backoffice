@@ -1,7 +1,7 @@
 import type { SupportedProvider } from '@/features/admin/types'
 import { useQueryClient } from '@tanstack/react-query'
-import { ToggleRight } from 'lucide-react'
 
+import { ToggleRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
@@ -50,7 +50,8 @@ export function ProvidersManager() {
   const videoSourceProviders = mergedProviders.filter((p) => p.category === 'video_source')
 
   const handleToggle = (provider: SupportedProvider) => {
-    if (!videoSources?.providers) return
+    if (!videoSources?.providers) 
+return
 
     const updatedProviders = {
       ...videoSources.providers,

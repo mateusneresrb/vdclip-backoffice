@@ -1889,6 +1889,7 @@
     "mfaDisabled": "2FA desativado com sucesso",
     "receivableMarked": "Recebimento registrado com sucesso",
     "providerToggled": "Integração atualizada com sucesso",
+    "providerToggleError": "Erro ao atualizar integração",
     "templateDeleteError": "Erro ao excluir template",
     "templateSetDefaultError": "Erro ao definir template padrão",
     "templateUpdateError": "Erro ao atualizar configurações do template",

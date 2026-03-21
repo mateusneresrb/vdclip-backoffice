@@ -12,11 +12,10 @@ import {
   ShieldX,
   Users,
 } from 'lucide-react'
-
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { PaginationControls } from '@/components/pagination-controls'
+
 import { EmptyState } from '@/components/shared/empty-state'
 import {
   AlertDialog,
@@ -28,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -63,12 +63,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useHasPermission } from '@/features/auth/hooks/use-permissions'
+import { PERMISSIONS } from '@/features/auth/lib/permissions'
+import { useAuthStore } from '@/features/auth/stores/auth-store'
 import { usePagination } from '@/hooks/use-pagination'
 import { apiClient } from '@/lib/api-client'
 import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 import { cn } from '@/lib/utils'
 import { useAdminAccounts } from '../hooks/use-admin-accounts'
+import { useAdminRoles } from '../hooks/use-admin-roles'
 
 const roleColors: Record<string, string> = {
   super_admin: 'bg-red-500/15 text-red-700 dark:text-red-400',
@@ -78,12 +82,19 @@ const roleColors: Record<string, string> = {
   viewer: 'bg-muted text-muted-foreground',
 }
 
-const roles = ['super_admin', 'finance_admin', 'finance_viewer', 'support', 'viewer'] as const
 
 export function AdminUsersListTab() {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
+  const currentAdmin = useAuthStore(s => s.admin)
+  const canWrite = useHasPermission(PERMISSIONS.ADMIN_WRITE)
   const { data: admins, isLoading } = useAdminAccounts()
+  const { data: availableRoles } = useAdminRoles()
+
+  const getRoleDisplayName = (slug: string) => {
+    const found = availableRoles?.find(r => r.name === slug)
+    return found?.displayName ?? slug
+  }
 
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
@@ -114,13 +125,11 @@ return []
   const handleToggleConfirm = async () => {
     if (!toggleAdmin)
       return
-    const endpoint = toggleAdmin.isActive
-      ? `/admin-users/${toggleAdmin.id}/lock`
-      : `/admin-users/${toggleAdmin.id}/unlock`
     const key = toggleAdmin.isActive ? 'toast.adminDeactivated' : 'toast.adminActivated'
     try {
-      await apiClient.post(endpoint, {})
+      await apiClient.patch(`/admin-users/${toggleAdmin.id}`, { isActive: !toggleAdmin.isActive })
       await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t(key) })
     } catch (error) {
       showErrorToast({
@@ -161,9 +170,9 @@ return []
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t('adminUsers.allRoles')}</SelectItem>
-            {roles.map((role) => (
-              <SelectItem key={role} value={role}>
-                {t(`adminUsers.roles.${role}`)}
+            {(availableRoles ?? []).map((r) => (
+              <SelectItem key={r.name} value={r.name}>
+                {r.displayName}
               </SelectItem>
             ))}
           </SelectContent>
@@ -178,10 +187,12 @@ return []
             <SelectItem value="inactive">{t('adminUsers.inactive')}</SelectItem>
           </SelectContent>
         </Select>
-        <Button className="gap-1.5" onClick={() => setShowCreateDialog(true)}>
-          <Plus className="size-4" />
-          {t('adminUsers.createAdmin')}
-        </Button>
+        {canWrite && (
+          <Button className="gap-1.5" onClick={() => setShowCreateDialog(true)}>
+            <Plus className="size-4" />
+            {t('adminUsers.createAdmin')}
+          </Button>
+        )}
       </div>
 
       {/* Table */}
@@ -228,7 +239,7 @@ return []
                         roleColors[admin.role] ?? roleColors.viewer,
                       )}
                     >
-                      {t(`adminUsers.roles.${admin.role}`)}
+                      {getRoleDisplayName(admin.role)}
                     </span>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
@@ -273,6 +284,7 @@ return []
                     </span>
                   </TableCell>
                   <TableCell>
+                    {canWrite && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="size-8">
@@ -284,21 +296,24 @@ return []
                           <Pencil className="mr-2 size-4" />
                           {t('adminUsers.edit')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setToggleAdmin(admin)}>
-                          {admin.isActive ? (
-                            <>
-                              <ShieldX className="mr-2 size-4" />
-                              {t('adminUsers.deactivate')}
-                            </>
-                          ) : (
-                            <>
-                              <ShieldCheck className="mr-2 size-4" />
-                              {t('adminUsers.activate')}
-                            </>
-                          )}
-                        </DropdownMenuItem>
+                        {currentAdmin?.id !== admin.id && (
+                          <DropdownMenuItem onClick={() => setToggleAdmin(admin)}>
+                            {admin.isActive ? (
+                              <>
+                                <ShieldX className="mr-2 size-4" />
+                                {t('adminUsers.deactivate')}
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck className="mr-2 size-4" />
+                                {t('adminUsers.activate')}
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -365,6 +380,7 @@ function CreateAdminDialog({
 }) {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
+  const { data: availableRoles } = useAdminRoles()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -410,10 +426,14 @@ function CreateAdminDialog({
         email,
         password,
       })
-      if (role) {
-        await apiClient.put(`/admin-users/${result.id}/roles`, { roleIds: [role] })
+      if (role && availableRoles) {
+        const matched = availableRoles.find(r => r.name === role)
+        if (matched) {
+          await apiClient.put(`/admin-users/${result.id}/roles`, { roleIds: [matched.id] })
+        }
       }
       await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t('toast.adminInvited') })
       onClose()
       setFirstName('')
@@ -422,10 +442,13 @@ function CreateAdminDialog({
       setRole('')
       setPassword('')
       setPasswordError(null)
-    } catch (error) {
+    } catch (error: unknown) {
+      const description = error && typeof error === 'object' && 'errorMessage' in error
+        ? String((error as { errorMessage: string }).errorMessage)
+        : error instanceof Error ? error.message : undefined
       showErrorToast({
         title: t('toast.error'),
-        description: error instanceof Error ? error.message : undefined,
+        description,
       })
     } finally {
       setIsSubmitting(false)
@@ -463,9 +486,9 @@ function CreateAdminDialog({
                 <SelectValue placeholder={t('adminUsers.selectRole')} />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {t(`adminUsers.roles.${r}`)}
+                {(availableRoles ?? []).map((r) => (
+                  <SelectItem key={r.name} value={r.name}>
+                    {r.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -520,6 +543,7 @@ function EditAdminDialog({
 }) {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
+  const { data: availableRoles } = useAdminRoles()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('')
@@ -544,14 +568,29 @@ onClose()
       return
     setIsSubmitting(true)
     try {
-      await apiClient.patch(`/admin-users/${admin.id}`, { name, email, role })
+      const [firstName, ...lastParts] = name.trim().split(/\s+/)
+      await apiClient.patch(`/admin-users/${admin.id}`, {
+        firstName,
+        lastName: lastParts.length > 0 ? lastParts.join(' ') : undefined,
+        email,
+      })
+      if (role !== admin.role && availableRoles) {
+        const matched = availableRoles.find(r => r.name === role)
+        if (matched) {
+          await apiClient.put(`/admin-users/${admin.id}/roles`, { roleIds: [matched.id] })
+        }
+      }
       await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t('toast.adminUpdated') })
       onClose()
-    } catch (error) {
+    } catch (error: unknown) {
+      const description = error && typeof error === 'object' && 'errorMessage' in error
+        ? String((error as { errorMessage: string }).errorMessage)
+        : error instanceof Error ? error.message : undefined
       showErrorToast({
         title: t('toast.error'),
-        description: error instanceof Error ? error.message : undefined,
+        description,
       })
     } finally {
       setIsSubmitting(false)
@@ -581,9 +620,9 @@ onClose()
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {t(`adminUsers.roles.${r}`)}
+                {(availableRoles ?? []).map((r) => (
+                  <SelectItem key={r.name} value={r.name}>
+                    {r.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>
