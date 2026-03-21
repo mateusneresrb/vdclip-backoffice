@@ -74,7 +74,7 @@ export function useAuditLogsRaw() {
       const data = await apiClient.get<
         Record<string, unknown>[]
         | { items: Record<string, unknown>[] }
-      >('/audit-logs', { page: 1, per_page: 200 })
+      >('/audit-logs', { page: 1, per_page: 100 })
       const items = Array.isArray(data) ? data : (data.items ?? [])
       return items.map(mapAuditLog)
     },

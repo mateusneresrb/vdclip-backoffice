@@ -19,6 +19,7 @@ export interface AdminRoleInfo {
   description: string
   permissionCount: number
   adminCount: number
+  isSystem: boolean
 }
 
 export interface AdminSession {

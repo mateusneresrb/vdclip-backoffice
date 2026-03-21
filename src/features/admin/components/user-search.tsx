@@ -109,7 +109,7 @@ export function UserSearch() {
                   <Avatar className="h-10 w-10 transition-opacity hover:opacity-80">
                     <AvatarImage src={user.avatar} alt={user.name} />
                     <AvatarFallback>
-                      {user.name.split(' ').map((n) => n[0]).join('').toUpperCase()}
+                      {user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
                 </Link>

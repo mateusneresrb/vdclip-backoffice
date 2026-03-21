@@ -19,7 +19,9 @@ function mapAdmin(data: Record<string, unknown>): BackofficeAdmin {
     id: String(data.id),
     name,
     email: String(data.email ?? ''),
-    role: (data.role as BackofficeAdmin['role']) ?? 'viewer',
+    role: (Array.isArray(data.roles) && data.roles.length > 0
+      ? data.roles[0]
+      : data.role ?? 'viewer') as BackofficeAdmin['role'],
     avatar: (data.pictureUrl ?? data.avatar) as string | undefined,
     mfaEnabled: Boolean(data.hasMfaEnabled ?? data.mfaEnabled ?? false),
     isActive: Boolean(data.isActive ?? true),

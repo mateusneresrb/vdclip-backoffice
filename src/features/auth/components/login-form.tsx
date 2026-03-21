@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
-import { ArrowLeft, KeyRound, Loader2, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, KeyRound, Loader2, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -40,6 +40,8 @@ export function LoginForm({ className }: { className?: string }) {
   const [error, setError] = useState<string | null>(null)
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loginEmail, setLoginEmail] = useState('')
 
   const loginForm = useForm<LoginValues>({
@@ -293,28 +295,52 @@ return
                 <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                   {t('auth.newPassword')}
                 </label>
-                <Input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  autoFocus
-                  className="h-10 border-zinc-700/50 bg-zinc-800/50 text-white placeholder:text-zinc-500 focus-visible:border-orange-500/50 focus-visible:ring-orange-500/20"
-                />
+                <div className="relative">
+                  <Input
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    autoFocus
+                    className="h-10 border-zinc-700/50 bg-zinc-800/50 pr-10 text-white placeholder:text-zinc-500 focus-visible:border-orange-500/50 focus-visible:ring-orange-500/20"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-10 w-10 text-zinc-500 hover:text-zinc-300"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    tabIndex={-1}
+                  >
+                    {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </Button>
+                </div>
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-zinc-300">
                   {t('auth.confirmPassword')}
                 </label>
-                <Input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  className="h-10 border-zinc-700/50 bg-zinc-800/50 text-white placeholder:text-zinc-500 focus-visible:border-orange-500/50 focus-visible:ring-orange-500/20"
-                />
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    className="h-10 border-zinc-700/50 bg-zinc-800/50 pr-10 text-white placeholder:text-zinc-500 focus-visible:border-orange-500/50 focus-visible:ring-orange-500/20"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-10 w-10 text-zinc-500 hover:text-zinc-300"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </Button>
+                </div>
               </div>
             </div>
             <p className="text-center text-xs text-zinc-500">

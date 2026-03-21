@@ -149,11 +149,24 @@ Object.keys(newValues).forEach((k) => keys.add(k))
 }
 
 function formatValue(value: unknown): string {
-  if (value === null || value === undefined) 
+  if (value === null || value === undefined)
 return '-'
-  if (typeof value === 'object') 
+  if (typeof value === 'object')
 return JSON.stringify(value)
   return String(value)
+}
+
+function formatFieldName(key: string): string {
+  // camelCase → human readable: "mfaSecretGenerated" → "MFA Secret Generated"
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, s => s.toUpperCase())
+    .replace(/\bMfa\b/g, 'MFA')
+    .replace(/\bId\b/g, 'ID')
+    .replace(/\bIds\b/g, 'IDs')
+    .replace(/\bIp\b/g, 'IP')
+    .replace(/\bUrl\b/g, 'URL')
+    .trim()
 }
 
 function exportToCsv(logs: AuditLogEntry[], t: (key: string, opts?: Record<string, unknown>) => string) {
@@ -221,7 +234,7 @@ return null
           const changed = JSON.stringify(oldVal) !== JSON.stringify(newVal)
           return (
             <div key={key} className="grid min-w-[480px] grid-cols-3 gap-px text-xs" role="row">
-              <div className="bg-background px-3 py-1.5 font-mono font-medium" role="cell">{key}</div>
+              <div className="bg-background px-3 py-1.5 font-medium" role="cell">{formatFieldName(key)}</div>
               <div className={cn('px-3 py-1.5 font-mono', changed ? 'bg-red-500/10 text-red-700 dark:text-red-400' : 'bg-background text-muted-foreground')} role="cell">
                 {oldVal !== undefined ? formatValue(oldVal) : '-'}
               </div>

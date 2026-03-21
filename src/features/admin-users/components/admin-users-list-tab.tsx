@@ -1,6 +1,8 @@
 import type { BackofficeAdmin } from '../types'
 import { useQueryClient } from '@tanstack/react-query'
 import {
+  Eye,
+  EyeOff,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -10,11 +12,10 @@ import {
   ShieldX,
   Users,
 } from 'lucide-react'
-
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { PaginationControls } from '@/components/pagination-controls'
+
 import { EmptyState } from '@/components/shared/empty-state'
 import {
   AlertDialog,
@@ -26,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -61,12 +63,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useHasPermission } from '@/features/auth/hooks/use-permissions'
+import { PERMISSIONS } from '@/features/auth/lib/permissions'
+import { useAuthStore } from '@/features/auth/stores/auth-store'
 import { usePagination } from '@/hooks/use-pagination'
 import { apiClient } from '@/lib/api-client'
 import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 import { cn } from '@/lib/utils'
 import { useAdminAccounts } from '../hooks/use-admin-accounts'
+import { useAdminRoles } from '../hooks/use-admin-roles'
 
 const roleColors: Record<string, string> = {
   super_admin: 'bg-red-500/15 text-red-700 dark:text-red-400',
@@ -76,12 +82,19 @@ const roleColors: Record<string, string> = {
   viewer: 'bg-muted text-muted-foreground',
 }
 
-const roles = ['super_admin', 'finance_admin', 'finance_viewer', 'support', 'viewer'] as const
 
 export function AdminUsersListTab() {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
+  const currentAdmin = useAuthStore(s => s.admin)
+  const canWrite = useHasPermission(PERMISSIONS.ADMIN_WRITE)
   const { data: admins, isLoading } = useAdminAccounts()
+  const { data: availableRoles } = useAdminRoles()
+
+  const getRoleDisplayName = (slug: string) => {
+    const found = availableRoles?.find(r => r.name === slug)
+    return found?.displayName ?? slug
+  }
 
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
@@ -112,13 +125,11 @@ return []
   const handleToggleConfirm = async () => {
     if (!toggleAdmin)
       return
-    const endpoint = toggleAdmin.isActive
-      ? `/admin-users/${toggleAdmin.id}/lock`
-      : `/admin-users/${toggleAdmin.id}/unlock`
     const key = toggleAdmin.isActive ? 'toast.adminDeactivated' : 'toast.adminActivated'
     try {
-      await apiClient.post(endpoint, {})
+      await apiClient.patch(`/admin-users/${toggleAdmin.id}`, { isActive: !toggleAdmin.isActive })
       await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t(key) })
     } catch (error) {
       showErrorToast({
@@ -159,9 +170,9 @@ return []
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t('adminUsers.allRoles')}</SelectItem>
-            {roles.map((role) => (
-              <SelectItem key={role} value={role}>
-                {t(`adminUsers.roles.${role}`)}
+            {(availableRoles ?? []).map((r) => (
+              <SelectItem key={r.name} value={r.name}>
+                {r.displayName}
               </SelectItem>
             ))}
           </SelectContent>
@@ -176,10 +187,12 @@ return []
             <SelectItem value="inactive">{t('adminUsers.inactive')}</SelectItem>
           </SelectContent>
         </Select>
-        <Button className="gap-1.5" onClick={() => setShowCreateDialog(true)}>
-          <Plus className="size-4" />
-          {t('adminUsers.createAdmin')}
-        </Button>
+        {canWrite && (
+          <Button className="gap-1.5" onClick={() => setShowCreateDialog(true)}>
+            <Plus className="size-4" />
+            {t('adminUsers.createAdmin')}
+          </Button>
+        )}
       </div>
 
       {/* Table */}
@@ -226,7 +239,7 @@ return []
                         roleColors[admin.role] ?? roleColors.viewer,
                       )}
                     >
-                      {t(`adminUsers.roles.${admin.role}`)}
+                      {getRoleDisplayName(admin.role)}
                     </span>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
@@ -271,6 +284,7 @@ return []
                     </span>
                   </TableCell>
                   <TableCell>
+                    {canWrite && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="size-8">
@@ -282,21 +296,24 @@ return []
                           <Pencil className="mr-2 size-4" />
                           {t('adminUsers.edit')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setToggleAdmin(admin)}>
-                          {admin.isActive ? (
-                            <>
-                              <ShieldX className="mr-2 size-4" />
-                              {t('adminUsers.deactivate')}
-                            </>
-                          ) : (
-                            <>
-                              <ShieldCheck className="mr-2 size-4" />
-                              {t('adminUsers.activate')}
-                            </>
-                          )}
-                        </DropdownMenuItem>
+                        {currentAdmin?.id !== admin.id && (
+                          <DropdownMenuItem onClick={() => setToggleAdmin(admin)}>
+                            {admin.isActive ? (
+                              <>
+                                <ShieldX className="mr-2 size-4" />
+                                {t('adminUsers.deactivate')}
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck className="mr-2 size-4" />
+                                {t('adminUsers.activate')}
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -352,6 +369,8 @@ setToggleAdmin(null) }}>
   )
 }
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,64}$/
+
 function CreateAdminDialog({
   open,
   onClose,
@@ -361,44 +380,82 @@ function CreateAdminDialog({
 }) {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
-  const [name, setName] = useState('')
+  const { data: availableRoles } = useAdminRoles()
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('')
-  const [tempPassword, setTempPassword] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleOpenChange = (v: boolean) => {
     if (!v)
-onClose()
+      onClose()
+  }
+
+  const validatePassword = (value: string) => {
+    if (!value) {
+      setPasswordError(null)
+      return
+    }
+    if (!PASSWORD_REGEX.test(value)) {
+      setPasswordError(t('adminUsers.passwordRequirements'))
+    } else {
+      setPasswordError(null)
+    }
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setPassword(value)
+    validatePassword(value)
   }
 
   const handleCreate = async () => {
+    if (!PASSWORD_REGEX.test(password)) {
+      setPasswordError(t('adminUsers.passwordRequirements'))
+      return
+    }
     setIsSubmitting(true)
     try {
-      await apiClient.post('/admin-users', {
-        name,
+      const result = await apiClient.post<{ id: string }>('/admin-users', {
+        firstName,
+        lastName: lastName || undefined,
         email,
-        role,
-        tempPassword,
+        password,
       })
+      if (role && availableRoles) {
+        const matched = availableRoles.find(r => r.name === role)
+        if (matched) {
+          await apiClient.put(`/admin-users/${result.id}/roles`, { roleIds: [matched.id] })
+        }
+      }
       await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t('toast.adminInvited') })
       onClose()
-      setName('')
+      setFirstName('')
+      setLastName('')
       setEmail('')
       setRole('')
-      setTempPassword('')
-    } catch (error) {
+      setPassword('')
+      setPasswordError(null)
+    } catch (error: unknown) {
+      const description = error && typeof error === 'object' && 'errorMessage' in error
+        ? String((error as { errorMessage: string }).errorMessage)
+        : error instanceof Error ? error.message : undefined
       showErrorToast({
         title: t('toast.error'),
-        description: error instanceof Error ? error.message : undefined,
+        description,
       })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const isValid = name.trim() && email.trim() && role && tempPassword.trim()
+  const isValid = firstName.trim() && email.trim() && role && password.trim() && !passwordError
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -408,9 +465,15 @@ onClose()
           <DialogDescription>{t('adminUsers.createAdminDescription')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label>{t('adminUsers.name')}</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('adminUsers.namePlaceholder')} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>{t('adminUsers.firstName')}</Label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={t('adminUsers.firstNamePlaceholder')} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('adminUsers.lastName')}</Label>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder={t('adminUsers.lastNamePlaceholder')} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label>{t('adminUsers.email')}</Label>
@@ -423,9 +486,9 @@ onClose()
                 <SelectValue placeholder={t('adminUsers.selectRole')} />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {t(`adminUsers.roles.${r}`)}
+                {(availableRoles ?? []).map((r) => (
+                  <SelectItem key={r.name} value={r.name}>
+                    {r.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -433,12 +496,29 @@ onClose()
           </div>
           <div className="space-y-2">
             <Label>{t('adminUsers.tempPassword')}</Label>
-            <Input
-              type="password"
-              value={tempPassword}
-              onChange={(e) => setTempPassword(e.target.value)}
-              placeholder={t('adminUsers.tempPasswordPlaceholder')}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={handlePasswordChange}
+                placeholder={t('adminUsers.tempPasswordPlaceholder')}
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:text-foreground"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </Button>
+            </div>
+            {passwordError && (
+              <p className="text-xs text-destructive">{passwordError}</p>
+            )}
+            <p className="text-xs text-muted-foreground">{t('adminUsers.passwordRequirements')}</p>
           </div>
         </div>
         <DialogFooter>
@@ -463,6 +543,7 @@ function EditAdminDialog({
 }) {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
+  const { data: availableRoles } = useAdminRoles()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('')
@@ -487,14 +568,29 @@ onClose()
       return
     setIsSubmitting(true)
     try {
-      await apiClient.patch(`/admin-users/${admin.id}`, { name, email, role })
+      const [firstName, ...lastParts] = name.trim().split(/\s+/)
+      await apiClient.patch(`/admin-users/${admin.id}`, {
+        firstName,
+        lastName: lastParts.length > 0 ? lastParts.join(' ') : undefined,
+        email,
+      })
+      if (role !== admin.role && availableRoles) {
+        const matched = availableRoles.find(r => r.name === role)
+        if (matched) {
+          await apiClient.put(`/admin-users/${admin.id}/roles`, { roleIds: [matched.id] })
+        }
+      }
       await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
+      await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t('toast.adminUpdated') })
       onClose()
-    } catch (error) {
+    } catch (error: unknown) {
+      const description = error && typeof error === 'object' && 'errorMessage' in error
+        ? String((error as { errorMessage: string }).errorMessage)
+        : error instanceof Error ? error.message : undefined
       showErrorToast({
         title: t('toast.error'),
-        description: error instanceof Error ? error.message : undefined,
+        description,
       })
     } finally {
       setIsSubmitting(false)
@@ -524,9 +620,9 @@ onClose()
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {t(`adminUsers.roles.${r}`)}
+                {(availableRoles ?? []).map((r) => (
+                  <SelectItem key={r.name} value={r.name}>
+                    {r.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -71,6 +71,7 @@ export function UserDetailHeader({ user }: { user: AdminUser }) {
     .map((n) => n[0])
     .join('')
     .toUpperCase()
+    .slice(0, 2)
 
   const handleStatusChange = (value: UserStatus) => {
     setPendingStatus(value)
