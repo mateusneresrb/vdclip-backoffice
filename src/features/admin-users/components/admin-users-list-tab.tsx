@@ -1,7 +1,4 @@
 import type { BackofficeAdmin } from '../types'
-import { useAuthStore } from '@/features/auth/stores/auth-store'
-import { useHasPermission } from '@/features/auth/hooks/use-permissions'
-import { PERMISSIONS } from '@/features/auth/lib/permissions'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   Eye,
@@ -15,11 +12,10 @@ import {
   ShieldX,
   Users,
 } from 'lucide-react'
-
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { PaginationControls } from '@/components/pagination-controls'
+
 import { EmptyState } from '@/components/shared/empty-state'
 import {
   AlertDialog,
@@ -31,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -66,6 +63,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useHasPermission } from '@/features/auth/hooks/use-permissions'
+import { PERMISSIONS } from '@/features/auth/lib/permissions'
+import { useAuthStore } from '@/features/auth/stores/auth-store'
 import { usePagination } from '@/hooks/use-pagination'
 import { apiClient } from '@/lib/api-client'
 import { showErrorToast, showSuccessToast } from '@/lib/toast'
