@@ -35,6 +35,7 @@ useAdminTransactions(search, typeFilter)        → TransactionPage
 useAdminSubscriptions(search, statusFilter)     → Subscription[]
 useAdminAuthLogs(search)                        → AuthLog[]
 useAdminProviders()                             → Provider[]
+adminProviderKeys                               → query key factory (exported for cross-feature invalidation)
 useAdminMediaResults(mediaId, enabled)          → MediaResult[]
 
 // Compras Pendentes
