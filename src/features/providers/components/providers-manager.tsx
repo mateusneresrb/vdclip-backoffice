@@ -1,19 +1,23 @@
 import type { SupportedProvider } from '@/features/admin/types'
 import { ToggleRight } from 'lucide-react'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
+import { showSuccessToast } from '@/lib/toast'
 import { useAdminProviders } from '@/features/admin/hooks/use-admin-providers'
 
-import { useToggleProvider } from '../hooks/use-provider-mutations'
+import { useUpdateVideoSources, useVideoSources } from '../hooks/use-video-sources'
 import { ProviderSection } from './provider-section'
 
 export function ProvidersManager() {
   const { t } = useTranslation('admin')
+  const queryClient = useQueryClient()
   const { data: providers, isLoading } = useAdminProviders()
-  const toggleProvider = useToggleProvider()
+  const { data: videoSources } = useVideoSources()
+  const updateMutation = useUpdateVideoSources()
 
   if (isLoading) {
     return (
@@ -37,10 +41,28 @@ export function ProvidersManager() {
     )
   }
 
-  const videoSourceProviders = providers.filter((p) => p.category === 'video_source')
+  // Merge DynamoDB enabled state into provider list
+  const mergedProviders = providers.map((p) => ({
+    ...p,
+    enabled: videoSources?.providers?.[p.slug] ?? p.enabled,
+  }))
+
+  const videoSourceProviders = mergedProviders.filter((p) => p.category === 'video_source')
 
   const handleToggle = (provider: SupportedProvider) => {
-    toggleProvider.mutate({ slug: provider.slug, enabled: !provider.enabled })
+    if (!videoSources?.providers) return
+
+    const updatedProviders = {
+      ...videoSources.providers,
+      [provider.slug]: !provider.enabled,
+    }
+
+    updateMutation.mutate(updatedProviders, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['admin-providers'] })
+        showSuccessToast({ title: t('toast.providerToggled') })
+      },
+    })
   }
 
   return (

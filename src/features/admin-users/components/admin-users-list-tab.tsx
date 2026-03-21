@@ -4,6 +4,8 @@ import { useHasPermission } from '@/features/auth/hooks/use-permissions'
 import { PERMISSIONS } from '@/features/auth/lib/permissions'
 import { useQueryClient } from '@tanstack/react-query'
 import {
+  Eye,
+  EyeOff,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -367,6 +369,8 @@ setToggleAdmin(null) }}>
   )
 }
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,64}$/
+
 function CreateAdminDialog({
   open,
   onClose,
@@ -377,41 +381,67 @@ function CreateAdminDialog({
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
   const { data: availableRoles } = useAdminRoles()
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('')
-  const [tempPassword, setTempPassword] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleOpenChange = (v: boolean) => {
     if (!v)
-onClose()
+      onClose()
+  }
+
+  const validatePassword = (value: string) => {
+    if (!value) {
+      setPasswordError(null)
+      return
+    }
+    if (!PASSWORD_REGEX.test(value)) {
+      setPasswordError(t('adminUsers.passwordRequirements'))
+    } else {
+      setPasswordError(null)
+    }
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setPassword(value)
+    validatePassword(value)
   }
 
   const handleCreate = async () => {
+    if (!PASSWORD_REGEX.test(password)) {
+      setPasswordError(t('adminUsers.passwordRequirements'))
+      return
+    }
     setIsSubmitting(true)
     try {
-      const [firstName, ...lastParts] = name.trim().split(/\s+/)
-      const created = await apiClient.post<{ id: string }>('/admin-users', {
+      const result = await apiClient.post<{ id: string }>('/admin-users', {
         firstName,
-        lastName: lastParts.length > 0 ? lastParts.join(' ') : undefined,
+        lastName: lastName || undefined,
         email,
-        password: tempPassword,
+        password,
       })
       if (role && availableRoles) {
         const matched = availableRoles.find(r => r.name === role)
         if (matched) {
-          await apiClient.put(`/admin-users/${created.id}/roles`, { roleIds: [matched.id] })
+          await apiClient.put(`/admin-users/${result.id}/roles`, { roleIds: [matched.id] })
         }
       }
       await queryClient.invalidateQueries({ queryKey: ['admin-accounts'] })
       await queryClient.invalidateQueries({ queryKey: ['admin-roles'] })
       showSuccessToast({ title: t('toast.adminInvited') })
       onClose()
-      setName('')
+      setFirstName('')
+      setLastName('')
       setEmail('')
       setRole('')
-      setTempPassword('')
+      setPassword('')
+      setPasswordError(null)
     } catch (error: unknown) {
       const description = error && typeof error === 'object' && 'errorMessage' in error
         ? String((error as { errorMessage: string }).errorMessage)
@@ -425,7 +455,7 @@ onClose()
     }
   }
 
-  const isValid = name.trim() && email.trim() && role && tempPassword.trim() && tempPassword.length >= 8
+  const isValid = firstName.trim() && email.trim() && role && password.trim() && !passwordError
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -435,9 +465,15 @@ onClose()
           <DialogDescription>{t('adminUsers.createAdminDescription')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label>{t('adminUsers.name')}</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('adminUsers.namePlaceholder')} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>{t('adminUsers.firstName')}</Label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={t('adminUsers.firstNamePlaceholder')} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('adminUsers.lastName')}</Label>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder={t('adminUsers.lastNamePlaceholder')} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label>{t('adminUsers.email')}</Label>
@@ -460,12 +496,29 @@ onClose()
           </div>
           <div className="space-y-2">
             <Label>{t('adminUsers.tempPassword')}</Label>
-            <Input
-              type="password"
-              value={tempPassword}
-              onChange={(e) => setTempPassword(e.target.value)}
-              placeholder={t('adminUsers.tempPasswordPlaceholder')}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={handlePasswordChange}
+                placeholder={t('adminUsers.tempPasswordPlaceholder')}
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full w-10 text-muted-foreground hover:text-foreground"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </Button>
+            </div>
+            {passwordError && (
+              <p className="text-xs text-destructive">{passwordError}</p>
+            )}
+            <p className="text-xs text-muted-foreground">{t('adminUsers.passwordRequirements')}</p>
           </div>
         </div>
         <DialogFooter>

@@ -143,6 +143,7 @@ return null
     .map((n) => n[0])
     .join('')
     .toUpperCase()
+    .slice(0, 2)
 
   return (
     <div className="space-y-6">
@@ -976,7 +977,8 @@ return null
                               .split(' ')
                               .map((n) => n[0])
                               .join('')
-                              .toUpperCase()}
+                              .toUpperCase()
+                              .slice(0, 2)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
