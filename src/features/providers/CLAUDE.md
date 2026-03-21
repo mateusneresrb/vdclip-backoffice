@@ -27,6 +27,14 @@ useAdminProviders()  // re-exportado de @/features/admin/hooks/use-admin-provide
 
 Retorna `SupportedProvider[]` com todos os providers configurados.
 
+## Mutation Hook
+
+```ts
+useToggleProvider()  // from ./hooks/use-provider-mutations
+```
+
+Calls `PATCH /platform/providers/{slug}` with `{ enabled: boolean }`. On success, invalidates `adminProviderKeys.all` query and shows success toast.
+
 ## Types
 
 ```ts
@@ -43,3 +51,4 @@ SupportedProvider {
 
 Este feature é um thin wrapper. Dados e tipos reais ficam em `@/features/admin`.
 `useProviders` e `SupportedProvider` re-exportam de lá via `index.ts`.
+O toggle de providers persiste o estado enabled/disabled no DynamoDB via API (`PATCH /platform/providers/{slug}`).
